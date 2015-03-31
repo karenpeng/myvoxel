@@ -1,0 +1,19 @@
+{
+  "name": "myvoxel",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".bundle.js",
+  "dependencies": {
+    "voxel-debris": "^0.0.4",
+    "voxel-engine": "^0.20.1",
+    "voxel-forest": "^0.0.1",
+    "voxel-perlin-terrain": "^1.0.0",
+    "voxel-player": "^0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
