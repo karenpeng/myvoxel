@@ -126,15 +126,6 @@ three js experiments
 var mesh1 = new game.THREE.Mesh(new game.THREE.SphereGeometry(20), new game.THREE.MeshNormalMaterial());
 mesh1.position.set(1, 4, 0);
 game.scene.add(mesh1);
-// var item = game.addItem({
-//   mesh: mesh1,
-//   size: 1,
-//   velocity: {
-//     x: 0,
-//     y: 0,
-//     z: 0
-//   }
-// })
 
 //second error says 'is not an instance of THREE.Object3D.''
 //comment out line 137 the error is gone
@@ -262,6 +253,40 @@ hl.on('highlight', function (_voxelPos) {
 hl.on('highlight-select', function (selection) {
   console.log(">>> [" + selection.start + "][" + selection.end + "] highlighted selection")
 })
+
+/*
+start experiment!  :D
+ */
+
+var geometry = new game.THREE.SphereGeometry(0.1);
+var material = new game.THREE.MeshNormalMaterial();
+var mesh2 = new game.THREE.Mesh(geometry, material);
+mesh2.position.set(10, 10, -10);
+game.scene.add(mesh2);
+// add a torus
+for (var i = 0; i <= 1; i += 0.1) {
+  for (var j = 0; j <= 1; j += 0.1) {
+    var uv = [i, j];
+
+    var u = uv[0];
+    var v = uv[1];
+    var geometry = new game.THREE.SphereGeometry(0.1);
+    var material = new game.THREE.MeshNormalMaterial();
+    var mesh0 = new game.THREE.Mesh(geometry, material);
+
+    var theta = 2 * Math.PI * u;
+    var phil = Math.PI * v - Math.PI / 2;
+    // var x = Math.sin(theta);
+    //   var y = 2 * v - 1;
+    //   var z = Math.cos(theta);
+    var x = Math.cos(phil) * Math.sin(theta);
+    var y = Math.sin(phil);
+    var z = Math.cos(phil) * Math.cos(theta);
+    mesh0.position.set(x, y, z);
+    mesh2.add(mesh0);
+    //scene.add(mesh0);
+  }
+}
 
 /*
 eval!
@@ -25209,7 +25234,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25252,7 +25277,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
