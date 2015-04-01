@@ -106,23 +106,23 @@ three js experiments
  */
 
 // first attempt:( does not show up
-var THREE = require('three');
-var mesh1 = new THREE.Mesh(new THREE.SphereGeometry(20), new THREE.MeshNormalMaterial());
+
+var mesh1 = new game.THREE.Mesh(new game.THREE.SphereGeometry(20), new game.THREE.MeshNormalMaterial());
 mesh1.position.set(1, 4, 0);
-//game.scene.add(mesh);
-var item = game.addItem({
-  mesh: mesh1,
-  size: 1,
-  velocity: {
-    x: 0,
-    y: 0,
-    z: 0
-  }
-})
+game.scene.add(mesh1);
+// var item = game.addItem({
+//   mesh: mesh1,
+//   size: 1,
+//   velocity: {
+//     x: 0,
+//     y: 0,
+//     z: 0
+//   }
+// })
 
 //second error says 'is not an instance of THREE.Object3D.''
 //comment out line 137 the error is gone
-var parent = new THREE.Object3D();
+var parent = new game.THREE.Object3D();
 parent.name = 'parent';
 //console.log(parent);
 //parent.position.set(0, 0, 0);
@@ -209,9 +209,6 @@ collision detection
 
 game.on('tick', function (delta) {
   sky(delta);
-  if (item !== undefined) {
-    //game.getCollisions(dude.position, item);
-  }
 });
 
 //game.on('tick', sky);
