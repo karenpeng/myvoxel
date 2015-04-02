@@ -9,6 +9,16 @@ editor.setTheme('ace/theme/monokai');
 
 var consoleLog = ace.edit('console');
 
+var editing = false;
+
+editor.on('focus', function () {
+  editing = true;
+});
+
+editor.on("blur", function () {
+  editing = false;
+});
+
 module.exports = {
   editor: editor,
   consoleLog: consoleLog
@@ -18,7 +28,7 @@ var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
 
-var createSelect = require('voxel-select');
+//var createSelect = require('voxel-select');
 // var highlight = require('voxel-highlight');
 // var transforms = require('voxel-transforms');
 //require('./parse.js');
@@ -37,7 +47,7 @@ var game = createGame({
     'grass'
   ],
   //materialFlatColor: true,
-  chunkSize: 32,
+  chunkSize: 16,
   chunkDistance: 2,
   worldOrigin: [0, 0, 0],
   controls: {
@@ -52,7 +62,7 @@ game.appendTo(container);
 window.game = game; //for debug:)
 
 // initialize your noise with a seed, floor height, ceiling height and scale factor
-var chunkSize = 32;
+var chunkSize = 16;
 var generateChunk = terrain('foo', 0, 5, 50);
 // then hook it up to your game as such:
 game.voxels.on('missingChunk', function (p) {
@@ -69,6 +79,7 @@ var createSky = require('voxel-sky')(game);
 
 var sky = createSky();
 
+game.on('tick', sky);
 //create dude
 var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
@@ -78,7 +89,7 @@ var jumpFromSky = 10;
 dude.yaw.position.set(0, jumpFromSky, 0);
 
 window.addEventListener('keydown', function (ev) {
-  if (ev.keyCode === 'R'.charCodeAt(0)) {
+  if (!editing && ev.keyCode === 'R'.charCodeAt(0)) {
     dude.toggle();
   }
 });
@@ -186,7 +197,7 @@ addThing(10, 20, 0);
 
 window.onkeydown = function (e) {
   //j
-  if (e.which === 74) {
+  if (!editing && e.which === 74) {
     e.preventDefault();
     //console.log('create block please!');
     //game.createBlock(dude.position, 1);
@@ -227,9 +238,13 @@ game.on('collision', function (item) {
   console.log(item);
 })
 
-/*
-interaction!
- */
+function isHit() {
+    //get user direction!!
+    //var rays =;
+  }
+  /*
+  interaction!
+   */
 var createSelect = require('voxel-select');
 //var selector = createSelect(game);
 
@@ -253,7 +268,7 @@ start experiment!  :D
 var geometry = new game.THREE.SphereGeometry(0.1);
 var material = new game.THREE.MeshNormalMaterial();
 var mesh2 = new game.THREE.Mesh(geometry, material);
-mesh2.position.set(10, 10, -10);
+mesh2.position.set(10, 3, -10);
 game.scene.add(mesh2);
 // add a torus
 for (var i = 0; i <= 1; i += 0.1) {
@@ -284,10 +299,21 @@ for (var i = 0; i <= 1; i += 0.1) {
 eval!
  */
 var editor = require('./editor.js').editor;
+var editing = require('./editor.js').editing;
 document.getElementById('run').onclick = function () {
   console.log(editor.getValue());
   parse(editor.getValue());
 }
+
+var editing = false;
+
+editor.on('focus', function () {
+  editing = true;
+});
+
+editor.on("blur", function () {
+  editing = false;
+});
 
 function parse(str) {
   try {
@@ -25248,7 +25274,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25291,7 +25317,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
