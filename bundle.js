@@ -44,7 +44,7 @@ var game = createGame({
   materials: [
     ['grass', 'dirt', 'grass_dirt'],
     'brick',
-    'grass'
+    'meow'
   ],
   //materialFlatColor: true,
   chunkSize: 16,
@@ -79,7 +79,6 @@ var createSky = require('voxel-sky')(game);
 
 var sky = createSky();
 
-game.on('tick', sky);
 //create dude
 var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
@@ -212,18 +211,26 @@ window.onkeydown = function (e) {
 animation
  */
 var theta = 0;
-setInterval(function () {
+
+game.on('tick',function(delta){
+  sky(delta);
   //dude2.position.set(0, Math.sin(theta) + 3, 10);
   dude2.rotation.y = theta;
-  theta += 0.1;
   //console.log(dude.position);
   //console.log(game.controls.dude2().avatar.position())
   parent.rotation.y = theta;
   mesh2.rotation.y = theta / 10;
   mesh2.rotation.z = Math.sin(theta / 10);
-}, 16);
+  theta += (delta / 160);
+})
 
-// game.createBlock((0, 10, 20), 1);
+for(var i = 0; i<3; i++){
+  console.log(game.canCreateBlock([i,4,0]));
+  game.createBlock([i, 4, 0], '3');
+  console.log('are you ok?')
+}
+
+
 // game.createBlock({
 //   x: 0,
 //   y: 10,
@@ -20201,7 +20208,7 @@ Game.prototype.makePhysical = function (target, envelope, blocksCreation) {
 }
 
 Game.prototype.addItem = function (item, gravity) {
-  console.log(gravity)
+  //console.log(gravity)
   if (!item.tick) {
     var newItem = physical(
       item.mesh,
@@ -25274,7 +25281,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25317,7 +25324,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
