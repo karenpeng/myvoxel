@@ -138,7 +138,7 @@ function addThing(_x, _y, _z) {
   // create a mesh and use the internal game material (texture atlas)
 
   var mesh = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(1, 3, 1), // width, height, depth
+    new game.THREE.CubeGeometry(1, 1, 1), // width, height, depth
     game.materials.material
   )
 
@@ -146,9 +146,9 @@ function addThing(_x, _y, _z) {
   game.materials.paint(mesh, 'brick')
 
   //mesh.position.set(_x, _y, _z)
-  var x = _x || voxelPos[0];
-  var y = _y || voxelPos[1];
-  var z = _z || voxelPos[2];
+  var x = _x + voxelPos[0] + 0.5 || voxelPos[0] + 0.5;
+  var y = _y + voxelPos[1] + 1.5 || voxelPos[1] + 1.5;
+  var z = _z + voxelPos[2] + 0.5 || voxelPos[2] + 0.5;
 
   //for testing
   mesh.position.set(x, y, z);
@@ -162,7 +162,7 @@ function addThing(_x, _y, _z) {
         y: 0,
         z: 0
       } // initial velocity
-    })
+    }, false)
     //use `game.removeItem(item)` to remove
 }
 
@@ -176,7 +176,7 @@ window.onkeydown = function (e) {
     //game.createBlock(dude.position, 1);
     //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
     for (var i = 0; i < 3; i++) {
-      addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2]);
+      addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
     }
   }
 }
@@ -191,18 +191,10 @@ setInterval(function () {
   theta += 0.1;
   //console.log(dude.position);
   //console.log(game.controls.dude2().avatar.position())
-  //parent.rotation.y = theta;
+  parent.rotation.y = theta;
+  mesh2.rotation.y = theta / 10;
+  mesh2.rotation.z = Math.sin(theta / 10);
 }, 16);
-
-/*
-collision detection
- */
-
-game.on('tick', function (delta) {
-  sky(delta);
-});
-
-//game.on('tick', sky);
 
 // game.createBlock((0, 10, 20), 1);
 // game.createBlock({

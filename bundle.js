@@ -154,7 +154,7 @@ function addThing(_x, _y, _z) {
   // create a mesh and use the internal game material (texture atlas)
 
   var mesh = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(1, 3, 1), // width, height, depth
+    new game.THREE.CubeGeometry(1, 1, 1), // width, height, depth
     game.materials.material
   )
 
@@ -162,9 +162,9 @@ function addThing(_x, _y, _z) {
   game.materials.paint(mesh, 'brick')
 
   //mesh.position.set(_x, _y, _z)
-  var x = _x || voxelPos[0];
-  var y = _y || voxelPos[1];
-  var z = _z || voxelPos[2];
+  var x = _x + voxelPos[0] + 0.5 || voxelPos[0] + 0.5;
+  var y = _y + voxelPos[1] + 1.5 || voxelPos[1] + 1.5;
+  var z = _z + voxelPos[2] + 0.5 || voxelPos[2] + 0.5;
 
   //for testing
   mesh.position.set(x, y, z);
@@ -178,7 +178,7 @@ function addThing(_x, _y, _z) {
         y: 0,
         z: 0
       } // initial velocity
-    })
+    }, false)
     //use `game.removeItem(item)` to remove
 }
 
@@ -192,7 +192,7 @@ window.onkeydown = function (e) {
     //game.createBlock(dude.position, 1);
     //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
     for (var i = 0; i < 3; i++) {
-      addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2]);
+      addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
     }
   }
 }
@@ -207,18 +207,10 @@ setInterval(function () {
   theta += 0.1;
   //console.log(dude.position);
   //console.log(game.controls.dude2().avatar.position())
-  //parent.rotation.y = theta;
+  parent.rotation.y = theta;
+  mesh2.rotation.y = theta / 10;
+  mesh2.rotation.z = Math.sin(theta / 10);
 }, 16);
-
-/*
-collision detection
- */
-
-game.on('tick', function (delta) {
-  sky(delta);
-});
-
-//game.on('tick', sky);
 
 // game.createBlock((0, 10, 20), 1);
 // game.createBlock({
@@ -20050,9 +20042,9 @@ function Game(opts) {
   var self = this
   if (!opts) opts = {}
   if (process.browser && this.notCapable(opts)) return
-  
+
   // is this a client or a headless server
-  this.isClient = Boolean( (typeof opts.isClient !== 'undefined') ? opts.isClient : process.browser )
+  this.isClient = Boolean((typeof opts.isClient !== 'undefined') ? opts.isClient : process.browser)
 
   if (!('generateChunks' in opts)) opts.generateChunks = true
   this.generateChunks = opts.generateChunks
@@ -20065,12 +20057,12 @@ function Game(opts) {
   this.arrayType = opts.arrayType || Uint8Array
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
-  
+
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
   this.chunkDistance = opts.chunkDistance || 2
   this.removeDistance = opts.removeDistance || this.chunkDistance + 1
-  
+
   this.skyColor = opts.skyColor || 0xBFD1E5
   this.antialias = opts.antialias
   this.playerHeight = opts.playerHeight || 1.62
@@ -20090,17 +20082,15 @@ function Game(opts) {
   this.view.bindToScene(this.scene)
   this.camera = this.view.getCamera()
   if (!opts.lightsDisabled) this.addLights(this.scene)
-  
+
   this.fogScale = opts.fogScale || 32
-  if (!opts.fogDisabled) this.scene.fog = new THREE.Fog( this.skyColor, 0.00025, this.worldWidth() * this.fogScale )
-  
+  if (!opts.fogDisabled) this.scene.fog = new THREE.Fog(this.skyColor, 0.00025, this.worldWidth() * this.fogScale)
+
   this.collideVoxels = collisions(
     this.getBlock.bind(this),
-    1,
-    [Infinity, Infinity, Infinity],
-    [-Infinity, -Infinity, -Infinity]
+    1, [Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]
   )
-  
+
   this.timer = this.initializeTimer((opts.tickFPS || 16))
   this.paused = false
 
@@ -20112,7 +20102,7 @@ function Game(opts) {
 
   // contains chunks that has had an update this tick. Will be generated right before redrawing the frame
   this.chunksNeedsUpdate = {}
-  // contains new chunks yet to be generated. Handled by game.loadPendingChunks
+    // contains new chunks yet to be generated. Handled by game.loadPendingChunks
   this.pendingChunks = []
 
   this.materials = texture({
@@ -20123,9 +20113,11 @@ function Game(opts) {
     materialFlatColor: opts.materialFlatColor === true
   })
 
-  this.materialNames = opts.materials || [['grass', 'dirt', 'grass_dirt'], 'brick', 'dirt']
-  
-  self.chunkRegion.on('change', function(newChunk) {
+  this.materialNames = opts.materials || [
+    ['grass', 'dirt', 'grass_dirt'], 'brick', 'dirt'
+  ]
+
+  self.chunkRegion.on('change', function (newChunk) {
     self.removeFarChunks()
   })
 
@@ -20135,13 +20127,13 @@ function Game(opts) {
 
   // client side only after this point
   if (!this.isClient) return
-  
+
   this.paused = true
   this.initializeRendering(opts)
- 
+
   this.showAllChunks()
 
-  setTimeout(function() {
+  setTimeout(function () {
     self.asyncChunkGeneration = 'asyncChunkGeneration' in opts ? opts.asyncChunkGeneration : true
   }, 2000)
 
@@ -20152,7 +20144,7 @@ inherits(Game, EventEmitter)
 
 // # External API
 
-Game.prototype.voxelPosition = function(gamePosition) {
+Game.prototype.voxelPosition = function (gamePosition) {
   var _ = Math.floor
   var p = gamePosition
   var v = []
@@ -20162,48 +20154,56 @@ Game.prototype.voxelPosition = function(gamePosition) {
   return v
 }
 
-Game.prototype.cameraPosition = function() {
+Game.prototype.cameraPosition = function () {
   return this.view.cameraPosition()
 }
 
-Game.prototype.cameraVector = function() {
+Game.prototype.cameraVector = function () {
   return this.view.cameraVector()
 }
 
-Game.prototype.makePhysical = function(target, envelope, blocksCreation) {
+Game.prototype.makePhysical = function (target, envelope, blocksCreation) {
   var vel = this.terminalVelocity
-  envelope = envelope || [2/3, 1.5, 2/3]
-  var obj = physical(target, this.potentialCollisionSet(), envelope, {x: vel[0], y: vel[1], z: vel[2]})
+  envelope = envelope || [2 / 3, 1.5, 2 / 3]
+  var obj = physical(target, this.potentialCollisionSet(), envelope, {
+    x: vel[0],
+    y: vel[1],
+    z: vel[2]
+  })
   obj.blocksCreation = !!blocksCreation
   return obj
 }
 
-Game.prototype.addItem = function(item) {
+Game.prototype.addItem = function (item, gravity) {
+  console.log(gravity)
   if (!item.tick) {
     var newItem = physical(
       item.mesh,
-      this.potentialCollisionSet(),
-      [item.size, item.size, item.size]
+      this.potentialCollisionSet(), [item.size, item.size, item.size]
     )
-    
+
     if (item.velocity) {
       newItem.velocity.copy(item.velocity)
-      newItem.subjectTo(this.gravity)
+      if (gravity) {
+        newItem.subjectTo(this.gravity)
+      }
     }
-    
-    newItem.repr = function() { return 'debris' }
+
+    newItem.repr = function () {
+      return 'debris'
+    }
     newItem.mesh = item.mesh
     newItem.blocksCreation = item.blocksCreation
-    
+
     item = newItem
   }
-  
+
   this.items.push(item)
   if (item.mesh) this.scene.add(item.mesh)
   return this.items[this.items.length - 1]
 }
 
-Game.prototype.removeItem = function(item) {
+Game.prototype.removeItem = function (item) {
   var ix = this.items.indexOf(item)
   if (ix < 0) return
   this.items.splice(ix, 1)
@@ -20212,34 +20212,36 @@ Game.prototype.removeItem = function(item) {
 
 // only intersects voxels, not items (for now)
 Game.prototype.raycast = // backwards compat
-Game.prototype.raycastVoxels = function(start, direction, maxDistance, epilson) {
-  if (!start) return this.raycastVoxels(this.cameraPosition(), this.cameraVector(), 10)
-  
-  var hitNormal = [0, 0, 0]
-  var hitPosition = [0, 0, 0]
-  var cp = start || this.cameraPosition()
-  var cv = direction || this.cameraVector()
-  var hitBlock = ray(this, cp, cv, maxDistance || 10.0, hitPosition, hitNormal, epilson || this.epilson)
-  if (hitBlock <= 0) return false
-  var adjacentPosition = [0, 0, 0]
-  var voxelPosition = this.voxelPosition(hitPosition)
-  vector.add(adjacentPosition, voxelPosition, hitNormal)
-  
-  return {
-    position: hitPosition,
-    voxel: voxelPosition,
-    direction: direction,
-    value: hitBlock,
-    normal: hitNormal,
-    adjacent: adjacentPosition
-  }
-}
+  Game.prototype.raycastVoxels = function (start, direction, maxDistance, epilson) {
+    if (!start) return this.raycastVoxels(this.cameraPosition(), this.cameraVector(), 10)
 
-Game.prototype.canCreateBlock = function(pos) {
+    var hitNormal = [0, 0, 0]
+    var hitPosition = [0, 0, 0]
+    var cp = start || this.cameraPosition()
+    var cv = direction || this.cameraVector()
+    var hitBlock = ray(this, cp, cv, maxDistance || 10.0, hitPosition, hitNormal, epilson || this.epilson)
+    if (hitBlock <= 0) return false
+    var adjacentPosition = [0, 0, 0]
+    var voxelPosition = this.voxelPosition(hitPosition)
+    vector.add(adjacentPosition, voxelPosition, hitNormal)
+
+    return {
+      position: hitPosition,
+      voxel: voxelPosition,
+      direction: direction,
+      value: hitBlock,
+      normal: hitNormal,
+      adjacent: adjacentPosition
+    }
+  }
+
+Game.prototype.canCreateBlock = function (pos) {
   pos = this.parseVectorArguments(arguments)
-  var floored = pos.map(function(i) { return Math.floor(i) })
+  var floored = pos.map(function (i) {
+    return Math.floor(i)
+  })
   var bbox = aabb(floored, [1, 1, 1])
-  
+
   for (var i = 0, len = this.items.length; i < len; ++i) {
     var item = this.items[i]
     var itemInTheWay = item.blocksCreation && item.aabb && bbox.intersects(item.aabb())
@@ -20249,30 +20251,30 @@ Game.prototype.canCreateBlock = function(pos) {
   return true
 }
 
-Game.prototype.createBlock = function(pos, val) {
+Game.prototype.createBlock = function (pos, val) {
   if (typeof val === 'string') val = this.materials.find(val)
   if (!this.canCreateBlock(pos)) return false
   this.setBlock(pos, val)
   return true
 }
 
-Game.prototype.setBlock = function(pos, val) {
+Game.prototype.setBlock = function (pos, val) {
   if (typeof val === 'string') val = this.materials.find(val)
   var old = this.voxels.voxelAtPosition(pos, val)
   var c = this.voxels.chunkAtPosition(pos)
   var chunk = this.voxels.chunks[c.join('|')]
-  if (!chunk) return// todo - does self.emit('missingChunk', c.join('|')) make sense here?
+  if (!chunk) return // todo - does self.emit('missingChunk', c.join('|')) make sense here?
   this.addChunkToNextUpdate(chunk)
   this.spatial.emit('change-block', pos, old, val)
   this.emit('setBlock', pos, val, old)
 }
 
-Game.prototype.getBlock = function(pos) {
+Game.prototype.getBlock = function (pos) {
   pos = this.parseVectorArguments(arguments)
   return this.voxels.voxelAtPosition(pos)
 }
 
-Game.prototype.blockPosition = function(pos) {
+Game.prototype.blockPosition = function (pos) {
   pos = this.parseVectorArguments(arguments)
   var ox = Math.floor(pos[0])
   var oy = Math.floor(pos[1])
@@ -20280,22 +20282,26 @@ Game.prototype.blockPosition = function(pos) {
   return [ox, oy, oz]
 }
 
-Game.prototype.blocks = function(low, high, iterator) {
-  var l = low, h = high
-  var d = [ h[0]-l[0], h[1]-l[1], h[2]-l[2] ]
-  if (!iterator) var voxels = new this.arrayType(d[0]*d[1]*d[2])
+Game.prototype.blocks = function (low, high, iterator) {
+  var l = low,
+    h = high
+  var d = [h[0] - l[0], h[1] - l[1], h[2] - l[2]]
+  if (!iterator) var voxels = new this.arrayType(d[0] * d[1] * d[2])
   var i = 0
-  for(var z=l[2]; z<h[2]; ++z)
-  for(var y=l[1]; y<h[1]; ++y)
-  for(var x=l[0]; x<h[0]; ++x, ++i) {
-    if (iterator) iterator(x, y, z, i)
-    else voxels[i] = this.voxels.voxelAtPosition([x, y, z])
+  for (var z = l[2]; z < h[2]; ++z)
+    for (var y = l[1]; y < h[1]; ++y)
+      for (var x = l[0]; x < h[0]; ++x, ++i) {
+        if (iterator) iterator(x, y, z, i)
+        else voxels[i] = this.voxels.voxelAtPosition([x, y, z])
+      }
+  if (!iterator) return {
+    voxels: voxels,
+    dims: d
   }
-  if (!iterator) return {voxels: voxels, dims: d}
 }
 
 // backwards compat
-Game.prototype.createAdjacent = function(hit, val) {
+Game.prototype.createAdjacent = function (hit, val) {
   this.createBlock(hit.adjacent, val)
 }
 
@@ -20311,36 +20317,36 @@ Game.prototype.epilson = 1e-8
 Game.prototype.terminalVelocity = [0.9, 0.1, 0.9]
 
 Game.prototype.defaultButtons = {
-  'W': 'forward'
-, 'A': 'left'
-, 'S': 'backward'
-, 'D': 'right'
-, '<up>': 'forward'
-, '<left>': 'left'
-, '<down>': 'backward'
-, '<right>': 'right'
-, '<mouse 1>': 'fire'
-, '<mouse 3>': 'firealt'
-, '<space>': 'jump'
-, '<shift>': 'crouch'
-, '<control>': 'alt'
+  'W': 'forward',
+  'A': 'left',
+  'S': 'backward',
+  'D': 'right',
+  '<up>': 'forward',
+  '<left>': 'left',
+  '<down>': 'backward',
+  '<right>': 'right',
+  '<mouse 1>': 'fire',
+  '<mouse 3>': 'firealt',
+  '<space>': 'jump',
+  '<shift>': 'crouch',
+  '<control>': 'alt'
 }
 
 // used in methods that have identity function(pos) {}
-Game.prototype.parseVectorArguments = function(args) {
+Game.prototype.parseVectorArguments = function (args) {
   if (!args) return false
   if (args[0] instanceof Array) return args[0]
   return [args[0], args[1], args[2]]
 }
 
-Game.prototype.setConfigurablePositions = function(opts) {
+Game.prototype.setConfigurablePositions = function (opts) {
   var sp = opts.startingPosition
   this.startingPosition = sp || [35, 1024, 35]
   var wo = opts.worldOrigin
   this.worldOrigin = wo || [0, 0, 0]
 }
 
-Game.prototype.setDimensions = function(opts) {
+Game.prototype.setDimensions = function (opts) {
   if (opts.container) this.container = opts.container
   if (opts.container && opts.container.clientHeight) {
     this.height = opts.container.clientHeight
@@ -20354,11 +20360,11 @@ Game.prototype.setDimensions = function(opts) {
   }
 }
 
-Game.prototype.notCapable = function(opts) {
+Game.prototype.notCapable = function (opts) {
   var self = this
-  if( !Detector().webgl ) {
+  if (!Detector().webgl) {
     this.view = {
-      appendTo: function(el) {
+      appendTo: function (el) {
         el.appendChild(self.notCapableMessage())
       }
     }
@@ -20367,7 +20373,7 @@ Game.prototype.notCapable = function(opts) {
   return false
 }
 
-Game.prototype.notCapableMessage = function() {
+Game.prototype.notCapableMessage = function () {
   var wrapper = document.createElement('div')
   wrapper.className = "errorMessage"
   var a = document.createElement('a')
@@ -20378,7 +20384,7 @@ Game.prototype.notCapableMessage = function() {
   return wrapper
 }
 
-Game.prototype.onWindowResize = function() {
+Game.prototype.onWindowResize = function () {
   var width = window.innerWidth
   var height = window.innerHeight
   if (this.container) {
@@ -20390,13 +20396,15 @@ Game.prototype.onWindowResize = function() {
 
 // # Physics/collision related methods
 
-Game.prototype.control = function(target) {
+Game.prototype.control = function (target) {
   this.controlling = target
   return this.controls.target(target)
 }
 
-Game.prototype.potentialCollisionSet = function() {
-  return [{ collide: this.collideTerrain.bind(this) }]
+Game.prototype.potentialCollisionSet = function () {
+  return [{
+    collide: this.collideTerrain.bind(this)
+  }]
 }
 
 /**
@@ -20407,25 +20415,23 @@ Game.prototype.potentialCollisionSet = function() {
  * @return {Array} an [x, y, z] tuple
  */
 
-Game.prototype.playerPosition = function() {
+Game.prototype.playerPosition = function () {
   var target = this.controls.target()
-  var position = target
-    ? target.avatar.position
-    : this.camera.localToWorld(this.camera.position.clone())
+  var position = target ? target.avatar.position : this.camera.localToWorld(this.camera.position.clone())
   return [position.x, position.y, position.z]
 }
 
-Game.prototype.playerAABB = function(position) {
+Game.prototype.playerAABB = function (position) {
   var pos = position || this.playerPosition()
   var lower = []
-  var upper = [1/2, this.playerHeight, 1/2]
-  var playerBottom = [1/4, this.playerHeight, 1/4]
+  var upper = [1 / 2, this.playerHeight, 1 / 2]
+  var playerBottom = [1 / 4, this.playerHeight, 1 / 4]
   vector.subtract(lower, pos, playerBottom)
   var bbox = aabb(lower, upper)
   return bbox
 }
 
-Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
+Game.prototype.collideTerrain = function (other, bbox, vec, resting) {
   var self = this
   var axes = ['x', 'y', 'z']
   var vec3 = [vec.x, vec.y, vec.z]
@@ -20435,37 +20441,37 @@ Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
     vec3[axis] = vec[axes[axis]] = edge
     other.acceleration[axes[axis]] = 0
     resting[axes[axis]] = dir
-    other.friction[axes[(axis + 1) % 3]] = other.friction[axes[(axis + 2) % 3]] = axis === 1 ? self.friction  : 1
+    other.friction[axes[(axis + 1) % 3]] = other.friction[axes[(axis + 2) % 3]] = axis === 1 ? self.friction : 1
     return true
   })
 }
 
 // # Three.js specific methods
 
-Game.prototype.addStats = function() {
+Game.prototype.addStats = function () {
   stats = new Stats()
-  stats.domElement.style.position  = 'absolute'
-  stats.domElement.style.bottom  = '0px'
-  document.body.appendChild( stats.domElement )
+  stats.domElement.style.position = 'absolute'
+  stats.domElement.style.bottom = '0px'
+  document.body.appendChild(stats.domElement)
 }
 
-Game.prototype.addLights = function(scene) {
+Game.prototype.addLights = function (scene) {
   var ambientLight, directionalLight
   ambientLight = new THREE.AmbientLight(0xcccccc)
   scene.add(ambientLight)
-  var light	= new THREE.DirectionalLight( 0xffffff , 1)
-  light.position.set( 1, 1, 0.5 ).normalize()
-  scene.add( light )
+  var light = new THREE.DirectionalLight(0xffffff, 1)
+  light.position.set(1, 1, 0.5).normalize()
+  scene.add(light)
 }
 
 // # Chunk related methods
 
-Game.prototype.configureChunkLoading = function(opts) {
+Game.prototype.configureChunkLoading = function (opts) {
   var self = this
   if (!opts.generateChunks) return
   if (!opts.generate) {
-    this.generate = function(x,y,z) {
-      return x*x+y*y+z*z <= 15*15 ? 1 : 0 // sphere world
+    this.generate = function (x, y, z) {
+      return x * x + y * y + z * z <= 15 * 15 ? 1 : 0 // sphere world
     }
   } else {
     this.generate = opts.generate
@@ -20473,17 +20479,17 @@ Game.prototype.configureChunkLoading = function(opts) {
   if (opts.generateVoxelChunk) {
     this.generateVoxelChunk = opts.generateVoxelChunk
   } else {
-    this.generateVoxelChunk = function(low, high) {
+    this.generateVoxelChunk = function (low, high) {
       return voxel.generate(low, high, self.generate, self)
     }
   }
 }
 
-Game.prototype.worldWidth = function() {
+Game.prototype.worldWidth = function () {
   return this.chunkSize * 2 * this.chunkDistance
 }
 
-Game.prototype.chunkToWorld = function(pos) {
+Game.prototype.chunkToWorld = function (pos) {
   return [
     pos[0] * this.chunkSize,
     pos[1] * this.chunkSize,
@@ -20491,13 +20497,13 @@ Game.prototype.chunkToWorld = function(pos) {
   ]
 }
 
-Game.prototype.removeFarChunks = function(playerPosition) {
+Game.prototype.removeFarChunks = function (playerPosition) {
   var self = this
   playerPosition = playerPosition || this.playerPosition()
-  var nearbyChunks = this.voxels.nearbyChunks(playerPosition, this.removeDistance).map(function(chunkPos) {
+  var nearbyChunks = this.voxels.nearbyChunks(playerPosition, this.removeDistance).map(function (chunkPos) {
     return chunkPos.join('|')
   })
-  Object.keys(self.voxels.chunks).map(function(chunkIndex) {
+  Object.keys(self.voxels.chunks).map(function (chunkIndex) {
     if (nearbyChunks.indexOf(chunkIndex) > -1) return
     var chunk = self.voxels.chunks[chunkIndex]
     var mesh = self.voxels.meshes[chunkIndex]
@@ -20526,11 +20532,11 @@ Game.prototype.removeFarChunks = function(playerPosition) {
   self.voxels.requestMissingChunks(playerPosition)
 }
 
-Game.prototype.addChunkToNextUpdate = function(chunk) {
+Game.prototype.addChunkToNextUpdate = function (chunk) {
   this.chunksNeedsUpdate[chunk.position.join('|')] = chunk
 }
 
-Game.prototype.updateDirtyChunks = function() {
+Game.prototype.updateDirtyChunks = function () {
   var self = this
   Object.keys(this.chunksNeedsUpdate).forEach(function showChunkAtIndex(chunkIndex) {
     var chunk = self.chunksNeedsUpdate[chunkIndex]
@@ -20540,7 +20546,7 @@ Game.prototype.updateDirtyChunks = function() {
   this.chunksNeedsUpdate = {}
 }
 
-Game.prototype.loadPendingChunks = function(count) {
+Game.prototype.loadPendingChunks = function (count) {
   var pendingChunks = this.pendingChunks
 
   if (!this.asyncChunkGeneration) {
@@ -20552,7 +20558,7 @@ Game.prototype.loadPendingChunks = function(count) {
 
   for (var i = 0; i < count; i += 1) {
     var chunkPos = pendingChunks[i].split('|')
-    var chunk = this.voxels.generateChunk(chunkPos[0]|0, chunkPos[1]|0, chunkPos[2]|0)
+    var chunk = this.voxels.generateChunk(chunkPos[0] | 0, chunkPos[1] | 0, chunkPos[2] | 0)
 
     if (this.isClient) this.showChunk(chunk)
   }
@@ -20560,19 +20566,19 @@ Game.prototype.loadPendingChunks = function(count) {
   if (count) pendingChunks.splice(0, count)
 }
 
-Game.prototype.getChunkAtPosition = function(pos) {
+Game.prototype.getChunkAtPosition = function (pos) {
   var chunkID = this.voxels.chunkAtPosition(pos).join('|')
   var chunk = this.voxels.chunks[chunkID]
   return chunk
 }
 
-Game.prototype.showAllChunks = function() {
+Game.prototype.showAllChunks = function () {
   for (var chunkIndex in this.voxels.chunks) {
     this.showChunk(this.voxels.chunks[chunkIndex])
   }
 }
 
-Game.prototype.showChunk = function(chunk) {
+Game.prototype.showChunk = function (chunk) {
   var chunkIndex = chunk.position.join('|')
   var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
   var scale = new THREE.Vector3(1, 1, 1)
@@ -20596,24 +20602,33 @@ Game.prototype.showChunk = function(chunk) {
 
 // # Debugging methods
 
-Game.prototype.addMarker = function(position) {
-  var geometry = new THREE.SphereGeometry( 0.1, 10, 10 )
-  var material = new THREE.MeshPhongMaterial( { color: 0xffffff, shading: THREE.FlatShading } )
-  var mesh = new THREE.Mesh( geometry, material )
+Game.prototype.addMarker = function (position) {
+  var geometry = new THREE.SphereGeometry(0.1, 10, 10)
+  var material = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    shading: THREE.FlatShading
+  })
+  var mesh = new THREE.Mesh(geometry, material)
   mesh.position.copy(position)
   this.scene.add(mesh)
 }
 
-Game.prototype.addAABBMarker = function(aabb, color) {
+Game.prototype.addAABBMarker = function (aabb, color) {
   var geometry = new THREE.CubeGeometry(aabb.width(), aabb.height(), aabb.depth())
-  var material = new THREE.MeshBasicMaterial({ color: color || 0xffffff, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+  var material = new THREE.MeshBasicMaterial({
+    color: color || 0xffffff,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.5,
+    side: THREE.DoubleSide
+  })
   var mesh = new THREE.Mesh(geometry, material)
   mesh.position.set(aabb.x0() + aabb.width() / 2, aabb.y0() + aabb.height() / 2, aabb.z0() + aabb.depth() / 2)
   this.scene.add(mesh)
   return mesh
 }
 
-Game.prototype.addVoxelMarker = function(x, y, z, color) {
+Game.prototype.addVoxelMarker = function (x, y, z, color) {
   var bbox = aabb([x, y, z], [1, 1, 1])
   return this.addAABBMarker(bbox, color)
 }
@@ -20622,7 +20637,7 @@ Game.prototype.pin = pin
 
 // # Misc internal methods
 
-Game.prototype.onControlChange = function(gained, stream) {
+Game.prototype.onControlChange = function (gained, stream) {
   this.paused = false
 
   if (!gained && !this.optout) {
@@ -20634,52 +20649,52 @@ Game.prototype.onControlChange = function(gained, stream) {
   stream.pipe(this.controls.createWriteRotationStream())
 }
 
-Game.prototype.onControlOptOut = function() {
+Game.prototype.onControlOptOut = function () {
   this.optout = true
 }
 
-Game.prototype.onFire = function(state) {
+Game.prototype.onFire = function (state) {
   this.emit('fire', this.controlling, state)
 }
 
 Game.prototype.setInterval = tic.interval.bind(tic)
 Game.prototype.setTimeout = tic.timeout.bind(tic)
 
-Game.prototype.tick = function(delta) {
-  for(var i = 0, len = this.items.length; i < len; ++i) {
+Game.prototype.tick = function (delta) {
+  for (var i = 0, len = this.items.length; i < len; ++i) {
     this.items[i].tick(delta)
   }
-  
+
   if (this.materials) this.materials.tick(delta)
 
   if (this.pendingChunks.length) this.loadPendingChunks()
   if (Object.keys(this.chunksNeedsUpdate).length > 0) this.updateDirtyChunks()
-  
+
   tic.tick(delta)
 
   this.emit('tick', delta)
-  
+
   if (!this.controls) return
   var playerPos = this.playerPosition()
   this.spatial.emit('position', playerPos, playerPos)
 }
 
-Game.prototype.render = function(delta) {
+Game.prototype.render = function (delta) {
   this.view.render(this.scene)
 }
 
-Game.prototype.initializeTimer = function(rate) {
+Game.prototype.initializeTimer = function (rate) {
   var self = this
   var accum = 0
   var now = 0
   var last = null
   var dt = 0
   var wholeTick
-  
+
   self.frameUpdated = true
   self.interval = setInterval(timer, 0)
   return self.interval
-  
+
   function timer() {
     if (self.paused) {
       last = Date.now()
@@ -20691,37 +20706,37 @@ Game.prototype.initializeTimer = function(rate) {
     last = now
     accum += dt
     if (accum < rate) return
-    wholeTick = ((accum / rate)|0)
+    wholeTick = ((accum / rate) | 0)
     if (wholeTick <= 0) return
     wholeTick *= rate
-    
+
     self.tick(wholeTick)
     accum -= wholeTick
-    
+
     self.frameUpdated = true
   }
 }
 
-Game.prototype.initializeRendering = function(opts) {
+Game.prototype.initializeRendering = function (opts) {
   var self = this
 
   if (!opts.statsDisabled) self.addStats()
 
   window.addEventListener('resize', self.onWindowResize.bind(self), false)
 
-  requestAnimationFrame(window).on('data', function(dt) {
+  requestAnimationFrame(window).on('data', function (dt) {
     self.emit('prerender', dt)
     self.render(dt)
     self.emit('postrender', dt)
   })
   if (typeof stats !== 'undefined') {
-    self.on('postrender', function() {
+    self.on('postrender', function () {
       stats.update()
     })
   }
 }
 
-Game.prototype.initializeControls = function(opts) {
+Game.prototype.initializeControls = function (opts) {
   // player control
   this.keybindings = opts.keybindings || this.defaultButtons
   this.buttons = kb(document.body, this.keybindings)
@@ -20729,13 +20744,13 @@ Game.prototype.initializeControls = function(opts) {
   this.optout = false
   this.interact = interact(opts.interactElement || this.view.element, opts.interactMouseDrag)
   this.interact
-      .on('attain', this.onControlChange.bind(this, true))
-      .on('release', this.onControlChange.bind(this, false))
-      .on('opt-out', this.onControlOptOut.bind(this))
+    .on('attain', this.onControlChange.bind(this, true))
+    .on('release', this.onControlChange.bind(this, false))
+    .on('opt-out', this.onControlOptOut.bind(this))
   this.hookupControls(this.buttons, opts)
 }
 
-Game.prototype.hookupControls = function(buttons, opts) {
+Game.prototype.hookupControls = function (buttons, opts) {
   opts = opts || {}
   opts.controls = opts.controls || {}
   opts.controls.onfire = this.onFire.bind(this)
@@ -20744,9 +20759,9 @@ Game.prototype.hookupControls = function(buttons, opts) {
   this.controlling = null
 }
 
-Game.prototype.handleChunkGeneration = function() {
+Game.prototype.handleChunkGeneration = function () {
   var self = this
-  this.voxels.on('missingChunk', function(chunkPos) {
+  this.voxels.on('missingChunk', function (chunkPos) {
     self.pendingChunks.push(chunkPos.join('|'))
   })
   this.voxels.requestMissingChunks(this.worldOrigin)
@@ -20754,10 +20769,9 @@ Game.prototype.handleChunkGeneration = function() {
 }
 
 // teardown methods
-Game.prototype.destroy = function() {
+Game.prototype.destroy = function () {
   clearInterval(this.timer)
 }
-
 }).call(this,require('_process'))
 },{"./lib/detector":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/lib/detector.js","./lib/stats":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/lib/stats.js","_process":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/process/browser.js","aabb-3d":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/aabb-3d/index.js","collide-3d-tilemap":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/collide-3d-tilemap/index.js","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js","gl-matrix":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/gl-matrix/dist/gl-matrix.js","inherits":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/inherits/inherits.js","interact":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/interact/index.js","kb-controls":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/index.js","path":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/path-browserify/index.js","pin-it":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/pin-it/index.js","raf":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/raf/index.js","spatial-events":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/spatial-events/index.js","three":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/three/three.js","tic":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/tic/index.js","voxel":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel/index.js","voxel-control":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-control/index.js","voxel-mesh":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-mesh/index.js","voxel-physical":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-physical/index.js","voxel-raycast":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-raycast/raycast.js","voxel-region-change":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-region-change/index.js","voxel-texture":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-texture/index.js","voxel-view":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/voxel-view/index.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/lib/detector.js":[function(require,module,exports){
 /**
@@ -25234,7 +25248,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25277,7 +25291,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
@@ -65747,7 +65761,7 @@ function inherits (c, p, proto) {
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js":[function(require,module,exports){
 var noise = require('perlin').noise
 
-module.exports = function(seed, floor, ceiling, divisor) {
+module.exports = function (seed, floor, ceiling, divisor) {
   floor = floor || 0
   ceiling = ceiling || 20 // minecraft's limit
   divisor = divisor || 50
@@ -65757,8 +65771,8 @@ module.exports = function(seed, floor, ceiling, divisor) {
     var startY = position[1] * width
     var startZ = position[2] * width
     var chunk = new Int8Array(width * width * width)
-    pointsInside(startX, startZ, width, function(x, z) {
-      var n = noise.simplex2(x / divisor , z / divisor)
+    pointsInside(startX, startZ, width, function (x, z) {
+      var n = noise.simplex2(x / divisor, z / divisor)
       var y = ~~scale(n, -1, 1, floor, ceiling)
       if (y === floor || startY < y && y < startY + width) {
         var xidx = Math.abs((width + x % width) % width)
@@ -65778,10 +65792,9 @@ function pointsInside(startX, startY, width, func) {
       func(x, y)
 }
 
-function scale( x, fromLow, fromHigh, toLow, toHigh ) {
-  return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow
-}
-;
+function scale(x, fromLow, fromHigh, toLow, toHigh) {
+  return (x - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow
+};
 },{"perlin":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/node_modules/perlin/index.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/node_modules/perlin/index.js":[function(require,module,exports){
 /*
  * A speed-improved perlin and simplex noise algorithms for 2D.
