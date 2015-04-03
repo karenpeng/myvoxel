@@ -33,6 +33,8 @@ var terrain = require('voxel-perlin-terrain');
 // var transforms = require('voxel-transforms');
 //require('./parse.js');
 var voxelPos = [0, 0, 0];
+var startPosition = [0, 0, 0];
+var xMin, xMax, yMin, yMax, zMin, zMax;
 /*
 set up game
  */
@@ -42,9 +44,9 @@ var game = createGame({
   generateChunks: false,
   texturePath: 'textures/',
   materials: [
-    ['grass', 'dirt', 'grass_dirt'],
-    'brick',
-    'meow'
+    ['grass', 'dirt', 'grass_dirt']
+    ,'brick'
+    ,'meow'
   ],
   //materialFlatColor: true,
   chunkSize: 16,
@@ -66,7 +68,7 @@ var chunkSize = 16;
 var generateChunk = terrain('foo', 0, 5, 50);
 // then hook it up to your game as such:
 game.voxels.on('missingChunk', function (p) {
-  var voxels = generateChunk(p, chunkSize)
+  var voxels = generateChunk(p, chunkSize);
   var chunk = {
     position: p,
     dims: [chunkSize, chunkSize, chunkSize],
@@ -131,35 +133,9 @@ game.scene.add(dude2);
 three js experiments
  */
 
-// first attempt:( does not show up
 
-var mesh1 = new game.THREE.Mesh(new game.THREE.SphereGeometry(20), new game.THREE.MeshNormalMaterial());
-mesh1.position.set(1, 4, 0);
-game.scene.add(mesh1);
 
-//second error says 'is not an instance of THREE.Object3D.''
-//comment out line 137 the error is gone
-var parent = new game.THREE.Object3D();
-parent.name = 'parent';
-//console.log(parent);
-//parent.position.set(0, 0, 0);
-var mesh0 = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(1, 3, 1), // width, height, depth
-    game.materials.material
-  )
-  // paint the mesh with a specific texture in the atlas
-game.materials.paint(mesh0, 'brick')
-  //for testing
-mesh0.position.set(1, 10, 0);
-//parent.add(mesh0);
-console.log(parent)
-console.log(mesh0)
-  //game.scene.add(parent);
-
-//third attempt :(
-//parent.add(mesh);
-//game.scene.add(parent);
-
+var colliObjs = [];
 function addThing(_x, _y, _z) {
   // create a mesh and use the internal game material (texture atlas)
 
@@ -169,15 +145,17 @@ function addThing(_x, _y, _z) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, 'brick')
+  game.materials.paint(mesh, 'brick');
 
   //mesh.position.set(_x, _y, _z)
-  var x = _x + voxelPos[0] + 0.5 || voxelPos[0] + 0.5;
-  var y = _y + voxelPos[1] + 1.5 || voxelPos[1] + 1.5;
-  var z = _z + voxelPos[2] + 0.5 || voxelPos[2] + 0.5;
+  var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
+  var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
+  var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
 
   //for testing
   mesh.position.set(x, y, z);
+  colliObjs.push(mesh);
+  //console.log(x, y, z);
   //game.scene.add(mesh)
   //console.log(mesh)
   var item = game.addItem({
@@ -190,45 +168,66 @@ function addThing(_x, _y, _z) {
       } // initial velocity
     }, false)
     //use `game.removeItem(item)` to remove
+    //return [x, y, z];
 }
 
 addThing(10, 20, 0);
 
 window.onkeydown = function (e) {
   //j
-  if (!editing && e.which === 74) {
-    e.preventDefault();
-    //console.log('create block please!');
-    //game.createBlock(dude.position, 1);
-    //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
-    for (var i = 0; i < 3; i++) {
-      addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
+  if (!editing){
+    if(e.which === 74) {
+      e.preventDefault();
+      //console.log('create block please!');
+      //game.createBlock(dude.position, 1);
+      //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
+      for (var i = 0; i < 3; i++) {
+        addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
+      }
     }
   }
 }
+
+
 
 /*
 animation
  */
 var theta = 0;
-
+var interval = 60;
+var begintToCount = 0;
 game.on('tick',function(delta){
+  //console.log(delta)
   sky(delta);
   //dude2.position.set(0, Math.sin(theta) + 3, 10);
-  dude2.rotation.y = theta;
+  dude2.rotation.y = theta / 100;
   //console.log(dude.position);
   //console.log(game.controls.dude2().avatar.position())
-  parent.rotation.y = theta;
-  mesh2.rotation.y = theta / 10;
-  mesh2.rotation.z = Math.sin(theta / 10);
-  theta += (delta / 160);
+  //parent.rotation.y = theta / 100;
+  mesh2.rotation.y = theta / 100;
+  mesh2.rotation.z = Math.sin(theta / 100);
+  theta += (delta / 16);
+
+  if(begintToCount % interval === 0 && evaled){
+    //console.log('hello~')
+    run(call);
+  }
+
+  if(evaled){
+    begintToCount += (delta / 16);
+  }
+
+  var result = isHit();
+  if(result){
+    dude.yaw.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
+  };
 })
 
-for(var i = 0; i<3; i++){
-  console.log(game.canCreateBlock([i,4,0]));
-  game.createBlock([i, 4, 0], '3');
-  console.log('are you ok?')
-}
+// for(var i = 0; i<3; i++){
+//   //console.log(game.canCreateBlock([i,4,0]));
+//   game.createBlock([i, 4, 0], '2');
+//   //console.log('are you ok?')
+// }
 
 
 // game.createBlock({
@@ -245,10 +244,18 @@ game.on('collision', function (item) {
   console.log(item);
 })
 
+var rayCaster = new game.THREE.Raycaster();
 function isHit() {
     //get user direction!!
-    //var rays =;
-  }
+    var ray = new game.THREE.Vector3(0, -1, 0);
+    rayCaster.ray.set(dude.yaw.position, ray);
+    var intersects = rayCaster.intersectObjects(colliObjs);
+    if (intersects.length > 0 && intersects[0].distance <= 0.5) {
+      console.log(intersects[0].object.position);
+      return intersects[0].object.position;
+    }
+    return false;
+}
   /*
   interaction!
    */
@@ -261,9 +268,19 @@ var hl = highlight(game, {
 });
 
 hl.on('highlight', function (_voxelPos) {
-  //console.log(_voxelPos);
-  voxelPos = _voxelPos;
+  //if(shiftIsDown){
+    voxelPos = _voxelPos;
+    //console.log(_voxelPos);
+  //}
 });
+
+game.on('fire', function(){
+  console.log('what does fire mean');
+  startPosition = voxelPos;
+  console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
+})
+
+
 hl.on('highlight-select', function (selection) {
   console.log(">>> [" + selection.start + "][" + selection.end + "] highlighted selection")
 })
@@ -306,9 +323,11 @@ for (var i = 0; i <= 1; i += 0.1) {
 eval!
  */
 var editor = require('./editor.js').editor;
+var consoleLog = require('./editor.js').consoleLog;
 var editing = require('./editor.js').editing;
 document.getElementById('run').onclick = function () {
-  console.log(editor.getValue());
+  evaled = false;
+  //console.log(editor.getValue());
   parse(editor.getValue());
 }
 
@@ -322,16 +341,97 @@ editor.on("blur", function () {
   editing = false;
 });
 
+
+var injectMaxMin = require('./parse.js').injectMaxMin;
+var wrapGenerator = require('./parse.js').wrapGenerator;
+
 function parse(str) {
-  try {
-    console.log('start eval');
-    eval(str);
-    console.log('end eval');
-  } catch (e) {
+  xMin = 10000000000000;
+  xMax = -xMin;
+  yMin = 10000000000000;
+  yMax = -yMin;
+  zMin = 10000000000000;
+  zMax = -zMin;
+
+  try{
+    var str1 = injectMaxMin(str);
+    eval(str1);
+  }catch(e){
     console.log(e);
   }
+
+  try {
+    //console.log('start eval');
+    var str2 = wrapGenerator(str);
+    console.log(str2);
+    eval(str2);
+    call = wat();
+    evaled = true;
+    //console.log('end eval');
+  } catch (e) {
+    console.log(e);
+    consoleLog.insert(e);
+  }
+
 }
-},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-select":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js":[function(require,module,exports){
+
+function addThingModified(x, y, z){
+  addThing(x, y, z);
+  console.log(x, y, z);
+  if(xMin > x) xMin = x;
+  if(xMax < x) xMax = x;
+  if(yMin > y) yMin = y;
+  if(xMax < y) yMax = y;
+  if(zMin > z) zMin = z;
+  if(zMax < z) zMax = z;
+  console.log('hahaha ', xMin, xMax);
+}
+
+
+function run(generator) {
+  //console.log(generator)
+  var ret = generator.next();
+  if (ret.done) {
+    evaled = false;
+    begintToCount = 0;
+    return;
+  }
+  //console.log(ret.value);
+}
+
+document.getElementById('valueP').innerHTML = interval;
+var call;
+var evaled = false;
+var sliderr = document.getElementById('sliderr');
+sliderr.addEventListener('change', function(){
+  console.log(sliderr.value);
+  interval = sliderr.value;
+  document.getElementById('valueP').innerHTML = sliderr.value;
+});
+
+},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-select":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+function injectMaxMin(str){
+  var copy = str;
+  copy = copy.replace(/addThing/g, 'addThingModified');
+  return copy;
+}
+
+
+function wrapGenerator(str){
+  var copy = str;
+  var copy = copy.replace(/addThing/g, 'yield addThing');
+  var copy = 'function* wat(){\n' + copy +'\n}';
+  return copy;
+}
+
+
+module.exports = {
+  injectMaxMin: injectMaxMin,
+  wrapGenerator: wrapGenerator
+}
+
+
+},{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js":[function(require,module,exports){
 /* ***** BEGIN LICENSE BLOCK *****
  * Distributed under the BSD license:
  *
@@ -25281,7 +25381,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25324,7 +25424,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",

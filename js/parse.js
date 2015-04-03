@@ -1,35 +1,20 @@
-// var editor = require('./editor.js').editor;
-// var consoleLog = require('./editor.js').consoleLog;
-
-// console.log(require('./editor.js'));
-// document.getElementById('run').onclick = function () {
-//   console.log(editor.getValue());
-// }
-
-// function parse(str){
-//   try{
-//     eval(str);
-//   }catch(e){
-//     console.log(e);
-//   }
-// }
-
-/*
-try eval!!!
- */
-
-var editor = require('./editor.js').editor;
-document.getElementById('run').onclick = function () {
-  console.log(editor.getValue());
-  parse(editor.getValue());
+function injectMaxMin(str){
+  var copy = str;
+  copy = copy.replace(/addThing/g, 'addThingModified');
+  return copy;
 }
 
-function parse(str) {
-  try {
-    console.log('start eval');
-    eval(str);
-    console.log('end eval');
-  } catch (e) {
-    console.log(e);
-  }
+
+function wrapGenerator(str){
+  var copy = str;
+  var copy = copy.replace(/addThing/g, 'yield addThing');
+  var copy = 'function* wat(){\n' + copy +'\n}';
+  return copy;
 }
+
+
+module.exports = {
+  injectMaxMin: injectMaxMin,
+  wrapGenerator: wrapGenerator
+}
+

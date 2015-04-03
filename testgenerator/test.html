@@ -33,7 +33,7 @@ var call = wat()
 // }, 1000);
 
 var frameCount = 0;
-var interval = 120;
+var interval = 1200;
 function animate(){
   requestAnimationFrame(animate);
   if(frameCount % interval === 0){
@@ -41,7 +41,10 @@ function animate(){
   }
   frameCount++;
 }
-animate();
+//animate();
+setInterval(function(){
+  run(call);
+},interval);
 
 var sliderr = document.getElementById('sliderr');
 sliderr.addEventListener('change', function(){

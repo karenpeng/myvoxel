@@ -23,11 +23,20 @@ html, body{
   height: 20%;
 }
 
-#run{
+#ui{
   position: absolute;
   bottom: 20%;
+  width: 400px;
   right: 0;
   z-index: 10;
+}
+#valueP{
+  color: white;
+}
+#dataLog{
+  position: absolute;
+  right: 410px;
+  bottom: 10px;
 }
 </style>
 <body>
@@ -42,9 +51,37 @@ html, body{
 // for(var i = 0; i< 10; i++){
 //     var theta = Math.PI * i /5;
 //     addThing(Math.sin(theta), i, Math.cos(theta))
-// }</div>
+// }
+
+//for (var i = 0; i <= 1; i += 0.1) {
+//  for (var j = 0; j <= 1; j += 0.1) {
+//    var uv = [i, j];
+
+//    var u = uv[0];
+//    var v = uv[1];
+
+//    var theta = 2 * Math.PI * u;
+//    var phil = Math.PI * v - Math.PI / 2;
+//    var x = Math.cos(phil) * Math.sin(theta) * 4;
+//    var y = Math.sin(phil) * 4;
+//    var z = Math.cos(phil) * Math.cos(theta) * 4;
+//    addThing(x, y + 2, z);
+//  }
+//}
+</div>
 <div class="edit" id="console"></div>
+<div id="ui">
 <button id="run">run</button>
+<input id="sliderr" type="range" min="10" max="120" step="10" value='60'/>
+<span id="valueP"></span>
+</div>
+<canvas id="dataLog" width="600px" height="200px"></canvas>
 </doby>
+<script type="text/javascript">
+function resize(){
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+}
+</script>
 <script type="text/javascript" src="bundle.js"></script>
 </html>
