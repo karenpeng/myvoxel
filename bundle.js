@@ -27,7 +27,6 @@ module.exports = {
 var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
-
 //var createSelect = require('voxel-select');
 // var highlight = require('voxel-highlight');
 // var transforms = require('voxel-transforms');
@@ -35,6 +34,23 @@ var terrain = require('voxel-perlin-terrain');
 var voxelPos = [0, 0, 0];
 var startPosition = [0, 0, 0];
 var xMin, xMax, yMin, yMax, zMin, zMax;
+var pointXs = [];
+var pointYs = [];
+var pointZs = [];
+var can = document.getElementById('dataLog');
+var ctx = can.getContext('2d');
+var w;
+var h;
+function resize(){
+  var ww = window.innerWidth;
+  var hh = window.innerHeight;
+  can.setAttribute('width', (ww - 400) + 'px');
+  can.setAttribute('height', (hh * 0.2) + 'px');
+  w = can.width;
+  h = can.height;
+}
+resize();
+window.addEventListener('resize', resize);
 /*
 set up game
  */
@@ -46,7 +62,7 @@ var game = createGame({
   materials: [
     ['grass', 'dirt', 'grass_dirt']
     ,'brick'
-    ,'meow'
+    // ,'meow'
   ],
   //materialFlatColor: true,
   chunkSize: 16,
@@ -221,6 +237,12 @@ game.on('tick',function(delta){
   if(result){
     dude.yaw.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
   };
+
+  ctx.clearRect(0, 0, w, h);
+  // pointXs.forEach(function(point){
+  //   point.render();
+  // });
+  point3Render();
 })
 
 // for(var i = 0; i<3; i++){
@@ -352,6 +374,9 @@ function parse(str) {
   yMax = -yMin;
   zMin = 10000000000000;
   zMax = -zMin;
+  pointXs = [];
+  pointYs = [];
+  pointZs = [];
 
   try{
     var str1 = injectMaxMin(str);
@@ -363,7 +388,7 @@ function parse(str) {
   try {
     //console.log('start eval');
     var str2 = wrapGenerator(str);
-    console.log(str2);
+    //console.log(str2);
     eval(str2);
     call = wat();
     evaled = true;
@@ -375,16 +400,25 @@ function parse(str) {
 
 }
 
-function addThingModified(x, y, z){
+function drawAndAddThing(x, y, z){
   addThing(x, y, z);
-  console.log(x, y, z);
+  point3Init(x, y, z);
+}
+
+// function drawData(x, y, z){
+
+// }
+
+function addThingModified(x, y, z){
+  // addThing(x, y, z);
+  //console.log(x, y, z);
   if(xMin > x) xMin = x;
   if(xMax < x) xMax = x;
   if(yMin > y) yMin = y;
   if(xMax < y) yMax = y;
   if(zMin > z) zMin = z;
   if(zMax < z) zMax = z;
-  console.log('hahaha ', xMin, xMax);
+  //console.log('hahaha ', xMin, xMax);
 }
 
 
@@ -409,6 +443,114 @@ sliderr.addEventListener('change', function(){
   document.getElementById('valueP').innerHTML = sliderr.value;
 });
 
+
+/*
+the 2d canvas for data graph
+ */
+function point3Init(x, y, z){
+  console.log('www ', x, y, z);
+  var p = new Point(x, 'x');
+  pointXs.push(p);
+  var p = new Point(y, 'y');
+  pointYs.push(p);
+  var p = new Point(z, 'z');
+  pointZs.push(p);
+}
+
+function point3Render(){
+  ctx.beginPath();
+  ctx.strokeStyle = 'white';
+  ctx.moveTo(0, h / 3);
+  ctx.lineTo(w, h / 3);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.strokeStyle = 'white';
+  ctx.moveTo( 0, h * 2/3);
+  ctx.lineTo( w, h * 2/3);
+  ctx.stroke();
+
+  pointXs.forEach(function(p){
+    p.render();
+  });
+  pointYs.forEach(function(p){
+    p.render();
+  });
+  pointZs.forEach(function(p){
+    p.render();
+  });
+  for(var i = 0; i< pointXs.length - 1; i++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'red';
+    ctx.moveTo(pointXs[i].value[0], pointXs[i].value[1]);
+    ctx.lineTo(pointXs[i + 1].value[0], pointXs[i + 1].value[1]);
+    ctx.stroke();
+  }
+  for(var i = 0; i< pointYs.length - 1; i++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'green';
+    ctx.moveTo(pointYs[i].value[0], pointYs[i].value[1]);
+    ctx.lineTo(pointYs[i + 1].value[0], pointYs[i + 1].value[1]);
+    ctx.stroke();
+  }
+  for(var i = 0; i< pointZs.length - 1; i++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'blue';
+    ctx.moveTo(pointZs[i].value[0], pointZs[i].value[1]);
+    ctx.lineTo(pointZs[i + 1].value[0], pointZs[i + 1].value[1]);
+    ctx.stroke();
+  }
+}
+
+
+function Point(value, axis){
+  this.value = [0, value];
+  this.velocity = 0.66;
+  this.axis = axis;
+  this.viewPoint();
+}
+
+Point.prototype.render = function(){
+  this.value[0] -= this.velocity;
+  switch(this.axis){
+    case 'x':
+      ctx.fillStyle = 'red';
+      break;
+    case 'y':
+      ctx.fillStyle = 'green';
+      break;
+    case 'z':
+      ctx.fillStyle = 'blue';
+    break;
+  }
+
+  ctx.fillRect(this.value[0] ,this.value[1], 5, 5);
+}
+
+Point.prototype.viewPoint = function(){
+  //scale the y here!
+  //make the x in the middle here!
+  this.value[0] = w - 10;
+  switch(this.axis){
+    case 'x':
+    this.value[1] = map(this.value[1], xMin, xMax, h/3-6, 6);
+    console.log(this.value)
+    break;
+    case 'y':
+    this.value[1] = map(this.value[1], yMin, yMax, h * 2/3 - 6, h/3 + 6);
+    console.log(this.value)
+    break;
+    case'z':
+    this.value[1] = map(this.value[1], zMin, zMax, h - 6, h * 2/3 + 6);
+    console.log(this.value)
+    break;
+  }
+}
+
+function map(n, start1, stop1, start2, stop2) {
+  if(stop1 === start1) return start2 + ( stop2 - start2 ) / 2;
+    return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
+  };
 },{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-select":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function injectMaxMin(str){
   var copy = str;
@@ -419,7 +561,7 @@ function injectMaxMin(str){
 
 function wrapGenerator(str){
   var copy = str;
-  var copy = copy.replace(/addThing/g, 'yield addThing');
+  var copy = copy.replace(/addThing/g, 'yield drawAndAddThing');
   var copy = 'function* wat(){\n' + copy +'\n}';
   return copy;
 }
@@ -25381,7 +25523,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25424,7 +25566,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",

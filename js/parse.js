@@ -7,7 +7,7 @@ function injectMaxMin(str){
 
 function wrapGenerator(str){
   var copy = str;
-  var copy = copy.replace(/addThing/g, 'yield addThing');
+  var copy = copy.replace(/addThing/g, 'yield drawAndAddThing');
   var copy = 'function* wat(){\n' + copy +'\n}';
   return copy;
 }

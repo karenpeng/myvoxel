@@ -35,8 +35,12 @@ html, body{
 }
 #dataLog{
   position: absolute;
-  right: 410px;
-  bottom: 10px;
+  bottom: 0;
+  background-color: #222;
+  opacity: 0.8;
+}
+#status{
+  top: 0;
 }
 </style>
 <body>
@@ -65,7 +69,7 @@ html, body{
 //    var x = Math.cos(phil) * Math.sin(theta) * 4;
 //    var y = Math.sin(phil) * 4;
 //    var z = Math.cos(phil) * Math.cos(theta) * 4;
-//    addThing(x, y + 2, z);
+//    addThing(x, y + 4, z);
 //  }
 //}
 </div>
@@ -75,13 +79,9 @@ html, body{
 <input id="sliderr" type="range" min="10" max="120" step="10" value='60'/>
 <span id="valueP"></span>
 </div>
-<canvas id="dataLog" width="600px" height="200px"></canvas>
+<canvas id="dataLog" width="0px" height="0px"></canvas>
 </doby>
 <script type="text/javascript">
-function resize(){
-  var w = window.innerWidth;
-  var h = window.innerHeight;
-}
 </script>
 <script type="text/javascript" src="bundle.js"></script>
 </html>
