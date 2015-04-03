@@ -8,6 +8,16 @@ editor.setTheme('ace/theme/monokai');
 
 var consoleLog = ace.edit('console');
 
+var editing = false;
+
+editor.on('focus', function () {
+  editing = true;
+});
+
+editor.on("blur", function () {
+  editing = false;
+});
+
 module.exports = {
   editor: editor,
   consoleLog: consoleLog

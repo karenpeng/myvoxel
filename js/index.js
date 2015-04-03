@@ -1,12 +1,30 @@
 var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
-
-var createSelect = require('voxel-select');
+//var createSelect = require('voxel-select');
 // var highlight = require('voxel-highlight');
 // var transforms = require('voxel-transforms');
 //require('./parse.js');
 var voxelPos = [0, 0, 0];
+var startPosition = [0, 0, 0];
+var xMin, xMax, yMin, yMax, zMin, zMax;
+var pointXs = [];
+var pointYs = [];
+var pointZs = [];
+var can = document.getElementById('dataLog');
+var ctx = can.getContext('2d');
+var w;
+var h;
+function resize(){
+  var ww = window.innerWidth;
+  var hh = window.innerHeight;
+  can.setAttribute('width', (ww - 400) + 'px');
+  can.setAttribute('height', (hh * 0.2) + 'px');
+  w = can.width;
+  h = can.height;
+}
+resize();
+window.addEventListener('resize', resize);
 /*
 set up game
  */
@@ -16,12 +34,12 @@ var game = createGame({
   generateChunks: false,
   texturePath: 'textures/',
   materials: [
-    ['grass', 'dirt', 'grass_dirt'],
-    'brick',
-    'grass'
+    ['grass', 'dirt', 'grass_dirt']
+    ,'brick'
+    // ,'meow'
   ],
   //materialFlatColor: true,
-  chunkSize: 32,
+  chunkSize: 16,
   chunkDistance: 2,
   worldOrigin: [0, 0, 0],
   controls: {
@@ -36,11 +54,11 @@ game.appendTo(container);
 window.game = game; //for debug:)
 
 // initialize your noise with a seed, floor height, ceiling height and scale factor
-var chunkSize = 32;
+var chunkSize = 16;
 var generateChunk = terrain('foo', 0, 5, 50);
 // then hook it up to your game as such:
 game.voxels.on('missingChunk', function (p) {
-  var voxels = generateChunk(p, chunkSize)
+  var voxels = generateChunk(p, chunkSize);
   var chunk = {
     position: p,
     dims: [chunkSize, chunkSize, chunkSize],
@@ -62,7 +80,7 @@ var jumpFromSky = 10;
 dude.yaw.position.set(0, jumpFromSky, 0);
 
 window.addEventListener('keydown', function (ev) {
-  if (ev.keyCode === 'R'.charCodeAt(0)) {
+  if (!editing && ev.keyCode === 'R'.charCodeAt(0)) {
     dude.toggle();
   }
 });
@@ -105,35 +123,9 @@ game.scene.add(dude2);
 three js experiments
  */
 
-// first attempt:( does not show up
 
-var mesh1 = new game.THREE.Mesh(new game.THREE.SphereGeometry(20), new game.THREE.MeshNormalMaterial());
-mesh1.position.set(1, 4, 0);
-game.scene.add(mesh1);
 
-//second error says 'is not an instance of THREE.Object3D.''
-//comment out line 137 the error is gone
-var parent = new game.THREE.Object3D();
-parent.name = 'parent';
-//console.log(parent);
-//parent.position.set(0, 0, 0);
-var mesh0 = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(1, 3, 1), // width, height, depth
-    game.materials.material
-  )
-  // paint the mesh with a specific texture in the atlas
-game.materials.paint(mesh0, 'brick')
-  //for testing
-mesh0.position.set(1, 10, 0);
-//parent.add(mesh0);
-console.log(parent)
-console.log(mesh0)
-  //game.scene.add(parent);
-
-//third attempt :(
-//parent.add(mesh);
-//game.scene.add(parent);
-
+var colliObjs = [];
 function addThing(_x, _y, _z) {
   // create a mesh and use the internal game material (texture atlas)
 
@@ -143,15 +135,17 @@ function addThing(_x, _y, _z) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, 'brick')
+  game.materials.paint(mesh, 'brick');
 
   //mesh.position.set(_x, _y, _z)
-  var x = _x + voxelPos[0] + 0.5 || voxelPos[0] + 0.5;
-  var y = _y + voxelPos[1] + 1.5 || voxelPos[1] + 1.5;
-  var z = _z + voxelPos[2] + 0.5 || voxelPos[2] + 0.5;
+  var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
+  var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
+  var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
 
   //for testing
   mesh.position.set(x, y, z);
+  colliObjs.push(mesh);
+  //console.log(x, y, z);
   //game.scene.add(mesh)
   //console.log(mesh)
   var item = game.addItem({
@@ -164,39 +158,74 @@ function addThing(_x, _y, _z) {
       } // initial velocity
     }, false)
     //use `game.removeItem(item)` to remove
+    //return [x, y, z];
 }
 
 addThing(10, 20, 0);
 
 window.onkeydown = function (e) {
   //j
-  if (e.which === 74) {
-    e.preventDefault();
-    //console.log('create block please!');
-    //game.createBlock(dude.position, 1);
-    //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
-    for (var i = 0; i < 3; i++) {
-      addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
+  if (!editing){
+    if(e.which === 74) {
+      e.preventDefault();
+      //console.log('create block please!');
+      //game.createBlock(dude.position, 1);
+      //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
+      for (var i = 0; i < 3; i++) {
+        addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
+      }
     }
   }
 }
+
+
 
 /*
 animation
  */
 var theta = 0;
-setInterval(function () {
+var interval = 60;
+var begintToCount = 0;
+game.on('tick',function(delta){
+  //console.log(delta)
+  sky(delta);
   //dude2.position.set(0, Math.sin(theta) + 3, 10);
-  dude2.rotation.y = theta;
-  theta += 0.1;
+  dude2.rotation.y = theta / 100;
   //console.log(dude.position);
   //console.log(game.controls.dude2().avatar.position())
-  parent.rotation.y = theta;
-  mesh2.rotation.y = theta / 10;
-  mesh2.rotation.z = Math.sin(theta / 10);
-}, 16);
+  //parent.rotation.y = theta / 100;
+  mesh2.rotation.y = theta / 100;
+  mesh2.rotation.z = Math.sin(theta / 100);
+  theta += (delta / 16);
 
-// game.createBlock((0, 10, 20), 1);
+  if(begintToCount % interval === 0 && evaled){
+    //console.log('hello~')
+    run(call);
+  }
+
+  if(evaled){
+    begintToCount += (delta / 16);
+  }
+
+  var result = isHit();
+  if(result){
+    dude.yaw.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
+  };
+
+  ctx.clearRect(0, 0, w, h);
+  // pointXs.forEach(function(point){
+  //   point.render();
+  // });
+  point3Render();
+})
+
+// for(var i = 0; i<3; i++){
+//   //console.log(game.canCreateBlock([i,4,0]));
+//   game.createBlock([i, 4, 0], '2');
+//   //console.log('are you ok?')
+// }
+
+
 // game.createBlock({
 //   x: 0,
 //   y: 10,
@@ -211,9 +240,21 @@ game.on('collision', function (item) {
   console.log(item);
 })
 
-/*
-interaction!
- */
+var rayCaster = new game.THREE.Raycaster();
+function isHit() {
+    //get user direction!!
+    var ray = new game.THREE.Vector3(0, -1, 0);
+    rayCaster.ray.set(dude.yaw.position, ray);
+    var intersects = rayCaster.intersectObjects(colliObjs);
+    if (intersects.length > 0 && intersects[0].distance <= 0.5) {
+      console.log(intersects[0].object.position);
+      return intersects[0].object.position;
+    }
+    return false;
+}
+  /*
+  interaction!
+   */
 var createSelect = require('voxel-select');
 //var selector = createSelect(game);
 
@@ -223,9 +264,19 @@ var hl = highlight(game, {
 });
 
 hl.on('highlight', function (_voxelPos) {
-  //console.log(_voxelPos);
-  voxelPos = _voxelPos;
+  //if(shiftIsDown){
+    voxelPos = _voxelPos;
+    //console.log(_voxelPos);
+  //}
 });
+
+game.on('fire', function(){
+  console.log('what does fire mean');
+  startPosition = voxelPos;
+  console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
+})
+
+
 hl.on('highlight-select', function (selection) {
   console.log(">>> [" + selection.start + "][" + selection.end + "] highlighted selection")
 })
@@ -237,7 +288,7 @@ start experiment!  :D
 var geometry = new game.THREE.SphereGeometry(0.1);
 var material = new game.THREE.MeshNormalMaterial();
 var mesh2 = new game.THREE.Mesh(geometry, material);
-mesh2.position.set(10, 10, -10);
+mesh2.position.set(10, 3, -10);
 game.scene.add(mesh2);
 // add a torus
 for (var i = 0; i <= 1; i += 0.1) {
@@ -268,17 +319,209 @@ for (var i = 0; i <= 1; i += 0.1) {
 eval!
  */
 var editor = require('./editor.js').editor;
+var consoleLog = require('./editor.js').consoleLog;
+var editing = require('./editor.js').editing;
 document.getElementById('run').onclick = function () {
-  console.log(editor.getValue());
+  evaled = false;
+  //console.log(editor.getValue());
   parse(editor.getValue());
 }
 
+var editing = false;
+
+editor.on('focus', function () {
+  editing = true;
+});
+
+editor.on("blur", function () {
+  editing = false;
+});
+
+
+var injectMaxMin = require('./parse.js').injectMaxMin;
+var wrapGenerator = require('./parse.js').wrapGenerator;
+
 function parse(str) {
-  try {
-    console.log('start eval');
-    eval(str);
-    console.log('end eval');
-  } catch (e) {
+  xMin = 10000000000000;
+  xMax = -xMin;
+  yMin = 10000000000000;
+  yMax = -yMin;
+  zMin = 10000000000000;
+  zMax = -zMin;
+  pointXs = [];
+  pointYs = [];
+  pointZs = [];
+
+  try{
+    var str1 = injectMaxMin(str);
+    eval(str1);
+  }catch(e){
     console.log(e);
   }
+
+  try {
+    //console.log('start eval');
+    var str2 = wrapGenerator(str);
+    //console.log(str2);
+    eval(str2);
+    call = wat();
+    evaled = true;
+    //console.log('end eval');
+  } catch (e) {
+    console.log(e);
+    consoleLog.insert(e);
+  }
+
 }
+
+function drawAndAddThing(x, y, z){
+  addThing(x, y, z);
+  point3Init(x, y, z);
+}
+
+// function drawData(x, y, z){
+
+// }
+
+function addThingModified(x, y, z){
+  // addThing(x, y, z);
+  //console.log(x, y, z);
+  if(xMin > x) xMin = x;
+  if(xMax < x) xMax = x;
+  if(yMin > y) yMin = y;
+  if(xMax < y) yMax = y;
+  if(zMin > z) zMin = z;
+  if(zMax < z) zMax = z;
+  //console.log('hahaha ', xMin, xMax);
+}
+
+
+function run(generator) {
+  //console.log(generator)
+  var ret = generator.next();
+  if (ret.done) {
+    evaled = false;
+    begintToCount = 0;
+    return;
+  }
+  //console.log(ret.value);
+}
+
+document.getElementById('valueP').innerHTML = interval;
+var call;
+var evaled = false;
+var sliderr = document.getElementById('sliderr');
+sliderr.addEventListener('change', function(){
+  console.log(sliderr.value);
+  interval = sliderr.value;
+  document.getElementById('valueP').innerHTML = sliderr.value;
+});
+
+
+/*
+the 2d canvas for data graph
+ */
+function point3Init(x, y, z){
+  console.log('www ', x, y, z);
+  var p = new Point(x, 'x');
+  pointXs.push(p);
+  var p = new Point(y, 'y');
+  pointYs.push(p);
+  var p = new Point(z, 'z');
+  pointZs.push(p);
+}
+
+function point3Render(){
+  ctx.beginPath();
+  ctx.strokeStyle = 'white';
+  ctx.moveTo(0, h / 3);
+  ctx.lineTo(w, h / 3);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.strokeStyle = 'white';
+  ctx.moveTo( 0, h * 2/3);
+  ctx.lineTo( w, h * 2/3);
+  ctx.stroke();
+
+  pointXs.forEach(function(p){
+    p.render();
+  });
+  pointYs.forEach(function(p){
+    p.render();
+  });
+  pointZs.forEach(function(p){
+    p.render();
+  });
+  for(var i = 0; i< pointXs.length - 1; i++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'red';
+    ctx.moveTo(pointXs[i].value[0], pointXs[i].value[1]);
+    ctx.lineTo(pointXs[i + 1].value[0], pointXs[i + 1].value[1]);
+    ctx.stroke();
+  }
+  for(var i = 0; i< pointYs.length - 1; i++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'green';
+    ctx.moveTo(pointYs[i].value[0], pointYs[i].value[1]);
+    ctx.lineTo(pointYs[i + 1].value[0], pointYs[i + 1].value[1]);
+    ctx.stroke();
+  }
+  for(var i = 0; i< pointZs.length - 1; i++){
+    ctx.beginPath();
+    ctx.strokeStyle = 'blue';
+    ctx.moveTo(pointZs[i].value[0], pointZs[i].value[1]);
+    ctx.lineTo(pointZs[i + 1].value[0], pointZs[i + 1].value[1]);
+    ctx.stroke();
+  }
+}
+
+
+function Point(value, axis){
+  this.value = [0, value];
+  this.velocity = 0.66;
+  this.axis = axis;
+  this.viewPoint();
+}
+
+Point.prototype.render = function(){
+  this.value[0] -= this.velocity;
+  switch(this.axis){
+    case 'x':
+      ctx.fillStyle = 'red';
+      break;
+    case 'y':
+      ctx.fillStyle = 'green';
+      break;
+    case 'z':
+      ctx.fillStyle = 'blue';
+    break;
+  }
+
+  ctx.fillRect(this.value[0] ,this.value[1], 5, 5);
+}
+
+Point.prototype.viewPoint = function(){
+  //scale the y here!
+  //make the x in the middle here!
+  this.value[0] = w - 10;
+  switch(this.axis){
+    case 'x':
+    this.value[1] = map(this.value[1], xMin, xMax, h/3-6, 6);
+    console.log(this.value)
+    break;
+    case 'y':
+    this.value[1] = map(this.value[1], yMin, yMax, h * 2/3 - 6, h/3 + 6);
+    console.log(this.value)
+    break;
+    case'z':
+    this.value[1] = map(this.value[1], zMin, zMax, h - 6, h * 2/3 + 6);
+    console.log(this.value)
+    break;
+  }
+}
+
+function map(n, start1, stop1, start2, stop2) {
+  if(stop1 === start1) return start2 + ( stop2 - start2 ) / 2;
+    return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
+  };

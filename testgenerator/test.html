@@ -1,0 +1,56 @@
+<input id="sliderr" type="range" min="10" max="180"/ step="10">
+<p id="valueP"></p>
+
+<script>
+
+function* wat(){
+
+  for (var i = 0; i < 30; i++) {
+    var theta = Math.PI * i / 5;
+    yield addThing(Math.sin(theta), i, Math.cos(theta))
+    //yield i;
+  }
+
+}
+
+function addThing(x, y, z) {
+  x = x || 0;
+  y = y || 0;
+  z = z || 0;
+  console.log(x, y, z);
+}
+
+function run(generator) {
+  //console.log(generator)
+  var ret = generator.next();
+  if (ret.done) return;
+  //console.log(ret.value);
+}
+
+var call = wat()
+// setInterval(function () {
+//   run(call);
+// }, 1000);
+
+var frameCount = 0;
+var interval = 1200;
+function animate(){
+  requestAnimationFrame(animate);
+  if(frameCount % interval === 0){
+    run(call);
+  }
+  frameCount++;
+}
+//animate();
+setInterval(function(){
+  run(call);
+},interval);
+
+var sliderr = document.getElementById('sliderr');
+sliderr.addEventListener('change', function(){
+  console.log(sliderr.value);
+  interval = sliderr.value;
+  document.getElementById('valueP').innerHTML = sliderr.value;
+});
+
+</script>
