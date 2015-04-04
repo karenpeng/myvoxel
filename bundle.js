@@ -31,6 +31,10 @@ var terrain = require('voxel-perlin-terrain');
 // var highlight = require('voxel-highlight');
 // var transforms = require('voxel-transforms');
 //require('./parse.js');
+// var toolbar = require('toolbar');
+// var bartab = toolbar('.bar-tab');
+//var fly = require('voxel-fly');
+
 var voxelPos = [0, 0, 0];
 var startPosition = [0, 0, 0];
 var xMin, xMax, yMin, yMax, zMin, zMax;
@@ -93,9 +97,16 @@ game.voxels.on('missingChunk', function (p) {
   game.showChunk(chunk);
 })
 
+// var makeFly = fly(game);
+// makeFly(game.contrls.target())
+
 var createSky = require('voxel-sky')(game);
 
 var sky = createSky();
+
+// toolbar('.bar-tab').on('select', function (item) {
+//   currentMaterial = item
+// })
 
 //create dude
 var createPlayer = require('voxel-player')(game);
@@ -194,9 +205,6 @@ window.onkeydown = function (e) {
   if (!editing){
     if(e.which === 74) {
       e.preventDefault();
-      //console.log('create block please!');
-      //game.createBlock(dude.position, 1);
-      //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
       for (var i = 0; i < 3; i++) {
         addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
       }
@@ -213,19 +221,12 @@ var theta = 0;
 var interval = 60;
 var begintToCount = 0;
 game.on('tick',function(delta){
-  //console.log(delta)
   sky(delta);
-  //dude2.position.set(0, Math.sin(theta) + 3, 10);
   dude2.rotation.y = theta / 100;
-  //console.log(dude.position);
-  //console.log(game.controls.dude2().avatar.position())
-  //parent.rotation.y = theta / 100;
-  mesh2.rotation.y = theta / 100;
-  mesh2.rotation.z = Math.sin(theta / 100);
+
   theta += (delta / 16);
 
   if(begintToCount % interval === 0 && evaled){
-    //console.log('hello~')
     run(call);
   }
 
@@ -239,9 +240,6 @@ game.on('tick',function(delta){
   };
 
   ctx.clearRect(0, 0, w, h);
-  // pointXs.forEach(function(point){
-  //   point.render();
-  // });
   point3Render();
 })
 
@@ -259,13 +257,6 @@ game.on('tick',function(delta){
 // }, 1);
 
 //collision detection!!!
-//never got any detection...
-game.raycastVoxels();
-
-game.on('collision', function (item) {
-  console.log(item);
-})
-
 var rayCaster = new game.THREE.Raycaster();
 function isHit() {
     //get user direction!!
@@ -281,7 +272,7 @@ function isHit() {
   /*
   interaction!
    */
-var createSelect = require('voxel-select');
+// var createSelect = require('voxel-select');
 //var selector = createSelect(game);
 
 var highlight = require('voxel-highlight');
@@ -301,45 +292,6 @@ game.on('fire', function(){
   startPosition = voxelPos;
   console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
 })
-
-
-hl.on('highlight-select', function (selection) {
-  console.log(">>> [" + selection.start + "][" + selection.end + "] highlighted selection")
-})
-
-/*
-start experiment!  :D
- */
-
-var geometry = new game.THREE.SphereGeometry(0.1);
-var material = new game.THREE.MeshNormalMaterial();
-var mesh2 = new game.THREE.Mesh(geometry, material);
-mesh2.position.set(10, 3, -10);
-game.scene.add(mesh2);
-// add a torus
-for (var i = 0; i <= 1; i += 0.1) {
-  for (var j = 0; j <= 1; j += 0.1) {
-    var uv = [i, j];
-
-    var u = uv[0];
-    var v = uv[1];
-    var geometry = new game.THREE.SphereGeometry(0.1);
-    var material = new game.THREE.MeshNormalMaterial();
-    var mesh0 = new game.THREE.Mesh(geometry, material);
-
-    var theta = 2 * Math.PI * u;
-    var phil = Math.PI * v - Math.PI / 2;
-    // var x = Math.sin(theta);
-    //   var y = 2 * v - 1;
-    //   var z = Math.cos(theta);
-    var x = Math.cos(phil) * Math.sin(theta);
-    var y = Math.sin(phil);
-    var z = Math.cos(phil) * Math.cos(theta);
-    mesh0.position.set(x, y, z);
-    mesh2.add(mesh0);
-    //scene.add(mesh0);
-  }
-}
 
 /*
 eval!
@@ -404,10 +356,6 @@ function drawAndAddThing(x, y, z){
   addThing(x, y, z);
   point3Init(x, y, z);
 }
-
-// function drawData(x, y, z){
-
-// }
 
 function addThingModified(x, y, z){
   // addThing(x, y, z);
@@ -551,7 +499,7 @@ function map(n, start1, stop1, start2, stop2) {
   if(stop1 === start1) return start2 + ( stop2 - start2 ) / 2;
     return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
   };
-},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-select":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function injectMaxMin(str){
   var copy = str;
   copy = copy.replace(/addThing/g, 'addThingModified');
@@ -25523,7 +25471,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25566,7 +25514,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
@@ -66833,130 +66781,6 @@ Skin.prototype.createPlayerObject = function(scene) {
   playerGroup.scale = this.scale
   return playerGroup
 }
-},{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/index.js":[function(require,module,exports){
-var inherits = require('inherits')
-var events = require('events')
-
-module.exports = function(game, opts) {
-  return new Selector(game, opts)
-}
-
-function Selector(game, opts) {
-  if (!opts) opts = {}
-  this.opts = opts
-  this.game = game
-}
-
-inherits(Selector, events.EventEmitter)
-
-Selector.prototype.set = function(start, end, visible) {
-  if (typeof visible === 'undefined') visible = true
-  var THREE = this.game.THREE
-  this.start = start
-  this.end = end
-  if (visible) this.drawMesh(this.start, this.end)
-}
-
-Selector.prototype.drawMesh = function(start, end) {
-  var THREE = this.game.THREE
-  var cube = new THREE.CubeGeometry(1, 1, 1)
-  var material = new game.THREE.MeshBasicMaterial({
-    color: 0xffaa00,
-    wireframe: true,
-    wireframeLinewidth: 2
-  })
-  var mesh = new THREE.Mesh( cube, material )
-  
-  var scale = []
-  scale[0] = Math.abs(end[0] - start[0]) + 1
-  scale[1] = Math.abs(end[1] - start[1]) + 1
-  scale[2] = Math.abs(end[2] - start[2]) + 1
-  mesh.scale.set(scale[0], scale[1], scale[2])
-
-  var pos = []
-  pos[0] = this.start[0] + 0.5 + (this.end[0] - this.start[0]) / 2
-  pos[1] = this.start[1] + 0.5 + (this.end[1] - this.start[1]) / 2
-  pos[2] = this.start[2] + 0.5 + (this.end[2] - this.start[2]) / 2
-  mesh.position.set(pos[0], pos[1], pos[2])
-
-  this.game.scene.add(mesh)
-  this.mesh = mesh
-}
-
-Selector.prototype.bounds = function() {
-  var s = this.start
-  var e = this.end
-  return [
-    [Math.min(s[0], e[0]), Math.min(s[1], e[1]), Math.min(s[2], e[2])],
-    [Math.max(s[0], e[0]), Math.max(s[1], e[1]), Math.max(s[2], e[2])],
-  ]
-}
-
-Selector.prototype.dimensions = function() {
-  var bounds = this.bounds()
-  var w = bounds[1][0] - bounds[0][0]
-  var h = bounds[1][1] - bounds[0][1]
-  var d = bounds[1][2] - bounds[0][2]
-  return [w + 1, h + 1, d + 1]
-}
-
-Selector.prototype.transform = function(func) {
-  var bounds = this.bounds()
-  var l = bounds[0], h = bounds[1]
-  for(var z = h[2]; z >= l[2]; --z)
-    for(var y = h[1]; y >= l[1]; --y)
-      for(var x = h[0]; x >= l[0]; --x)
-        func(x, y, z, this.game)
-}
-
-Selector.prototype.selection = function() {
-  var d = this.dimensions()
-  var v = new Int8Array(d[0] * d[1] * d[2])
-  this.transform(function(x, y, z, n) {
-    v[n] = this.game.getBlock(x, y, z)
-  })
-  return {voxels: v, dimensions: d, start: this.start}
-}
-
-Selector.prototype.reset = function() {
-  this.start = false
-  this.end = false
-  if (this.mesh) {
-    this.game.scene.remove(this.mesh)
-    this.mesh = undefined
-  }
-}
-},{"events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js","inherits":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/node_modules/inherits/inherits.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-select/node_modules/inherits/inherits.js":[function(require,module,exports){
-module.exports = inherits
-
-function inherits (c, p, proto) {
-  proto = proto || {}
-  var e = {}
-  ;[c.prototype, proto].forEach(function (s) {
-    Object.getOwnPropertyNames(s).forEach(function (k) {
-      e[k] = Object.getOwnPropertyDescriptor(s, k)
-    })
-  })
-  c.prototype = Object.create(p.prototype, e)
-  c.super = p
-}
-
-//function Child () {
-//  Child.super.call(this)
-//  console.error([this
-//                ,this.constructor
-//                ,this.constructor === Child
-//                ,this.constructor.super === Parent
-//                ,Object.getPrototypeOf(this) === Child.prototype
-//                ,Object.getPrototypeOf(Object.getPrototypeOf(this))
-//                 === Parent.prototype
-//                ,this instanceof Child
-//                ,this instanceof Parent])
-//}
-//function Parent () {}
-//inherits(Child, Parent)
-//new Child
-
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js":[function(require,module,exports){
 var traj = require('voxel-trajectory');
 var tic = require('tic')();
