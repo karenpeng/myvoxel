@@ -5,6 +5,10 @@ var terrain = require('voxel-perlin-terrain');
 // var highlight = require('voxel-highlight');
 // var transforms = require('voxel-transforms');
 //require('./parse.js');
+// var toolbar = require('toolbar');
+// var bartab = toolbar('.bar-tab');
+//var fly = require('voxel-fly');
+
 var voxelPos = [0, 0, 0];
 var startPosition = [0, 0, 0];
 var xMin, xMax, yMin, yMax, zMin, zMax;
@@ -67,9 +71,16 @@ game.voxels.on('missingChunk', function (p) {
   game.showChunk(chunk);
 })
 
+// var makeFly = fly(game);
+// makeFly(game.contrls.target())
+
 var createSky = require('voxel-sky')(game);
 
 var sky = createSky();
+
+// toolbar('.bar-tab').on('select', function (item) {
+//   currentMaterial = item
+// })
 
 //create dude
 var createPlayer = require('voxel-player')(game);
@@ -168,9 +179,6 @@ window.onkeydown = function (e) {
   if (!editing){
     if(e.which === 74) {
       e.preventDefault();
-      //console.log('create block please!');
-      //game.createBlock(dude.position, 1);
-      //game.createBlock([dude.position.x, dude.position.y, dude.position.z], 1);
       for (var i = 0; i < 3; i++) {
         addThing(voxelPos[0] + i, voxelPos[1], voxelPos[2] + 1);
       }
@@ -187,19 +195,12 @@ var theta = 0;
 var interval = 60;
 var begintToCount = 0;
 game.on('tick',function(delta){
-  //console.log(delta)
   sky(delta);
-  //dude2.position.set(0, Math.sin(theta) + 3, 10);
   dude2.rotation.y = theta / 100;
-  //console.log(dude.position);
-  //console.log(game.controls.dude2().avatar.position())
-  //parent.rotation.y = theta / 100;
-  mesh2.rotation.y = theta / 100;
-  mesh2.rotation.z = Math.sin(theta / 100);
+
   theta += (delta / 16);
 
   if(begintToCount % interval === 0 && evaled){
-    //console.log('hello~')
     run(call);
   }
 
@@ -213,9 +214,6 @@ game.on('tick',function(delta){
   };
 
   ctx.clearRect(0, 0, w, h);
-  // pointXs.forEach(function(point){
-  //   point.render();
-  // });
   point3Render();
 })
 
@@ -233,13 +231,6 @@ game.on('tick',function(delta){
 // }, 1);
 
 //collision detection!!!
-//never got any detection...
-game.raycastVoxels();
-
-game.on('collision', function (item) {
-  console.log(item);
-})
-
 var rayCaster = new game.THREE.Raycaster();
 function isHit() {
     //get user direction!!
@@ -255,7 +246,7 @@ function isHit() {
   /*
   interaction!
    */
-var createSelect = require('voxel-select');
+// var createSelect = require('voxel-select');
 //var selector = createSelect(game);
 
 var highlight = require('voxel-highlight');
@@ -275,45 +266,6 @@ game.on('fire', function(){
   startPosition = voxelPos;
   console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
 })
-
-
-hl.on('highlight-select', function (selection) {
-  console.log(">>> [" + selection.start + "][" + selection.end + "] highlighted selection")
-})
-
-/*
-start experiment!  :D
- */
-
-var geometry = new game.THREE.SphereGeometry(0.1);
-var material = new game.THREE.MeshNormalMaterial();
-var mesh2 = new game.THREE.Mesh(geometry, material);
-mesh2.position.set(10, 3, -10);
-game.scene.add(mesh2);
-// add a torus
-for (var i = 0; i <= 1; i += 0.1) {
-  for (var j = 0; j <= 1; j += 0.1) {
-    var uv = [i, j];
-
-    var u = uv[0];
-    var v = uv[1];
-    var geometry = new game.THREE.SphereGeometry(0.1);
-    var material = new game.THREE.MeshNormalMaterial();
-    var mesh0 = new game.THREE.Mesh(geometry, material);
-
-    var theta = 2 * Math.PI * u;
-    var phil = Math.PI * v - Math.PI / 2;
-    // var x = Math.sin(theta);
-    //   var y = 2 * v - 1;
-    //   var z = Math.cos(theta);
-    var x = Math.cos(phil) * Math.sin(theta);
-    var y = Math.sin(phil);
-    var z = Math.cos(phil) * Math.cos(theta);
-    mesh0.position.set(x, y, z);
-    mesh2.add(mesh0);
-    //scene.add(mesh0);
-  }
-}
 
 /*
 eval!
@@ -378,10 +330,6 @@ function drawAndAddThing(x, y, z){
   addThing(x, y, z);
   point3Init(x, y, z);
 }
-
-// function drawData(x, y, z){
-
-// }
 
 function addThingModified(x, y, z){
   // addThing(x, y, z);
