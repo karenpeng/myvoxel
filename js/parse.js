@@ -1,6 +1,6 @@
-function injectMaxMin(str){
+function maxMinFuc(str){
   var copy = str;
-  copy = copy.replace(/addThing/g, 'addThingModified');
+  copy = copy.replace(/addThing/g, 'getMaxMin');
   return copy;
 }
 
@@ -8,13 +8,14 @@ function injectMaxMin(str){
 function wrapGenerator(str){
   var copy = str;
   var copy = copy.replace(/addThing/g, 'yield drawAndAddThing');
+  //var copy = copy.replace(/function/g, 'function*');
   var copy = 'function* wat(){\n' + copy +'\n}';
   return copy;
 }
 
 
 module.exports = {
-  injectMaxMin: injectMaxMin,
+  maxMinFuc: maxMinFuc,
   wrapGenerator: wrapGenerator
 }
 

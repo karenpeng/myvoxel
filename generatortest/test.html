@@ -1,0 +1,20 @@
+<script type="text/javascript">
+var i = 0;
+
+
+function* ok(){
+  yield i
+}
+
+var call = ok()
+
+setInterval(function(){
+  console.log(call.next())
+  if(call.done) return
+},2000)
+
+setInterval(function(){
+  i++;
+},1000);
+
+</script>
