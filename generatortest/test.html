@@ -3,7 +3,9 @@ var i = 0;
 
 
 function* ok(){
-  yield i
+  while(true){
+    yield i
+  }
 }
 
 var call = ok()

@@ -25,7 +25,7 @@ function resize(){
   var ww = window.innerWidth;
   var hh = window.innerHeight;
   can.setAttribute('width', (ww - 400) + 'px');
-  can.setAttribute('height', (hh * 0.2) + 'px');
+  can.setAttribute('height', (hh * 0.15) + 'px');
   w = can.width;
   h = can.height;
 }
@@ -77,6 +77,10 @@ game.voxels.on('missingChunk', function (p) {
   game.showChunk(chunk);
 })
 
+var light = new game.THREE.DirectionalLight(0xffffff, 0.5);
+light.position.set(0, 10, 0);
+game.scene.add(light);
+
 // var makeFly = fly(game);
 // makeFly(game.contrls.target())
 
@@ -116,7 +120,7 @@ three js experiments
 
 
 window.myItems = myItems;
-function addThing(_x, _y, _z) {
+function addThing(_x, _y, _z, _clickTimes) {
   // create a mesh and use the internal game material (texture atlas)
 
   var mesh = new game.THREE.Mesh(
@@ -134,7 +138,7 @@ function addThing(_x, _y, _z) {
 
   //for testing
   mesh.position.set(x, y, z);
-  mesh.name = clickTimes;
+  mesh.name = _clickTimes;
   colliObjs.push(mesh);
   //console.log(x, y, z);
   //game.scene.add(mesh)
@@ -148,7 +152,7 @@ function addThing(_x, _y, _z) {
         z: 0
       } // initial velocity
     }, false)
-  item.name = clickTimes;
+  item.name = _clickTimes;
   myItems.push(item);
 
   return mesh;
@@ -274,7 +278,7 @@ hl.on('highlight', function (_voxelPos) {
 game.on('fire', function(){
   startPosition = voxelPos;
   console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
-})
+});
 
 /*
 eval!
@@ -329,7 +333,7 @@ function parse(str) {
   try {
     //console.log('start eval');
     var str2 = wrapGenerator(str);
-    //console.log(str2);
+    console.log(str2);
     eval(str2);
     call = wat();
     evaled = true;
