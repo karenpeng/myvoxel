@@ -92,20 +92,22 @@ function replaceFunc(str){
   return copy;
 }
 
-// function* addGuy(x, y, z, c){
-
-//   var X = x || 0;
-//   var Y = y || 0;
-//   var Z = z || 0;
-//   var C = c || 0;
-
-//   if(C < 10){
-
-//     C++;
-//     yield addThing(X, Y, Z);
-//     yield* addGuy(C, C, 0, C);
-
-//   }
-// }
-
-//  addGuy(); => what about this guy??? what should i do with it?
+// function* wat(){
+  // function* addGuy(x, y, z, c){
+  
+  //   var X = x || 0;
+  //   var Y = y || 0;
+  //   var Z = z || 0;
+  //   var C = c || 0;
+  
+  //   if(C < 10){
+  
+  //     C++;
+  //     yield addThing(X, Y, Z);
+  //     yield* addGuy(C, C, 0, C);
+  
+  //   }
+  // }
+  
+  //yield*  addGuy(); => what about this guy??? what should i do with it?
+//}
