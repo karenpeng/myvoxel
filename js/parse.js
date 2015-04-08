@@ -8,7 +8,7 @@ function wrapGenerator(str){
   var copy = str;
   var copy = copy.replace(/addThing/g, 'yield drawAndAddThing');
   var copy = functionSWap(copy);
-  var copy = 'function* wat(){\n' + copy +'\n}';
+  var copy = 'function* wwwaaattt(){\n' + copy +'\n}';
   return copy;
 }
 

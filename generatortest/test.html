@@ -22,31 +22,61 @@
 // drawAndAddThing(x, y, z, clickTimes){
 //   addThing(x, y, z, clickTimes);
 // }
+//
+//
+// var j = 0;
+
+// function drawAndAddThing(x, y, z, num){
+//   console.log(num);
+// }
+
+// function* wwwaaattt(num){
+//   for(var i = 0; i< 10; i++){
+//     yield drawAndAddThing(i, i, 0, num);
+//   }
+// }
+
+// var ret = wwwaaattt(j);
+
+// setInterval(function(){
+//   if(ret.done){
+//     return;
+//   }
+//   ret.next(j);
+// },2000);
+
+// setInterval(function(){
+//   j++;
+// }, 1000);
+//
 var j = 0;
 
 function drawAndAddThing(x, y, z, num){
-  console.log(num);
+ console.log(num);
 }
 
 function* wat(num){
-  for(var i = 0; i< 10; i++){
-    yield drawAndAddThing(i, i, 0, num);
-  }
+ for(var i = 0; i< 10; i++){
+  yield drawAndAddThing(i, i, 0, num);
+ }
 }
 
-var ret = wat();
+var ret = wat(j);
 
 setInterval(function(){
-  if(ret.done){
-    return;
-  }
-  ret.next(j);
+ if(ret.done){
+   return;
+ }
+ ret.next();
 },2000);
 
-setInterval(function(){
+// setInterval(function(){
+//  j++;
+// }, 1000);
+window.onmousedown = function(){
   j++;
-}, 1000);
-
+  ret = wat(j);
+}
 </script>
 
 

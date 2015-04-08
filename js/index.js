@@ -25,7 +25,7 @@ function resize(){
   var ww = window.innerWidth;
   var hh = window.innerHeight;
   can.setAttribute('width', (ww - 400) + 'px');
-  can.setAttribute('height', (hh * 0.15) + 'px');
+  can.setAttribute('height', (hh * 0.1) + 'px');
   w = can.width;
   h = can.height;
 }
@@ -193,15 +193,17 @@ game.on('tick',function(delta){
       dude.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
     };
 
-    result2 = isClose();
+    // result2 = isClose();
 
-    if(result2!== null && result2 !== result2pre){
-      //1.show code
-      //2.how does reset button work?
-      console.log('wat');
-      showCode(result2);
-      result2pre = result2;
-    }
+    // if(result2!== null && result2 !== result2pre){
+    //   //1.show code
+    //   //2.how does reset button work?
+    //   console.log('wwwaaattt');
+    //   showCode(result2);
+    //   result2pre = result2;
+    // }
+
+    //isSelect();
 
     ctx.clearRect(0, 0, w, h);
     point3Render();
@@ -222,6 +224,7 @@ function destory(name){
 }
 //collision detection!!!
 var rayCaster = new game.THREE.Raycaster();
+
 function isHit() {
     //get user direction!!
     var ray = new game.THREE.Vector3(0, -1, 0);
@@ -256,6 +259,42 @@ function isClose() {
     }
   }
   return name;
+}
+
+var mouse = new game.THREE.Vector2();
+var INTERSECTED;
+function onDocumentMouseMove( event ) {
+  event.preventDefault();
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+}
+document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+var Three = require('three');
+var rayCaster2 = new Three.Raycaster();
+
+function isSelect(){
+  rayCaster2.setFromCamera( mouse, game.camera );
+  var intersects = rayCaster2.intersectObjects(colliObjs);
+  console.log(intersects);
+  if ( intersects.length > 0 ) {
+
+    if ( INTERSECTED != intersects[ 0 ].object ) {
+
+      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+      INTERSECTED = intersects[ 0 ].object;
+      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+      INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+    }
+
+  } else {
+
+    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+    INTERSECTED = null;
+
+  }
 }
   /*
   interaction!
@@ -335,7 +374,7 @@ function parse(str) {
     var str2 = wrapGenerator(str);
     console.log(str2);
     eval(str2);
-    call = wat();
+    call = wwwaaattt();
     evaled = true;
     //console.log('end eval');
   } catch (e) {
