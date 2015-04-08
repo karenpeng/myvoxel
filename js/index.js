@@ -35,6 +35,8 @@ window.addEventListener('resize', resize);
 var colliObjs = [];
 var myItems = [];
 var preItemNum = 0;
+var groups = [];
+window.groups = groups;
 /*
 set up game
  */
@@ -114,10 +116,6 @@ dude2.scale.set(0.1, 0.1, 0.1);
 window.dude2 = dude2;
 game.scene.add(dude2);
 
-/*
-three js experiments
- */
-
 
 window.myItems = myItems;
 function addThing( _clickTimes, _x, _y, _z) {
@@ -134,20 +132,32 @@ function addThing( _clickTimes, _x, _y, _z) {
   game.materials.paint(mesh, 'brick');
 
   //mesh.position.set(_x, _y, _z)
-  var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
-  var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
-  var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
+  // var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
+  // var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
+  // var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
+  var x = _x || 0;
+  var y = _y || 0;
+  var z = _z || 0;
 
   //for testing
   mesh.position.set(x, y, z);
-  mesh.name = _clickTimes;
-  colliObjs.push(mesh);
+  // console.log('position!');
+  // console.log(x, y, z);
+  //mesh.name = _clickTimes;
+  // colliObjs.push(mesh);
+
+  //parent
+  console.log('jjj');
+  console.log(groups[_clickTimes]);
+  groups[_clickTimes].add(mesh);
   //console.log(x, y, z);
   //game.scene.add(mesh)
   //console.log(mesh)
   var item = game.addItem({
-      mesh: mesh,
-      size: 1,
+      //hack!
+      //mesh: mesh,
+      mesh: groups[_clickTimes],
+      //size: 1,
       velocity: {
         x: 0,
         y: 0,
@@ -155,7 +165,10 @@ function addThing( _clickTimes, _x, _y, _z) {
       } // initial velocity
     }, false)
   item.name = _clickTimes;
+
+  //myItem is for destorying things
   myItems.push(item);
+  // colliObjs.push(item.mesh);
 
   return mesh;
     //use `game.removeItem(item)` to remove
@@ -174,10 +187,19 @@ var begintToCount = 0;
 var result2 = null;
 var result2pre = null;
 var frameCount = 0;
+var animi = {};
+
+animi.loop = function(){
+  //watok():
+}
+
+var b = {};
+
 game.on('tick',function(delta){
   frameCount ++;
   sky(delta);
-  if(frameCount % 3 === 0){
+
+  if(frameCount !== 0 && frameCount % 2 === 0){
     dude2.rotation.y = theta / 100;
 
     theta += (delta / 16);
@@ -205,7 +227,15 @@ game.on('tick',function(delta){
       result2pre = result2;
     }
 
-    //isSelect();
+    animi.loop();
+
+    if(groups.length){
+      groups.forEach(function(g){
+        //g.rotation.y = theta / 10;
+      })
+    }
+
+    isSelect();
 
     ctx.clearRect(0, 0, w, h);
     point3Render();
@@ -263,22 +293,30 @@ function isClose() {
   return name;
 }
 
+
 var mouse = new game.THREE.Vector2();
 var INTERSECTED;
+
 function onDocumentMouseMove( event ) {
   event.preventDefault();
   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  console.log(mouse.x, mouse.y);
 }
 document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-var Three = require('three');
-var rayCaster2 = new Three.Raycaster();
+
+var rayCaster2 = new game.THREE.Raycaster();
+
+console.log('#@#%^$%^Y^&RY%E$')
+console.log(game.camera instanceof game.THREE.PerspectiveCamera)
 
 function isSelect(){
   rayCaster2.setFromCamera( mouse, game.camera );
   var intersects = rayCaster2.intersectObjects(colliObjs);
-  console.log(intersects);
+
   if ( intersects.length > 0 ) {
+    console.log('ohhhhh')
+    console.log(intersects[0].object.name)
 
     if ( INTERSECTED != intersects[ 0 ].object ) {
 
@@ -363,6 +401,14 @@ function parse(str) {
   pointYs = [];
   pointZs = [];
 
+  groups[clickTimes] = new game.THREE.Object3D();
+  groups[clickTimes].position = new game.THREE.Vector3(
+    startPosition[0] + 0.5,
+    startPosition[1] + 1.5,
+    startPosition[2] + 0.5
+  );
+  colliObjs.push(groups[clickTimes]);
+
   try{
     var str1 = maxMinFuc(str);
     eval(str1);
@@ -392,8 +438,8 @@ function parse(str) {
 
 }
 
-function drawAndAddThing(x, y, z){
-  addThing(x, y, z, clickTimes);
+function drawAndAddThing(clickTimes, x, y, z){
+  addThing(clickTimes, x, y, z);
   point3Init(x, y, z);
 }
 
