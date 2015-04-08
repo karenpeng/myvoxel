@@ -65,7 +65,7 @@ window.game = game; //for debug:)
 
 // initialize your noise with a seed, floor height, ceiling height and scale factor
 var chunkSize = 16;
-var generateChunk = terrain('foo', 0, 5, 50);
+var generateChunk = terrain('foo', 0, 5, 100);
 // then hook it up to your game as such:
 game.voxels.on('missingChunk', function (p) {
   var voxels = generateChunk(p, chunkSize);

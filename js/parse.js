@@ -12,6 +12,16 @@ function wrapGenerator(str){
   return copy;
 }
 
+function injectClickTime(str){
+  var copy = str;
+  var lines = copy.split('\n');
+  lines.forEach(function(line){
+    if(line.match(/addThing/)!== null){
+
+    }
+  })
+}
+
 function functionSWap(str){
   var copy = str;
   var fnNames = functionDetection(copy);
@@ -53,8 +63,6 @@ function functionDetection(str){
       fnNames.push(fnName);
     });
   }
-  // console.log('fnNames');
-  // console.log(fnNames);
   return fnNames;
 }
 
@@ -68,19 +76,13 @@ function functionReplace(str, fnNames){
       line = line.replace(/function/g, 'function* ');
     }else{
       fnNames.forEach(function(fnName){
-       //console.log(line)
        var re = new RegExp(fnName, "g");
-       // console.log('www');
-       //console.log(line.match(re))
        line = line.replace(re, ('yield* ' + fnName));
       });
     }
-    console.log(line);
     newCopy += (line + '\n');
   });
 
-  // console.log('newCopy');
-  // console.log(newCopy);
   return newCopy;
 }
 
