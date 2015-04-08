@@ -120,7 +120,9 @@ three js experiments
 
 
 window.myItems = myItems;
-function addThing(_x, _y, _z, _clickTimes) {
+function addThing( _clickTimes, _x, _y, _z) {
+  console.log('raph');
+  console.log(_clickTimes);
   // create a mesh and use the internal game material (texture atlas)
 
   var mesh = new game.THREE.Mesh(
@@ -193,15 +195,15 @@ game.on('tick',function(delta){
       dude.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
     };
 
-    // result2 = isClose();
+    result2 = isClose();
 
-    // if(result2!== null && result2 !== result2pre){
-    //   //1.show code
-    //   //2.how does reset button work?
-    //   console.log('wwwaaattt');
-    //   showCode(result2);
-    //   result2pre = result2;
-    // }
+    if(result2!== null && result2 !== result2pre){
+      //1.show code
+      //2.how does reset button work?
+      console.log('wwwaaattt');
+      showCode(result2);
+      result2pre = result2;
+    }
 
     //isSelect();
 
@@ -374,7 +376,9 @@ function parse(str) {
     var str2 = wrapGenerator(str);
     console.log(str2);
     eval(str2);
-    call = wwwaaattt();
+    call = wwwaaattt(clickTimes);
+    console.log('meow');
+    console.log(clickTimes);
     evaled = true;
     //console.log('end eval');
   } catch (e) {

@@ -7,19 +7,16 @@ function maxMinFuc(str){
 function wrapGenerator(str){
   var copy = str;
   var copy = copy.replace(/addThing/g, 'yield drawAndAddThing');
+  var copy = injectClickTime(copy);
   var copy = functionSWap(copy);
-  var copy = 'function* wwwaaattt(){\n' + copy +'\n}';
+  var copy = 'function* wwwaaattt(num){\n' + copy +'\n}';
   return copy;
 }
 
 function injectClickTime(str){
   var copy = str;
-  var lines = copy.split('\n');
-  lines.forEach(function(line){
-    if(line.match(/addThing/)!== null){
-
-    }
-  })
+  var copy = copy.replace(/drawAndAddThing\(/g, 'drawAndAddThing(num, ');
+  return copy;
 }
 
 function functionSWap(str){
@@ -38,10 +35,10 @@ function functionDetection(str){
   var varFunctionReG = /var\s+\S*\s*=\s*function\s*\S*\s*\((.*?)\)\s*\{/g;
 
   var res = copy.match(functionReG);
-  console.log(res)
+  //console.log(res)
   if(res !== null){
-    console.log('ah');
-    console.log(res);
+    // console.log('ah');
+    // console.log(res);
     res.forEach(function(m){
       var temp = m.split(/function\s+/);
       var temp2 = temp[1].split('(');
@@ -53,8 +50,8 @@ function functionDetection(str){
 
   var res1 = copy.match(varFunctionReG);
   if(res1 !== null){
-    console.log('ha');
-    console.log(res1);
+    // console.log('ha');
+    // console.log(res1);
     res1.forEach(function(m){
       var temp = m.split(/\s*=/);
       var temp2 = temp[0].split(/var\s+/);
