@@ -18,7 +18,16 @@ editor.on("blur", function () {
   editing = false;
 });
 
+
+var Range = require('brace').Range;
+console.log('$^&%^$!@#%@$#^#');
+console.log(Range);
+function addMarkerRange(lineNum) {
+  return new Range(lineNum, 0, lineNum, 2000);
+}
+
 module.exports = {
   editor: editor,
-  consoleLog: consoleLog
+  consoleLog: consoleLog,
+  addMarkerRange: addMarkerRange
 }

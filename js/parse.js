@@ -4,18 +4,21 @@ function maxMinFuc(str){
   return copy;
 }
 
-function wrapGenerator(str){
-  var copy = str;
-  var copy = copy.replace(/addThing/g, 'yield drawAndAddThing');
-  var copy = injectClickTime(copy);
-  var copy = functionSWap(copy);
-  var copy = 'function* wwwaaattt(num){\n' + copy +'\n}';
-  return copy;
+function wrapGenerator(lines){
+  var result = '';
+  lines.forEach(function(l, index){
+    l = l.replace(/addThing\(/g, 'yield drawAndAddThing(' + index + ', ');
+    l = injectClickTime(l);
+    result += (l + '\n');
+  });
+  result = functionSWap(result);
+  result = 'function* wwwaaattt(num, pos){\n' + result +'\n}';
+  return result;
 }
 
 function injectClickTime(str){
   var copy = str;
-  var copy = copy.replace(/drawAndAddThing\(/g, 'drawAndAddThing(num, ');
+  var copy = copy.replace(/drawAndAddThing\(/g, 'drawAndAddThing(num, pos, ');
   return copy;
 }
 

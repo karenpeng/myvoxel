@@ -116,7 +116,7 @@ game.scene.add(dude2);
 
 window.myItems = myItems;
 
-function addThing( _clickTimes, _x, _y, _z) {
+function addThing( _clickTimes, pos, _x, _y, _z) {
   console.log('raph');
   console.log(_clickTimes);
   // create a mesh and use the internal game material (texture atlas)
@@ -129,9 +129,9 @@ function addThing( _clickTimes, _x, _y, _z) {
   // paint the mesh with a specific texture in the atlas
   game.materials.paint(mesh, 'brick');
 
-  var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
-  var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
-  var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
+  var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
+  var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
+  var z = _z + pos[2] + 0.5 || pos[2] + 0.5;
 
   mesh.position.set(x, y, z);
   mesh.name = _clickTimes;
@@ -330,7 +330,7 @@ var consoleLog = require('./editor.js').consoleLog;
 var editing = require('./editor.js').editing;
 document.getElementById('run').onclick = function () {
   evaled = false;
-  parse(editor.getValue());
+  parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
 document.getElementById('reset').onclick = function(){
@@ -353,7 +353,7 @@ editor.on("blur", function () {
 var maxMinFuc = require('./parse.js').maxMinFuc;
 var wrapGenerator = require('./parse.js').wrapGenerator;
 
-function parse(str) {
+function parse(str, arr) {
   xMin = 10000000000000;
   xMax = -xMin;
   yMin = 10000000000000;
@@ -364,20 +364,20 @@ function parse(str) {
   pointYs = [];
   pointZs = [];
 
-  try{
-    var str1 = maxMinFuc(str);
-    eval(str1);
-  }catch(e){
-    console.log(e);
-    return;
-  }
+  // try{
+  //   var str1 = maxMinFuc(str);
+  //   eval(str1);
+  // }catch(e){
+  //   console.log(e);
+  //   return;
+  // }
 
   try {
     //console.log('start eval');
-    var str2 = wrapGenerator(str);
+    var str2 = wrapGenerator(arr);
     console.log(str2);
     eval(str2);
-    call = wwwaaattt(clickTimes);
+    call = wwwaaattt(clickTimes, startPosition);
     console.log('meow');
     console.log(clickTimes);
     evaled = true;
@@ -393,9 +393,19 @@ function parse(str) {
 
 }
 
-function drawAndAddThing(clickTimes, x, y, z){
-  addThing(clickTimes, x, y, z);
+function drawAndAddThing(clickTimes, pos, lineNum, x, y, z){
+  addThing(clickTimes, pos, x, y, z);
+  highlightLine(lineNum);
   point3Init(x, y, z);
+}
+
+addMarkerRange = require('./editor.js').addMarkerRange;
+var marker = null;
+function highlightLine(lineNum){
+  console.log('wat?');
+  console.log(lineNum);
+  if(marker) editor.session.removeMarker(marker);
+  marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
 }
 
 function getMaxMin(x, y, z){
