@@ -402,11 +402,19 @@ function drawAndAddThing(clickTimes, pos, lineNum, x, y, z){
 addMarkerRange = require('./editor.js').addMarkerRange;
 var marker = null;
 function highlightLine(lineNum){
-  console.log('wat?');
-  console.log(lineNum);
-  if(marker) editor.session.removeMarker(marker);
+  console.log('line index ' + lineNum);
+  if(marker) {
+    editor.session.removeMarker(marker);
+    marker = null;
+  }
   marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
 }
+editor.on('focus', function(){
+  if(marker) {
+    editor.session.removeMarker(marker);
+    marker = null;
+  }
+});
 
 function getMaxMin(x, y, z){
   x = x || 0;
@@ -533,15 +541,15 @@ Point.prototype.viewPoint = function(){
   switch(this.axis){
     case 'x':
     this.value[1] = map(this.value[1], xMin, xMax, h/3-6, 6);
-    console.log(this.value)
+    //console.log(this.value)
     break;
     case 'y':
     this.value[1] = map(this.value[1], yMin, yMax, h * 2/3 - 6, h/3 + 6);
-    console.log(this.value)
+    //console.log(this.value)
     break;
     case'z':
     this.value[1] = map(this.value[1], zMin, zMax, h - 6, h * 2/3 + 6);
-    console.log(this.value)
+    //console.log(this.value)
     break;
   }
 }
