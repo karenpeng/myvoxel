@@ -34,9 +34,6 @@ window.addEventListener('resize', resize);
 
 var colliObjs = [];
 var myItems = [];
-var preItemNum = 0;
-var groups = [];
-window.groups = groups;
 /*
 set up game
  */
@@ -118,6 +115,7 @@ game.scene.add(dude2);
 
 
 window.myItems = myItems;
+
 function addThing( _clickTimes, _x, _y, _z) {
   console.log('raph');
   console.log(_clickTimes);
@@ -131,33 +129,17 @@ function addThing( _clickTimes, _x, _y, _z) {
   // paint the mesh with a specific texture in the atlas
   game.materials.paint(mesh, 'brick');
 
-  //mesh.position.set(_x, _y, _z)
-  // var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
-  // var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
-  // var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
-  var x = _x || 0;
-  var y = _y || 0;
-  var z = _z || 0;
+  var x = _x + startPosition[0] + 0.5 || startPosition[0] + 0.5;
+  var y = _y + startPosition[1] + 1.5 || startPosition[1] + 1.5;
+  var z = _z + startPosition[2] + 0.5 || startPosition[2] + 0.5;
 
-  //for testing
   mesh.position.set(x, y, z);
-  // console.log('position!');
-  // console.log(x, y, z);
-  //mesh.name = _clickTimes;
-  // colliObjs.push(mesh);
+  mesh.name = _clickTimes;
+  colliObjs.push(mesh);
 
-  //parent
-  console.log('jjj');
-  console.log(groups[_clickTimes]);
-  groups[_clickTimes].add(mesh);
-  //console.log(x, y, z);
-  //game.scene.add(mesh)
-  //console.log(mesh)
   var item = game.addItem({
-      //hack!
-      //mesh: mesh,
-      mesh: groups[_clickTimes],
-      //size: 1,
+      mesh: mesh,
+      size: 1,
       velocity: {
         x: 0,
         y: 0,
@@ -187,13 +169,6 @@ var begintToCount = 0;
 var result2 = null;
 var result2pre = null;
 var frameCount = 0;
-var animi = {};
-
-animi.loop = function(){
-  //watok():
-}
-
-var b = {};
 
 game.on('tick',function(delta){
   frameCount ++;
@@ -217,25 +192,17 @@ game.on('tick',function(delta){
       dude.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
     };
 
-    result2 = isClose();
+    // result2 = isClose();
 
-    if(result2!== null && result2 !== result2pre){
-      //1.show code
-      //2.how does reset button work?
-      console.log('wwwaaattt');
-      showCode(result2);
-      result2pre = result2;
-    }
+    // if(result2!== null && result2 !== result2pre){
+    //   //1.show code
+    //   //2.how does reset button work?
+    //   console.log('wwwaaattt');
+    //   showCode(result2);
+    //   result2pre = result2;
+    // }
 
-    animi.loop();
-
-    if(groups.length){
-      groups.forEach(function(g){
-        //g.rotation.y = theta / 10;
-      })
-    }
-
-    isSelect();
+    //isSelect();
 
     ctx.clearRect(0, 0, w, h);
     point3Render();
@@ -269,73 +236,69 @@ function isHit() {
     return false;
 }
 
-function isClose() {
-  var rays = [
-  new game.THREE.Vector3(1, 0, 0),
-  new game.THREE.Vector3(-1, 0, 0),
-  new game.THREE.Vector3(0, 0, 1),
-  new game.THREE.Vector3(0, 0, -1),
-  new game.THREE.Vector3(0, 1, 0),
-  new game.THREE.Vector3(0, -1, 0)
-  ];
+// function isClose() {
+//   var rays = [
+//   new game.THREE.Vector3(1, 0, 0),
+//   new game.THREE.Vector3(-1, 0, 0),
+//   new game.THREE.Vector3(0, 0, 1),
+//   new game.THREE.Vector3(0, 0, -1),
+//   new game.THREE.Vector3(0, 1, 0),
+//   new game.THREE.Vector3(0, -1, 0)
+//   ];
 
-  var name = null;
-  for(var i = 0; i< rays.length; i++){
-    var ray = rays[i];
-    rayCaster.ray.set(dude.yaw.position, ray);
-     var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0 && intersects[0].distance <= 2) {
-      //console.log(intersects[0].object.name);
-      name = intersects[0].object.name;
-      break;
-    }
-  }
-  return name;
-}
+//   var name = null;
+//   for(var i = 0; i< rays.length; i++){
+//     var ray = rays[i];
+//     rayCaster.ray.set(dude.yaw.position, ray);
+//      var intersects = rayCaster.intersectObjects(colliObjs);
+//     if (intersects.length > 0 && intersects[0].distance <= 2) {
+//       //console.log(intersects[0].object.name);
+//       name = intersects[0].object.name;
+//       break;
+//     }
+//   }
+//   return name;
+// }
 
 
-var mouse = new game.THREE.Vector2();
-var INTERSECTED;
+// var mouse = new game.THREE.Vector2();
+// var INTERSECTED;
 
-function onDocumentMouseMove( event ) {
-  event.preventDefault();
-  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-  console.log(mouse.x, mouse.y);
-}
-document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+// function onDocumentMouseMove( event ) {
+//   event.preventDefault();
+//   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+//   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+//   //console.log(mouse.x, mouse.y);
+// }
+// document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
-var rayCaster2 = new game.THREE.Raycaster();
 
-console.log('#@#%^$%^Y^&RY%E$')
-console.log(game.camera instanceof game.THREE.PerspectiveCamera)
+// function isSelect(){
+//   rayCaster.setFromCamera( mouse, game.camera );
+//   var intersects = rayCaster.intersectObjects(colliObjs);
 
-function isSelect(){
-  rayCaster2.setFromCamera( mouse, game.camera );
-  var intersects = rayCaster2.intersectObjects(colliObjs);
+//   if ( intersects.length > 0 ) {
+//     console.log('ohhhhh')
+//     console.log(intersects[0].object.name)
 
-  if ( intersects.length > 0 ) {
-    console.log('ohhhhh')
-    console.log(intersects[0].object.name)
+//     if ( INTERSECTED != intersects[ 0 ].object ) {
 
-    if ( INTERSECTED != intersects[ 0 ].object ) {
+//       if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+//       INTERSECTED = intersects[ 0 ].object;
+//       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+//       INTERSECTED.material.emissive.setHex( 0xff0000 );
 
-      INTERSECTED = intersects[ 0 ].object;
-      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-      INTERSECTED.material.emissive.setHex( 0xff0000 );
+//     }
 
-    }
+//   } else {
 
-  } else {
+//     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
-    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+//     INTERSECTED = null;
 
-    INTERSECTED = null;
-
-  }
-}
+//   }
+// }
   /*
   interaction!
    */
@@ -400,14 +363,6 @@ function parse(str) {
   pointXs = [];
   pointYs = [];
   pointZs = [];
-
-  groups[clickTimes] = new game.THREE.Object3D();
-  groups[clickTimes].position = new game.THREE.Vector3(
-    startPosition[0] + 0.5,
-    startPosition[1] + 1.5,
-    startPosition[2] + 0.5
-  );
-  colliObjs.push(groups[clickTimes]);
 
   try{
     var str1 = maxMinFuc(str);
