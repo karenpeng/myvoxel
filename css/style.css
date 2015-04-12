@@ -1,0 +1,61 @@
+html, body{
+  top: 0;
+  left: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.edit{
+  width: 400px;
+  opacity: 0.8;
+  right: 0;
+}
+
+#editor{
+  position: absolute;
+  top: 0;
+  height: 90%;
+}
+
+#console{
+  position: absolute;
+  bottom: 0;
+  height: 10%;
+}
+
+#ui{
+  position: absolute;
+  bottom: 10%;
+  width: 400px;
+  right: 0;
+  z-index: 10;
+}
+
+.highlight{
+  position: absolute;
+  background-color: #A4C402;
+}
+
+#status{
+  top: 0;
+}
+
+#tools{
+  top: 0;
+}
+
+#reset{
+
+}
+
+#ex1Slider .slider-selection {
+  background: #BABABA;
+}
+
+
+#navbar{
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #222;
+}

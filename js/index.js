@@ -11,27 +11,8 @@ var terrain = require('voxel-perlin-terrain');
 
 var voxelPos = [0, 0, 0];
 var startPosition = [0, 0, 0];
-var xMin, xMax, yMin, yMax, zMin, zMax;
-var pointXs = [];
-var pointYs = [];
-var pointZs = [];
-var can = document.getElementById('dataLog');
-var ctx = can.getContext('2d');
-var w;
-var h;
 var clickTimes = 0;
 var codes = [];
-function resize(){
-  var ww = window.innerWidth;
-  var hh = window.innerHeight;
-  can.setAttribute('width', (ww - 400) + 'px');
-  can.setAttribute('height', (hh * 0.1) + 'px');
-  w = can.width;
-  h = can.height;
-}
-resize();
-window.addEventListener('resize', resize);
-
 var colliObjs = [];
 var myItems = [];
 /*
@@ -96,7 +77,7 @@ var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
 dude.possess();
 //jump from sky
-var jumpFromSky = 10;
+var jumpFromSky = 60;
 dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
@@ -106,13 +87,18 @@ window.addEventListener('keydown', function (ev) {
   }
 });
 
-var dude2 = skin(game.THREE, 'textures/dude.png').createPlayerObject();
-//console.log(dude2);
-dude2.position.set(10, 4, 0);
-dude2.scale.set(0.1, 0.1, 0.1);
-window.dude2 = dude2;
-game.scene.add(dude2);
-
+// var dude2 = skin(game.THREE, 'textures/dude.png').createPlayerObject();
+// //console.log(dude2);
+// dude2.position.set(10, 4, 0);
+// dude2.scale.set(0.1, 0.1, 0.1);
+// window.dude2 = dude2;
+// game.scene.add(dude2);
+// var createDrone = require('voxel-drone');
+// var logodrone = require('logo-drone');
+// var drone = createDrone(game);
+// var item = drone.item();
+// item.avatar.position.set(0, 10, -10);
+// game.addItem(drone.item());
 
 window.myItems = myItems;
 
@@ -175,7 +161,7 @@ game.on('tick',function(delta){
   sky(delta);
 
   if(frameCount !== 0 && frameCount % 2 === 0){
-    dude2.rotation.y = theta / 100;
+    //dude2.rotation.y = theta / 100;
 
     theta += (delta / 16);
 
@@ -203,9 +189,6 @@ game.on('tick',function(delta){
     // }
 
     //isSelect();
-
-    ctx.clearRect(0, 0, w, h);
-    point3Render();
   }
 })
 
@@ -354,23 +337,6 @@ var maxMinFuc = require('./parse.js').maxMinFuc;
 var wrapGenerator = require('./parse.js').wrapGenerator;
 
 function parse(str, arr) {
-  xMin = 10000000000000;
-  xMax = -xMin;
-  yMin = 10000000000000;
-  yMax = -yMin;
-  zMin = 10000000000000;
-  zMax = -zMin;
-  pointXs = [];
-  pointYs = [];
-  pointZs = [];
-
-  // try{
-  //   var str1 = maxMinFuc(str);
-  //   eval(str1);
-  // }catch(e){
-  //   console.log(e);
-  //   return;
-  // }
 
   try {
     //console.log('start eval');
@@ -396,13 +362,12 @@ function parse(str, arr) {
 function drawAndAddThing(clickTimes, pos, lineNum, x, y, z){
   addThing(clickTimes, pos, x, y, z);
   highlightLine(lineNum);
-  point3Init(x, y, z);
 }
 
 addMarkerRange = require('./editor.js').addMarkerRange;
 var marker = null;
 function highlightLine(lineNum){
-  console.log('line index ' + lineNum);
+  //console.log('line index ' + lineNum);
   if(marker) {
     editor.session.removeMarker(marker);
     marker = null;
@@ -416,18 +381,6 @@ editor.on('focus', function(){
   }
 });
 
-function getMaxMin(x, y, z){
-  x = x || 0;
-  y = y || 0;
-  z = z || 0;
-  if(xMin > x) xMin = x;
-  if(xMax < x) xMax = x;
-  if(yMin > y) yMin = y;
-  if(xMax < y) yMax = y;
-  if(zMin > z) zMin = z;
-  if(zMax < z) zMax = z;
-}
-
 
 function runGenerator(generator) {
   //console.log(generator)
@@ -435,126 +388,23 @@ function runGenerator(generator) {
   if (ret.done) {
     evaled = false;
     begintToCount = 0;
+    editor.session.removeMarker(marker);
+    marker = null;
     return;
   }
   //console.log(ret.value);
 }
 
-document.getElementById('valueP').innerHTML = interval;
 var call;
 var evaled = false;
-var sliderr = document.getElementById('sliderr');
-sliderr.addEventListener('change', function(){
-  //console.log(sliderr.value);
-  interval = sliderr.value;
-  document.getElementById('valueP').innerHTML = sliderr.value;
+var mySlider = $('#sliderr').slider({
+  formatter: function(value) {
+    return 'Current value: ' + value;
+  }
 });
 
+mySlider.on('slide', function(e){
+  console.log(e.value);
+  interval = e.value;
+});
 
-/*
-the 2d canvas for data graph
- */
-function point3Init(x, y, z){
-  //console.log('www ', x, y, z);
-  var p = new Point(x, 'x');
-  pointXs.push(p);
-  var p = new Point(y, 'y');
-  pointYs.push(p);
-  var p = new Point(z, 'z');
-  pointZs.push(p);
-}
-
-function point3Render(){
-  ctx.beginPath();
-  ctx.strokeStyle = 'white';
-  ctx.moveTo(0, h / 3);
-  ctx.lineTo(w, h / 3);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.strokeStyle = 'white';
-  ctx.moveTo( 0, h * 2/3);
-  ctx.lineTo( w, h * 2/3);
-  ctx.stroke();
-
-  pointXs.forEach(function(p){
-    p.render();
-  });
-  pointYs.forEach(function(p){
-    p.render();
-  });
-  pointZs.forEach(function(p){
-    p.render();
-  });
-  for(var i = 0; i< pointXs.length - 1; i++){
-    ctx.beginPath();
-    ctx.strokeStyle = 'red';
-    ctx.moveTo(pointXs[i].value[0], pointXs[i].value[1]);
-    ctx.lineTo(pointXs[i + 1].value[0], pointXs[i + 1].value[1]);
-    ctx.stroke();
-  }
-  for(var i = 0; i< pointYs.length - 1; i++){
-    ctx.beginPath();
-    ctx.strokeStyle = 'green';
-    ctx.moveTo(pointYs[i].value[0], pointYs[i].value[1]);
-    ctx.lineTo(pointYs[i + 1].value[0], pointYs[i + 1].value[1]);
-    ctx.stroke();
-  }
-  for(var i = 0; i< pointZs.length - 1; i++){
-    ctx.beginPath();
-    ctx.strokeStyle = 'blue';
-    ctx.moveTo(pointZs[i].value[0], pointZs[i].value[1]);
-    ctx.lineTo(pointZs[i + 1].value[0], pointZs[i + 1].value[1]);
-    ctx.stroke();
-  }
-}
-
-
-function Point(value, axis){
-  this.value = [0, value];
-  this.velocity = 0.66;
-  this.axis = axis;
-  this.viewPoint();
-}
-
-Point.prototype.render = function(){
-  this.value[0] -= this.velocity;
-  switch(this.axis){
-    case 'x':
-      ctx.fillStyle = 'red';
-      break;
-    case 'y':
-      ctx.fillStyle = 'green';
-      break;
-    case 'z':
-      ctx.fillStyle = 'blue';
-    break;
-  }
-
-  ctx.fillRect(this.value[0] ,this.value[1], 5, 5);
-}
-
-Point.prototype.viewPoint = function(){
-  //scale the y here!
-  //make the x in the middle here!
-  this.value[0] = w - 10;
-  switch(this.axis){
-    case 'x':
-    this.value[1] = map(this.value[1], xMin, xMax, h/3-6, 6);
-    //console.log(this.value)
-    break;
-    case 'y':
-    this.value[1] = map(this.value[1], yMin, yMax, h * 2/3 - 6, h/3 + 6);
-    //console.log(this.value)
-    break;
-    case'z':
-    this.value[1] = map(this.value[1], zMin, zMax, h - 6, h * 2/3 + 6);
-    //console.log(this.value)
-    break;
-  }
-}
-
-function map(n, start1, stop1, start2, stop2) {
-  if(stop1 === start1) return start2 + ( stop2 - start2 ) / 2;
-    return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
-  };

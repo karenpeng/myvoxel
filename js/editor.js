@@ -20,7 +20,7 @@ editor.on("blur", function () {
 
 
 var Range = ace.acequire('ace/range').Range;
-console.log(Range);
+//console.log(Range);
 
 function addMarkerRange(lineNum) {
   return new Range(lineNum, 0, lineNum, 2000);
