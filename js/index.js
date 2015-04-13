@@ -77,7 +77,7 @@ var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
 dude.possess();
 //jump from sky
-var jumpFromSky = 60;
+var jumpFromSky = 10;
 dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
@@ -93,6 +93,7 @@ window.addEventListener('keydown', function (ev) {
 // dude2.scale.set(0.1, 0.1, 0.1);
 // window.dude2 = dude2;
 // game.scene.add(dude2);
+
 // var createDrone = require('voxel-drone');
 // var logodrone = require('logo-drone');
 // var drone = createDrone(game);
@@ -305,6 +306,21 @@ game.on('fire', function(){
   console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
 });
 
+var welcome = document.getElementById('welcome');
+var message = document.querySelector('#middleMessage');
+message.innerHTML = 'Click to play!';
+if (game.notCapable()) {
+  console.log('hello?')
+  welcome.style.visibility = 'hidden';
+}
+game.interact.on('attain', function() {
+  welcome.style.visibility = 'hidden';
+})
+game.interact.on('release', function() {
+  console.log('ouch1')
+  welcome.style.visibility = 'visible';
+})
+
 /*
 eval!
  */
@@ -408,3 +424,4 @@ mySlider.on('slide', function(e){
   interval = e.value;
 });
 
+require('./tutorial.js');

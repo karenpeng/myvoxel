@@ -6,7 +6,7 @@ html, body{
 }
 
 .edit{
-  width: 400px;
+  width: 420px;
   opacity: 0.8;
   right: 0;
 }
@@ -26,9 +26,9 @@ html, body{
 #ui{
   position: absolute;
   bottom: 10%;
-  width: 400px;
+  width: 420px;
   right: 0;
-  z-index: 10;
+  z-index: 1;
 }
 
 .highlight{
@@ -44,12 +44,12 @@ html, body{
   top: 0;
 }
 
-#reset{
-
-}
-
 #ex1Slider .slider-selection {
   background: #BABABA;
+}
+
+#ex1Slider{
+  margin: 0 10px;
 }
 
 
@@ -58,4 +58,64 @@ html, body{
   top: 0;
   left: 0;
   color: #222;
+}
+
+#welcome{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  color: #222;
+  z-index: 2;
+  display: none;
+}
+
+#instructions {
+
+  width: 100%;
+  height: 100%;
+
+  display: -webkit-box;
+  display: -moz-box;
+  display: box;
+
+  -webkit-box-orient: horizontal;
+  -moz-box-orient: horizontal;
+  box-orient: horizontal;
+
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  box-pack: center;
+
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  box-align: center;
+
+  color: #ffffff;
+  text-align: center;
+
+  cursor: pointer;
+
+}
+
+.bigger {
+  position: relative;
+  top: -60px;
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+.big {
+  position: relative;
+  top: -31px;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+.emphasis {
+  position: relative;
+  top: -58px;
+  font-size: 20px;
+  margin-bottom: 10px;
 }

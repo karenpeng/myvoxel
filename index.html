@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Build It!</title>
+  <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
   <link rel="stylesheet" href="css/bootstrap.css.map">
   <link rel="stylesheet" type="text/css" href="css/slider.css">
@@ -12,46 +14,7 @@
 <!-- Latest compiled and minified CSS -->
 <body>
   <div id="container"></div>
-  <div class="edit" id="editor">for(var i = 0; i < 3;i++){
-   addThing(i, 0, 0);
-  }
-  // for(var i = 0; i < 3;i++){
-  //  addThing(i, i, 0);
-  // }
-  //for(var i = 0; i < 6;i++){
-  //  if(i % 2=== 0){
-  //    addThing(i, 0, 0);
-  //  }else{
-  //    addThing(0, i, 0);
-  //  }
-  //}
-
-  // for(var i = 0; i < 10; i++){
-  //     var theta = Math.PI * i /5;
-  //     addThing(Math.sin(theta), i, Math.cos(theta))
-  // }
-
-  //for (var i = 0; i <= 1; i += 0.1) {
-  //  for (var j = 0; j <= 1; j += 0.1) {
-  //    var uv = [i, j];
-
-  //    var u = uv[0];
-  //    var v = uv[1];
-
-  //    var theta = 2 * Math.PI * u;
-  //    var phil = Math.PI * v - Math.PI / 2;
-  //    var x = Math.cos(phil) * Math.sin(theta) * 4;
-  //    var y = Math.sin(phil) * 4;
-  //    var z = Math.cos(phil) * Math.cos(theta) * 4;
-  //    addThing(x, y + 4, z);
-  //  }
-  //}
-
-  //var i = 0;
-  //while(true){
-  //  addThing(i, i, 0);
-  //  i++;
-  //}
+  <div class="edit" id="editor">
   </div>
   <div class="edit" id="console"></div>
   <div id="ui">
@@ -92,12 +55,12 @@
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Tutorial <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li><a href="#">One Block</a></li>
-          <li><a href="#">Foor Loop</a></li>
-          <li><a href="#">Nested Loop</a></li>
-          <li><a href="#">Condition</a></li>
-          <li><a href="#">Sine / Cosine</a></li>
-          <li><a href="#">Parenting</a></li>
+          <li><a href="#" class="tutorial" id="t1">One Block</a></li>
+          <li><a href="#" class="tutorial" id="t2">Line of Blocks / Foor Loop</a></li>
+          <li><a href="#" class="tutorial" id="t3">Wall / Nested Loop</a></li>
+          <li><a href="#" class="tutorial" id="t4">Windows / If Statement</a></li>
+          <li><a href="#" class="tutorial" id="t5">Spiral Stairs / sin cos</a></li>
+          <li><a href="#" class="tutorial" id="t6">Parenting</a></li>
         </ul>
       </li>
       <li class="dropdown">
@@ -113,6 +76,20 @@
         </ul>
       </li>
     </ul>
+  </div>
+  <div id="welcome">
+    <div id="instructions">
+        <span class="bigger">Build The world!</span>
+        <br>
+        <br>
+        <span class="emphasis">Start from the Tutorial</span>
+        <br>
+        <span id="middleMessage" class="big">loading...</span>
+        <br>
+        <span>W, A, S, D = Move, SPACE = Jump, MOUSE = Look around
+        <br>
+        <br>made by <a href="https://twitter.com/KarenPunkPunk">@KarenPunkPunk</a> with <a href="https://twitter.com/voxeljs">@voxeljs</a></span>
+      </div>
   </div>
 </body>
 <script type="text/javascript" src="bundle.js"></script>
