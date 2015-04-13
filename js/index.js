@@ -103,6 +103,9 @@ window.addEventListener('keydown', function (ev) {
 
 window.myItems = myItems;
 
+/*
+the api for end-user
+ */
 function addThing( _clickTimes, pos, _x, _y, _z) {
   console.log('raph');
   console.log(_clickTimes);
@@ -193,6 +196,9 @@ game.on('tick',function(delta){
   }
 })
 
+/*
+collision detection stuffs
+ */
 function showCode(name){
   editor.setValue(codes[name]);
 }
@@ -283,6 +289,7 @@ function isHit() {
 
 //   }
 // }
+
   /*
   interaction!
    */
@@ -308,18 +315,19 @@ game.on('fire', function(){
 
 var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
-message.innerHTML = 'Click to play!';
-if (game.notCapable()) {
-  console.log('hello?')
-  welcome.style.visibility = 'hidden';
-}
-game.interact.on('attain', function() {
-  welcome.style.visibility = 'hidden';
-})
-game.interact.on('release', function() {
-  console.log('ouch1')
-  welcome.style.visibility = 'visible';
-})
+message.innerHTML = 'Double Click to play';
+// if (game.notCapable()) {
+//   console.log('hello?')
+//   welcome.style.visibility = 'hidden';
+// }
+// game.interact.on('attain', function() {
+//   welcome.style.visibility = 'hidden';
+// })
+// game.interact.on('release', function() {
+//   console.log('ouch1')
+//   welcome.style.visibility = 'visible';
+// })
+
 
 /*
 eval!
@@ -338,18 +346,10 @@ document.getElementById('reset').onclick = function(){
   }
 }
 
-var editing = false;
-
-editor.on('focus', function () {
-  editing = true;
-});
-
-editor.on("blur", function () {
-  editing = false;
-});
-
-
-var maxMinFuc = require('./parse.js').maxMinFuc;
+/*
+parse
+ */
+//var maxMinFuc = require('./parse.js').maxMinFuc;
 var wrapGenerator = require('./parse.js').wrapGenerator;
 
 function parse(str, arr) {
@@ -380,8 +380,13 @@ function drawAndAddThing(clickTimes, pos, lineNum, x, y, z){
   highlightLine(lineNum);
 }
 
-addMarkerRange = require('./editor.js').addMarkerRange;
+
+/*
+editor
+ */
+var addMarkerRange = require('./editor.js').addMarkerRange;
 var marker = null;
+
 function highlightLine(lineNum){
   //console.log('line index ' + lineNum);
   if(marker) {
@@ -390,18 +395,39 @@ function highlightLine(lineNum){
   }
   marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
 }
+
 editor.on('focus', function(){
+  editing = true;
   if(marker) {
     editor.session.removeMarker(marker);
     marker = null;
   }
 });
 
+var editing = false;
+
+editor.on("blur", function () {
+  editing = false;
+});
+
+/*
+generator
+ */
+
+var call;
+var evaled = false;
+var pause = false;
 
 function runGenerator(generator) {
   //console.log(generator)
+  if(pause){
+    console.log('heyheyhey')
+    return;
+  }
+
   var ret = generator.next();
-  if (ret.done) {
+
+  if(ret.done) {
     evaled = false;
     begintToCount = 0;
     editor.session.removeMarker(marker);
@@ -411,8 +437,10 @@ function runGenerator(generator) {
   //console.log(ret.value);
 }
 
-var call;
-var evaled = false;
+
+/*
+slider
+ */
 var mySlider = $('#sliderr').slider({
   formatter: function(value) {
     return 'Current value: ' + value;
@@ -424,4 +452,16 @@ mySlider.on('slide', function(e){
   interval = e.value;
 });
 
+document.getElementById('pause').onclick = function(){
+  pause = !pause;
+  if(pause){
+    document.getElementById('pause').innerHTML = 'continue';
+  }else{
+    document.getElementById('pause').innerHTML = 'pause';
+  }
+}
+
+/*
+tutorial
+ */
 require('./tutorial.js');

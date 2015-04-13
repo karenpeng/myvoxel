@@ -3,10 +3,16 @@ require('brace/mode/javascript');
 require('brace/theme/monokai');
 
 var editor = ace.edit('editor');
-editor.getSession().setMode('ace/mode/javascript');
+// editor.getSession().setMode('ace/mode/javascript');
 editor.setTheme('ace/theme/monokai');
 
 var consoleLog = ace.edit('console');
+consoleLog.setReadOnly(true);
+  consoleLog.setOptions({
+    highlightActiveLine: false,
+    highlightGutterLine: false
+  });
+consoleLog.renderer.$cursorLayer.element.style.opacity = 0;
 
 var editing = false;
 

@@ -1,8 +1,8 @@
-function maxMinFuc(str){
-  var copy = str;
-  copy = copy.replace(/addThing/g, 'getMaxMin');
-  return copy;
-}
+// function maxMinFuc(str){
+//   var copy = str;
+//   copy = copy.replace(/addThing/g, 'getMaxMin');
+//   return copy;
+// }
 
 function wrapGenerator(lines){
   var result = '';
@@ -87,7 +87,7 @@ function functionReplace(str, fnNames){
 }
 
 module.exports = {
-  maxMinFuc: maxMinFuc,
+  //maxMinFuc: maxMinFuc,
   wrapGenerator: wrapGenerator
 }
 
