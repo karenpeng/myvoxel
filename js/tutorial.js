@@ -12,7 +12,8 @@ var warmup = [
   'Start from the tutorial,',
   'it will guide you through :)',
   '',
-  'press esc key to enable mouse control'
+  'press esc key to enable mouse control',
+  ''
 ]
 
 var tutorials =[
@@ -35,7 +36,8 @@ var tutorials =[
   '',
   '//You could select another place,',
   '//and replace the 0 with different values',
-  '//to see where the block will be.'
+  '//to see where the block will be.',
+  ''
 ],
 
 [
@@ -55,7 +57,8 @@ var tutorials =[
   '//click "build" to see it in action!',
   '',
   '//More information of for loop:',
-  '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for'
+  '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for',
+  ''
 ],
 
 [
@@ -76,7 +79,8 @@ var tutorials =[
   '',
   '//The slider bar below controls the speed',
   '//of the blocks being created.',
-  '//Smaller the number faster the speed.'
+  '//Smaller the number faster the speed.',
+  ''
 ],
 
 [
@@ -103,7 +107,8 @@ var tutorials =[
   '//Try make different windows!',
   '',
   '//More information of if statement:',
-  '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else'
+  '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else',
+  ''
 ],
 
 [
@@ -121,7 +126,8 @@ var tutorials =[
   '}',
   '',
   '//There\'s a lot you could do with it',
-  '//Try build a cylinder!'
+  '//Try build a cylinder!',
+  ''
 ],
 
 [
@@ -145,7 +151,8 @@ var showcases = [
     '   var z = Math.cos(phil) * Math.cos(theta) * 5;',
     '   addThing(x, y + 5, z);',
     ' }',
-    '}'
+    '}',
+    ''
 
   ],
 
@@ -161,7 +168,8 @@ var showcases = [
     '    addGuy(C,C,0,C);',
     '  }',
     '}',
-    'addGuy();'
+    'addGuy();',
+    ''
   ],
 
   [
@@ -172,8 +180,8 @@ var showcases = [
     '}',
     '',
     '//More info about while loop:',
-    '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/while'
-
+    '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/while',
+    ''
   ]
 
 ]
@@ -182,7 +190,6 @@ tutorials.forEach(function(t, index){
   document.getElementById(('t' + index)).onclick = function(){
     editor.getSession().setMode('ace/mode/javascript');
     editor.setValue(t.join('\n'));
-    editor.session.selection.moveCursorDown();
     editor.clearSelection();
   }
 });
@@ -191,7 +198,6 @@ showcases.forEach(function(s, index){
   document.getElementById(('s' + index)).onclick = function(){
     editor.getSession().setMode('ace/mode/javascript');
     editor.setValue(s.join('\n'));
-    editor.session.selection.moveCursorDown();
     editor.clearSelection();
   }
 });

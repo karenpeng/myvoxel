@@ -17,6 +17,7 @@ consoleLog.renderer.$cursorLayer.element.style.opacity = 0;
 var editing = false;
 
 editor.on('focus', function () {
+  editor.getSession().setMode('ace/mode/javascript');
   editing = true;
 });
 

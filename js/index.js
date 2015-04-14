@@ -211,6 +211,8 @@ function destory(name){
   })
   codes[name] = null;
 }
+// window.destory = destory; //for debug
+
 //collision detection!!!
 var rayCaster = new game.THREE.Raycaster();
 
@@ -340,11 +342,11 @@ document.getElementById('run').onclick = function () {
   parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
-document.getElementById('reset').onclick = function(){
-  if(result2 === result2pre && result2 !== null){
-    destory(result2pre);
-  }
-}
+// document.getElementById('reset').onclick = function(){
+//   if(result2 === result2pre && result2 !== null){
+//     destory(result2pre);
+//   }
+// }
 
 /*
 parse
@@ -386,6 +388,7 @@ editor
  */
 var addMarkerRange = require('./editor.js').addMarkerRange;
 var marker = null;
+exports.marker = marker;
 
 function highlightLine(lineNum){
   //console.log('line index ' + lineNum);
@@ -421,7 +424,6 @@ var pause = false;
 function runGenerator(generator) {
   //console.log(generator)
   if(pause){
-    console.log('heyheyhey')
     return;
   }
 
@@ -455,10 +457,16 @@ mySlider.on('slide', function(e){
 document.getElementById('pause').onclick = function(){
   pause = !pause;
   if(pause){
-    document.getElementById('pause').innerHTML = 'continue';
+    document.getElementById('pause').innerHTML = 'Continue';
   }else{
-    document.getElementById('pause').innerHTML = 'pause';
+    document.getElementById('pause').innerHTML = 'Pause';
   }
+}
+
+document.getElementById('reset').onclick = function(){
+  var id = clickTimes - 1;
+  call = null;
+  destory(id);
 }
 
 /*
