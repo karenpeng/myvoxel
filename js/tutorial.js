@@ -186,8 +186,12 @@ var showcases = [
 
 ]
 
+var marker = require('./index.js').marker;
 tutorials.forEach(function(t, index){
   document.getElementById(('t' + index)).onclick = function(){
+    editor.session.removeMarker(marker);
+    console.log(marker);
+    marker = null;
     editor.getSession().setMode('ace/mode/javascript');
     editor.setValue(t.join('\n'));
     editor.clearSelection();

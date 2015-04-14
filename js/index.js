@@ -387,23 +387,22 @@ function drawAndAddThing(clickTimes, pos, lineNum, x, y, z){
 editor
  */
 var addMarkerRange = require('./editor.js').addMarkerRange;
-var marker = null;
-exports.marker = marker;
+exports.marker = null;
 
 function highlightLine(lineNum){
   //console.log('line index ' + lineNum);
-  if(marker) {
-    editor.session.removeMarker(marker);
-    marker = null;
+  if(exports.marker) {
+    editor.session.removeMarker(exports.marker);
+    exports.marker = null;
   }
-  marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
+  exports.marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
 }
 
 editor.on('focus', function(){
   editing = true;
-  if(marker) {
-    editor.session.removeMarker(marker);
-    marker = null;
+  if(exports.marker) {
+    editor.session.removeMarker(exports.marker);
+    exports.marker = null;
   }
 });
 
