@@ -1,6 +1,7 @@
 var editor = require('./editor.js').editor;
 
 var warmup = [
+  '/*',
   '(•◡•)/',
   '',
   'Welcome!',
@@ -13,6 +14,7 @@ var warmup = [
   'it will guide you through :)',
   '',
   'press esc key to enable mouse control',
+  '*/',
   ''
 ]
 
@@ -186,29 +188,33 @@ var showcases = [
 
 ]
 
-var marker = require('./index.js').marker;
-tutorials.forEach(function(t, index){
-  document.getElementById(('t' + index)).onclick = function(){
-    editor.session.removeMarker(marker);
-    console.log(marker);
-    marker = null;
-    editor.getSession().setMode('ace/mode/javascript');
-    editor.setValue(t.join('\n'));
-    editor.clearSelection();
-  }
-});
 
-showcases.forEach(function(s, index){
-  document.getElementById(('s' + index)).onclick = function(){
-    editor.getSession().setMode('ace/mode/javascript');
-    editor.setValue(s.join('\n'));
-    editor.clearSelection();
-  }
-});
+function init(func){
+  //var marker = require('./index.js').marker;
+  tutorials.forEach(function(t, index){
+    document.getElementById(('t' + index)).onclick = function(){
+      func();
+      editor.setValue(t.join('\n'));
+      editor.clearSelection();
+    }
+  });
 
-document.getElementById('welcome').onclick = function(){
-  document.getElementById('welcome').style.visibility = 'hidden';
-  editor.setValue(warmup.join('\n'));
-  editor.clearSelection();
+  showcases.forEach(function(s, index){
+    document.getElementById(('s' + index)).onclick = function(){
+      func();
+      editor.setValue(s.join('\n'));
+      editor.clearSelection();
+    }
+  });
+
+  document.getElementById('welcome').onclick = function(){
+    document.getElementById('welcome').style.visibility = 'hidden';
+    editor.setValue(warmup.join('\n'));
+    editor.clearSelection();
+  };
+
 }
 
+module.exports = {
+  init: init
+}
