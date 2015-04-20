@@ -163,10 +163,6 @@ game.on('tick',function(delta){
   frameCount ++;
   sky(delta);
 
-  if(frameCount < 120){
-   console.log(dude.friction.x, dude.friction.y, dude.friction.z)
-  }
-
   if(frameCount !== 0 && frameCount % 2 === 0){
     //dude2.rotation.y = theta / 100;
 
@@ -180,68 +176,13 @@ game.on('tick',function(delta){
       begintToCount += (delta / 16);
     }
 
-    var result = isOnTop();
-    //var test = 0;
-    //console.log(dude.acceleration.y)
-    if(result){
-      // dude.acceleration = new game.THREE.Vector3(0, 0, 0);
-      // dude.velocity = new game.THREE.Vector3(0, 0, 0);
-      // //dude.forces = new game.THREE.Vector3(0, 0, 0);
-      // console.log(dude);
-      // dude.position.set(dude.position.x, dude.position.y + result.y, dude.position.z);
-      // dude.moveTo(dude.position.x, dude.position.y + result.y * 0.5, dude.position.z);
+    isOnTop();
 
-
-      //dude.yawn.position.y += 0.5;
-      //dude.removeForce([0, -0.0000036, 0]);
-
-      //dude.moveTo(something);
-      //dude.acceleration = new game.THREE.Vector3(0, 0.0000036, 0);
-      dude.acceleration.x = 0;
-      dude.acceleration.y = 0;
-      dude.acceleration.z = 0;
-      //dude.moveTo(0, result.point.y, 0);
-      dude.resting.y = true;
-
-      dude.friction.x = 1;
-      dude.friction.z = 1;
-      var something = new game.THREE.Vector3(result.point.x, result.point.y, result.point.z);
-      //var ppos = dude.yaw.position;
-      dude.moveTo(something);
-      //dude.subjectTo([0, 0.0000036, 0]);
-      //test = 1;
-      //dude.forces.y += 0.0000036  * delta;
-      //console.log(dude.avatar.position.y, result.y);
-     //dude.resting.y = false;
-
-    }
-    // else if(test===1){
-    //   console.log('hello')
-    //   dude.acceleration.y = 0;
-    //   //dude.subjectTo([0, -0.0000036, 0]);
-    //   test = 2;
-    //  //dude.resting.y = false;
-    //  //dude.acceleration = new game.THREE.Vector3(0, 0, 0);
-    // }
-    else{
-      dude.resting.y = false;
-      //console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
-    }
-
-    //console.log(dude.acceleration)
-    //console.log(dude.acceleration);
-    // result2 = isClose();
-
-    // if(result2!== null && result2 !== result2pre){
-    //   //1.show code
-    //   //2.how does reset button work?
-    //   console.log('wwwaaattt');
-    //   showCode(result2);
-    //   result2pre = result2;
-    // }
-
-    //isSelect();
+    //isHit();
+    console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
   }
+
+
 })
 
 /*
@@ -271,46 +212,81 @@ function isOnTop() {
     rayCaster.ray.set(dudePos, ray);
     var intersects = rayCaster.intersectObjects(colliObjs);
     if (intersects.length > 0 && intersects[0].distance <= 3.2  && intersects[0].distance >= 0.5) {
-      //console.log(intersects[0].object.position);
-      // console.log(dude.yaw.position);
-      // console.log('( .o.)');
+
       window.lol = intersects[0];
-      //console.log(intersects[0]);
-      return intersects[0];
+
+      dude.acceleration.x = 0;
+      dude.acceleration.y = 0;
+      dude.acceleration.z = 0;
+
+      dude.resting.x = true;
+      dude.resting.y = true;
+      dude.resting.z = true;
+
+      dude.friction.x = 1;
+      dude.friction.y = 1;
+      dude.friction.z = 1;
+      var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+
+      dude.moveTo(something);
+      console.log('hello??')
+      return;
+    }else if(intersects.length){
+      //console.log(intersects[0].distance)
     }
-    return false;
+      dude.resting.x = false;
+      dude.resting.y = false;
+      dude.resting.z = false;
 }
 
 function isHit(){
-  // var rays = [
-  //   new game.THREE.Vector3(1, 0, 0)
-  // ]
-  // rays[0].applyMatrix4()
+  var rays = [
+    new game.THREE.Vector3(1, 0, 0),
+    new game.THREE.Vector3(-1, 0, 0),
+    // new game.THREE.Vector3(0, 1, 0)
+    new game.THREE.Vector3(0, 0, 1),
+    new game.THREE.Vector3(0, 0, -1)
+  ]
+  //var m = new game.THREE.Matrix4();
+  //rays[0].applyMatrix4(m);
+  var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y, dude.yaw.position.z);
+/*
+  function check(el){
+    rayCaster.ray.set(dudePos, el);
+    var intersects = rayCaster.intersectObjects(colliObjs);
+    return (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5)
+  }
+
+  //omg the first time i use some in my project!!!!
+  //functional programming :D
+  //
+  //need the return cause there's one layer more to come out of the isHit function :)
+  return rays.some(check);
+*/
+  for(var i = 0; i < rays.length; i++){
+    var ray = rays[i];
+    rayCaster.ray.set(dudePos, ray);
+    var intersects = rayCaster.intersectObjects(colliObjs);
+    if (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5) {
+
+      window.lol = intersects[0];
+
+      dude.acceleration.x = 0;
+      dude.acceleration.y = 0;
+      dude.acceleration.z = 0;
+
+      //dude.resting.y = true;
+
+      dude.friction.x = 1;
+      dude.friction.z = 1;
+      var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+
+      dude.moveTo(something);
+      return;
+    }
+  }
 }
 
-// function isClose() {
-//   var rays = [
-//   new game.THREE.Vector3(1, 0, 0),
-//   new game.THREE.Vector3(-1, 0, 0),
-//   new game.THREE.Vector3(0, 0, 1),
-//   new game.THREE.Vector3(0, 0, -1),
-//   new game.THREE.Vector3(0, 1, 0),
-//   new game.THREE.Vector3(0, -1, 0)
-//   ];
-
-//   var name = null;
-//   for(var i = 0; i< rays.length; i++){
-//     var ray = rays[i];
-//     rayCaster.ray.set(dude.yaw.position, ray);
-//      var intersects = rayCaster.intersectObjects(colliObjs);
-//     if (intersects.length > 0 && intersects[0].distance <= 2) {
-//       //console.log(intersects[0].object.name);
-//       name = intersects[0].object.name;
-//       break;
-//     }
-//   }
-//   return name;
-// }
 
 
 // var mouse = new game.THREE.Vector2();
