@@ -163,6 +163,10 @@ game.on('tick',function(delta){
   frameCount ++;
   sky(delta);
 
+  if(frameCount < 120){
+   console.log(dude.friction.x, dude.friction.y, dude.friction.z)
+  }
+
   if(frameCount !== 0 && frameCount % 2 === 0){
     //dude2.rotation.y = theta / 100;
 
@@ -176,8 +180,8 @@ game.on('tick',function(delta){
       begintToCount += (delta / 16);
     }
 
-    var result = isHit();
-    var test = 0;
+    var result = isOnTop();
+    //var test = 0;
     //console.log(dude.acceleration.y)
     if(result){
       // dude.acceleration = new game.THREE.Vector3(0, 0, 0);
@@ -197,23 +201,31 @@ game.on('tick',function(delta){
       dude.acceleration.y = 0;
       dude.acceleration.z = 0;
       //dude.moveTo(0, result.point.y, 0);
-      //dude.resting.y = true;
-      var something = new game.THREE.Vector3(result.point.x, result.point.y + 1.31, result.point.z);
+      dude.resting.y = true;
+
+      dude.friction.x = 1;
+      dude.friction.z = 1;
+      var something = new game.THREE.Vector3(result.point.x, result.point.y, result.point.z);
       //var ppos = dude.yaw.position;
       dude.moveTo(something);
       //dude.subjectTo([0, 0.0000036, 0]);
-      test = 1;
+      //test = 1;
       //dude.forces.y += 0.0000036  * delta;
       //console.log(dude.avatar.position.y, result.y);
      //dude.resting.y = false;
 
-    }else if(test===1){
-      console.log('hello')
-      dude.acceleration.y = 0;
-      //dude.subjectTo([0, -0.0000036, 0]);
-      test = 2;
-     //dude.resting.y = false;
-     //dude.acceleration = new game.THREE.Vector3(0, 0, 0);
+    }
+    // else if(test===1){
+    //   console.log('hello')
+    //   dude.acceleration.y = 0;
+    //   //dude.subjectTo([0, -0.0000036, 0]);
+    //   test = 2;
+    //  //dude.resting.y = false;
+    //  //dude.acceleration = new game.THREE.Vector3(0, 0, 0);
+    // }
+    else{
+      dude.resting.y = false;
+      //console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
     }
 
     //console.log(dude.acceleration)
@@ -252,13 +264,13 @@ function destory(name){
 //collision detection!!!
 var rayCaster = new game.THREE.Raycaster();
 
-function isHit() {
+function isOnTop() {
     //get user direction!!
     var ray = new game.THREE.Vector3(0, -1, 0);
     var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + 1.31, dude.yaw.position.z);
     rayCaster.ray.set(dudePos, ray);
     var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0 && intersects[0].distance < 0.5) {
+    if (intersects.length > 0 && intersects[0].distance <= 3.2  && intersects[0].distance >= 0.5) {
       //console.log(intersects[0].object.position);
       // console.log(dude.yaw.position);
       // console.log('( .o.)');
@@ -267,6 +279,13 @@ function isHit() {
       return intersects[0];
     }
     return false;
+}
+
+function isHit(){
+  // var rays = [
+  //   new game.THREE.Vector3(1, 0, 0)
+  // ]
+  // rays[0].applyMatrix4()
 }
 
 // function isClose() {
