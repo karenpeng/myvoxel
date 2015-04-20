@@ -107,8 +107,7 @@ window.myItems = myItems;
 the api for end-user
  */
 function addThing( _clickTimes, pos, _x, _y, _z) {
-  console.log('raph');
-  console.log(_clickTimes);
+  console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
 
   var mesh = new game.THREE.Mesh(
@@ -178,10 +177,45 @@ game.on('tick',function(delta){
     }
 
     var result = isHit();
+    var test = 0;
+    //console.log(dude.acceleration.y)
     if(result){
-      dude.position.set(dude.yaw.position.x, dude.yaw.position.y + result.y, dude.yaw.position.z);
-    };
+      // dude.acceleration = new game.THREE.Vector3(0, 0, 0);
+      // dude.velocity = new game.THREE.Vector3(0, 0, 0);
+      // //dude.forces = new game.THREE.Vector3(0, 0, 0);
+      // console.log(dude);
+      // dude.position.set(dude.position.x, dude.position.y + result.y, dude.position.z);
+      // dude.moveTo(dude.position.x, dude.position.y + result.y * 0.5, dude.position.z);
 
+
+      //dude.yawn.position.y += 0.5;
+      //dude.removeForce([0, -0.0000036, 0]);
+
+      //dude.moveTo(something);
+      //dude.acceleration = new game.THREE.Vector3(0, 0.0000036, 0);
+      dude.acceleration.y = 0;
+      //dude.moveTo(0, result.point.y, 0);
+      //dude.resting.y = true;
+      var something = new game.THREE.Vector3(result.point.x, result.point.y + 1.31, result.point.z);
+      //var ppos = dude.yaw.position;
+      dude.moveTo(something);
+      //dude.subjectTo([0, 0.0000036, 0]);
+      test = 1;
+      //dude.forces.y += 0.0000036  * delta;
+      //console.log(dude.avatar.position.y, result.y);
+     //dude.resting.y = false;
+
+    }else if(test===1){
+      console.log('hello')
+      dude.acceleration.y = 0;
+      //dude.subjectTo([0, -0.0000036, 0]);
+      test = 2;
+     //dude.resting.y = false;
+     //dude.acceleration = new game.THREE.Vector3(0, 0, 0);
+    }
+
+    //console.log(dude.acceleration)
+    //console.log(dude.acceleration);
     // result2 = isClose();
 
     // if(result2!== null && result2 !== result2pre){
@@ -219,11 +253,16 @@ var rayCaster = new game.THREE.Raycaster();
 function isHit() {
     //get user direction!!
     var ray = new game.THREE.Vector3(0, -1, 0);
-    rayCaster.ray.set(dude.yaw.position, ray);
+    var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + 1.31, dude.yaw.position.z);
+    rayCaster.ray.set(dudePos, ray);
     var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0 && intersects[0].distance <= 0.5) {
+    if (intersects.length > 0 && intersects[0].distance < 0.5) {
       //console.log(intersects[0].object.position);
-      return intersects[0].object.position;
+      // console.log(dude.yaw.position);
+      // console.log('( .o.)');
+      window.lol = intersects[0];
+      //console.log(intersects[0]);
+      return intersects[0];
     }
     return false;
 }
@@ -362,8 +401,7 @@ function parse(str, arr) {
     console.log(str2);
     eval(str2);
     call = wwwaaattt(clickTimes, startPosition);
-    console.log('meow');
-    console.log(clickTimes);
+    console.log('meow', clickTimes);
     evaled = true;
     //console.log('end eval');
   } catch (e) {
