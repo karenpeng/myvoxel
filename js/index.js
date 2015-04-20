@@ -15,7 +15,6 @@ var clickTimes = 0;
 var codes = [];
 var colliObjs = [];
 var myItems = [];
-var geos = {};
 /*
 set up game
  */
@@ -111,47 +110,38 @@ function addThing( _clickTimes, pos, _x, _y, _z) {
   console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
 
-  // var mesh = new game.THREE.Mesh(
-  //   new game.THREE.CubeGeometry(1, 1, 1), // width, height, depth
-  //   game.materials.material
-  // )
+  var mesh = new game.THREE.Mesh(
+    new game.THREE.CubeGeometry(1, 1, 1), // width, height, depth
+    game.materials.material
+  )
 
-  // // paint the mesh with a specific texture in the atlas
-  // game.materials.paint(mesh, 'brick');
+  // paint the mesh with a specific texture in the atlas
+  game.materials.paint(mesh, 'brick');
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
   var z = _z + pos[2] + 0.5 || pos[2] + 0.5;
 
+  mesh.position.set(x, y, z);
+  mesh.name = _clickTimes;
+  colliObjs.push(mesh);
 
-  var geo = new game.THREE.CubeGeometry(1, 1, 1);
-  geo.applyMatrix(new game.THREE.Matrix4().makeTranslation(x, y, z));
-
-  // mesh.position.set(x, y, z);
-  // mesh.name = _clickTimes;
-  // colliObjs.push(mesh);
-
-  // var item = game.addItem({
-  //     mesh: mesh,
-  //     size: 1,
-  //     velocity: {
-  //       x: 0,
-  //       y: 0,
-  //       z: 0
-  //     } // initial velocity
-  //   }, false)
-  // item.name = _clickTimes;
-  console.log('hello?!')
-  console.log(geos[_clickTimes], geo);
-  console.log('wat?')
-  geos[_clickTimes].merge(geo);
-
+  var item = game.addItem({
+      mesh: mesh,
+      size: 1,
+      velocity: {
+        x: 0,
+        y: 0,
+        z: 0
+      } // initial velocity
+    }, false)
+  item.name = _clickTimes;
 
   //myItem is for destorying things
-  // myItems.push(item);
+  myItems.push(item);
   // colliObjs.push(item.mesh);
 
-  // return mesh;
+  return mesh;
     //use `game.removeItem(item)` to remove
     //return [x, y, z];
 }
@@ -203,16 +193,14 @@ game.on('tick',function(delta){
 
       //dude.moveTo(something);
       //dude.acceleration = new game.THREE.Vector3(0, 0.0000036, 0);
-
-      //dude.moveTo(0, result.point.y, 0);
-      //dude.resting.y = true;
-      var something = new game.THREE.Vector3(result.point.x, result.point.y + 1, result.point.z);
-      //var ppos = dude.yaw.position;
-      dude.moveTo(something);
-
       dude.acceleration.x = 0;
       dude.acceleration.y = 0;
       dude.acceleration.z = 0;
+      //dude.moveTo(0, result.point.y, 0);
+      //dude.resting.y = true;
+      var something = new game.THREE.Vector3(result.point.x, result.point.y + 1.31, result.point.z);
+      //var ppos = dude.yaw.position;
+      dude.moveTo(something);
       //dude.subjectTo([0, 0.0000036, 0]);
       test = 1;
       //dude.forces.y += 0.0000036  * delta;
@@ -221,7 +209,7 @@ game.on('tick',function(delta){
 
     }else if(test===1){
       console.log('hello')
-      //dude.acceleration.y = 0;
+      dude.acceleration.y = 0;
       //dude.subjectTo([0, -0.0000036, 0]);
       test = 2;
      //dude.resting.y = false;
@@ -241,7 +229,6 @@ game.on('tick',function(delta){
     // }
 
     //isSelect();
-    //console.log(dude.acceleration);
   }
 })
 
@@ -271,12 +258,12 @@ function isHit() {
     var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + 1.31, dude.yaw.position.z);
     rayCaster.ray.set(dudePos, ray);
     var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0 && intersects[0].distance <= 0.5) {
+    if (intersects.length > 0 && intersects[0].distance < 0.5) {
       //console.log(intersects[0].object.position);
       // console.log(dude.yaw.position);
       // console.log('( .o.)');
       window.lol = intersects[0];
-      console.log(intersects[0]);
+      //console.log(intersects[0]);
       return intersects[0];
     }
     return false;
@@ -412,23 +399,13 @@ function parse(str, arr) {
 
   try {
     //console.log('start eval');
-
-    console.log('meow', clickTimes);
-
-    //console.log('end eval');
-    geos[clickTimes] = new game.THREE.geometry();
-    var material = new game.THREE.MeshNormal();
-    var ok = new game.THREE.Mesh(geos[clickTimes], material);
-    ok.name = clickTimes;
-    game.scene.add(ok);
-    colliObjs.push(geos[clickTimes]);
-
     var str2 = wrapGenerator(arr);
     console.log(str2);
     eval(str2);
     call = wwwaaattt(clickTimes, startPosition);
+    console.log('meow', clickTimes);
     evaled = true;
-
+    //console.log('end eval');
   } catch (e) {
     console.log(e);
     consoleLog.insert(e);
