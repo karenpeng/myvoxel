@@ -166,7 +166,7 @@ game.on('tick',function(delta){
 
   if(frameCount !== 0 && frameCount % 2 === 0){
     //dude2.rotation.y = theta / 100;
-    console.log(game.controls.jumping)
+    //console.log(game.controls.jumping)
 
     theta += (delta / 16);
 
@@ -180,7 +180,7 @@ game.on('tick',function(delta){
 
     isOnTop(delta);
 
-    //isHit();
+    isHit();
     //console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
   }
 
@@ -271,8 +271,9 @@ function isHit(){
     new game.THREE.Vector3(0, 0, 1),
     new game.THREE.Vector3(0, 0, -1)
   ]
-  //var m = new game.THREE.Matrix4();
-  //rays[0].applyMatrix4(m);
+
+  var mY = new game.THREE.Matrix4().makeRotationY(dude.yaw.rotation.y);
+
   var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y, dude.yaw.position.z);
 /*
   function check(el){
@@ -289,24 +290,34 @@ function isHit(){
 */
   for(var i = 0; i < rays.length; i++){
     var ray = rays[i];
+    ray.applyMatrix4(mY);
+
     rayCaster.ray.set(dudePos, ray);
     var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5) {
+    if (intersects.length > 0){
+     if( (i === 0 || i === 1 && intersects[0].distance < 0.5 )|| (i === 2 || i === 3 && intersects[0].distance < 0.5)) {
 
-      window.lol = intersects[0];
+        // window.lol = intersects[0];
 
-      dude.acceleration.x = 0;
-      dude.acceleration.y = 0;
-      dude.acceleration.z = 0;
+        dude.acceleration.x = 0;
+        dude.acceleration.z = 0;
 
-      //dude.resting.y = true;
+        dude.resting.x = true;
+        dude.resting.z = true;
 
-      dude.friction.x = 1;
-      dude.friction.z = 1;
-      var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+        // dude.friction.x = 1;
+        // dude.friction.z = 1;
+        var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+        if(i === 0 || i === 1){
+          something.add(ray.setLength(0.4).negate());
+        }else{
+          something.add(ray.setLength(0.4).negate());
+        }
 
-      dude.moveTo(something);
-      return;
+        dude.moveTo(something);
+        console.log(i);
+        return;
+      }
     }
   }
 }
