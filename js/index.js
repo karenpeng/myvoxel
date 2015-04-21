@@ -126,8 +126,6 @@ function addThing( _clickTimes, pos, _x, _y, _z) {
 
   mesh.position.set(x, y, z);
 
-  var geo = new game.THREE.CubeGeometry(1, 1, 1);
-  geo.applyMatrix(new game.THREE.Matrix4().makeTranslation(x, y, z));
   //mesh.name = _clickTimes;
   //colliObjs.push(mesh);
 
@@ -146,7 +144,7 @@ function addThing( _clickTimes, pos, _x, _y, _z) {
   //myItems.push(item);
   geos[_clickTimes+''].verticesNeedUpdate = true;
 
-  game.THREE.GeometryUtils.merge(geos[_clickTimes+''], geo);
+  game.THREE.GeometryUtils.merge(geos[_clickTimes+''], mesh);
 
 }
 window.addThing = addThing; //for debug
