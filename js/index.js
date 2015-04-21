@@ -15,8 +15,8 @@ var clickTimes = 0;
 var codes = [];
 var colliObjs = [];
 var myItems = [];
-var geos = {};
-window.geos = geos;
+// var geos = {};
+// window.geos = geos;
 /*
 set up game
  */
@@ -108,12 +108,12 @@ window.myItems = myItems;
 /*
 the api for end-user
  */
-function addThing( _clickTimes, pos, _x, _y, _z) {
+function addThing( _clickTimes, pos, _x, _y, _z, _size) {
  console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
-
+  var size = _size || 1;
   var mesh = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(1, 1, 1), // width, height, depth
+    new game.THREE.CubeGeometry(size, size, size), // width, height, depth
     game.materials.material
   )
 
@@ -125,26 +125,25 @@ function addThing( _clickTimes, pos, _x, _y, _z) {
   var z = _z + pos[2] + 0.5 || pos[2] + 0.5;
 
   mesh.position.set(x, y, z);
+  mesh.name = _clickTimes;
+  colliObjs.push(mesh);
 
-  //mesh.name = _clickTimes;
-  //colliObjs.push(mesh);
-
-  // var item = game.addItem({
-  //     mesh: mesh,
-  //     size: 1,
-  //     velocity: {
-  //       x: 0,
-  //       y: 0,
-  //       z: 0
-  //     } // initial velocity
-  //   }, false)
-  // item.name = _clickTimes;
+  var item = game.addItem({
+      mesh: mesh,
+      size: 1,
+      velocity: {
+        x: 0,
+        y: 0,
+        z: 0
+      } // initial velocity
+    }, false)
+  item.name = _clickTimes;
 
   //myItem is for destorying things
-  //myItems.push(item);
-  geos[_clickTimes+''].verticesNeedUpdate = true;
+  myItems.push(item);
+  // colliObjs.push(item.mesh);
 
-  game.THREE.GeometryUtils.merge(geos[_clickTimes+''], mesh);
+  return mesh;
 
 }
 window.addThing = addThing; //for debug
@@ -327,11 +326,12 @@ function isHit(){
 }
 
 window.onkeydown = function(e){
-  if(e.which === 32){
+  if(e.which === 32 && jumpable){
+    e.preventDefault();
     dude.resting.y = false;
     dude.velocity.y = 0.014;
     //dude.friction.y = 1;
-    console.log(':(')
+    //console.log(':(')
   }
 }
 
@@ -405,13 +405,16 @@ message.innerHTML = 'Double Click to play';
 //   console.log('hello?')
 //   welcome.style.visibility = 'hidden';
 // }
-// game.interact.on('attain', function() {
-//   welcome.style.visibility = 'hidden';
-// })
-// game.interact.on('release', function() {
-//   console.log('ouch1')
-//   welcome.style.visibility = 'visible';
-// })
+var jumpable = true;
+game.interact.on('attain', function() {
+  //welcome.style.visibility = 'hidden';
+  jumpable = true;
+})
+game.interact.on('release', function() {
+  jumpable = false;
+  // console.log('ouch1')
+  // welcome.style.visibility = 'visible';
+})
 
 
 /*
@@ -440,22 +443,14 @@ var wrapGenerator = require('./parse.js').wrapGenerator;
 function parse(str, arr) {
 
   try {
-    //console.log(str, arr)
-    geos[clickTimes+''] = new game.THREE.Geometry();
-    geos[clickTimes+''].verticesNeedUpdate = true;
-    var material = new game.THREE.MeshNormalMaterial();
-
-    var ok = new game.THREE.Mesh(geos[clickTimes+''], material);
-
-    ok.name = clickTimes;
-    game.scene.add(ok);
-    window.ok = ok;
-    colliObjs.push(ok);
+    //console.log('start eval');
     var str2 = wrapGenerator(arr);
-    //console.log(str2);
+    console.log(str2);
     eval(str2);
     call = wwwaaattt(clickTimes, startPosition);
+    console.log('meow', clickTimes);
     evaled = true;
+
   } catch (e) {
     console.log(e);
     consoleLog.insert(e.toString());
@@ -467,8 +462,8 @@ function parse(str, arr) {
 
 }
 
-function drawAndAddThing(clickTimes, pos, lineNum, x, y, z){
-  addThing(clickTimes, pos, x, y, z);
+function drawAndAddThing(clickTimes, pos, lineNum, x, y, z, size){
+  addThing(clickTimes, pos, x, y, z, size);
   highlightLine(lineNum);
 }
 
