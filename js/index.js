@@ -15,8 +15,8 @@ var clickTimes = 0;
 var codes = [];
 var colliObjs = [];
 var myItems = [];
-// var geos = {};
-// window.geos = geos;
+var geos = {};
+window.geos = geos;
 /*
 set up game
  */
@@ -139,12 +139,14 @@ function addThing( _clickTimes, pos, _x, _y, _z, _size) {
     }, false)
   item.name = _clickTimes;
 
-  //myItem is for destorying things
-  myItems.push(item);
-  // colliObjs.push(item.mesh);
+  // //myItem is for destorying things
+  // myItems.push(item);
+  // // colliObjs.push(item.mesh);
 
   return mesh;
+  // geos[_clickTimes+''].verticesNeedUpdate = true;
 
+  // game.THREE.GeometryUtils.merge(geos[_clickTimes+''], mesh);
 }
 window.addThing = addThing; //for debug
 
@@ -443,14 +445,22 @@ var wrapGenerator = require('./parse.js').wrapGenerator;
 function parse(str, arr) {
 
   try {
-    //console.log('start eval');
+     //console.log(str, arr)
+    // geos[clickTimes+''] = new game.THREE.Geometry();
+    // geos[clickTimes+''].verticesNeedUpdate = true;
+    // var material = new game.THREE.MeshNormalMaterial();
+
+    // var ok = new game.THREE.Mesh(geos[clickTimes+''], material);
+
+    // ok.name = clickTimes;
+    // game.scene.add(ok);
+    // window.ok = ok;
+    // colliObjs.push(ok);
     var str2 = wrapGenerator(arr);
-    console.log(str2);
+    //console.log(str2);
     eval(str2);
     call = wwwaaattt(clickTimes, startPosition);
-    console.log('meow', clickTimes);
     evaled = true;
-
   } catch (e) {
     console.log(e);
     consoleLog.insert(e.toString());
