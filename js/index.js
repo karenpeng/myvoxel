@@ -114,11 +114,12 @@ function addThing( _clickTimes, pos, _x, _y, _z, _size) {
   var size = _size || 1;
   var mesh = new game.THREE.Mesh(
     new game.THREE.CubeGeometry(size, size, size), // width, height, depth
-    game.materials.material
+    //game.materials.material
+    new game.THREE.MeshNormalMaterial()
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, 'brick');
+  //game.materials.paint(mesh, 'brick');
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -184,7 +185,7 @@ game.on('tick',function(delta){
   if(colliObjs.length){
       isOnTop(delta);
 
-      isHit();
+      //isHit();
     }
     //console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
   }
@@ -211,6 +212,8 @@ function destory(name){
 
 //collision detection!!!
 var rayCaster = new game.THREE.Raycaster();
+
+var onTop = false;
 
 function isOnTop(dt) {
     //get user direction!!
@@ -264,8 +267,11 @@ function isOnTop(dt) {
 
       dude.moveTo(something);
       //console.log(intersects[0].distance)
+      onTop = true;
       return;
     }
+
+    onTop = false;
 }
 
 function isHit(){
@@ -328,7 +334,8 @@ function isHit(){
 }
 
 window.onkeydown = function(e){
-  if(e.which === 32 && jumpable){
+  if(e.which === 32 && jumpable && onTop){
+    console.log(':(')
     e.preventDefault();
     dude.resting.y = false;
     dude.velocity.y = 0.014;
@@ -398,6 +405,17 @@ hl.on('highlight', function (_voxelPos) {
 game.on('fire', function(){
   startPosition = voxelPos;
   console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
+  //$("body").trigger({type: 'keypress', which: 27, keyCode: 27});
+  var keyVal = 32;
+  $("body").trigger ( {
+    type: 'keypress', keyCode: keyVal, which: keyVal, charCode: keyVal
+  });
+
+  var press = jQuery.Event("keypress");
+  press.ctrlKey = false;
+  press.which = 32;
+  $("body").trigger(press);
+
 });
 
 var welcome = document.getElementById('welcome');
@@ -418,7 +436,20 @@ game.interact.on('release', function() {
   // welcome.style.visibility = 'visible';
 })
 
+window.onkeydown = function(e){
+  if(e.which === 66){
 
+    var keyVal = 32;
+    $("#container").trigger ( {
+      type: 'keypress', keyCode: keyVal, which: keyVal, charCode: keyVal
+    });
+
+    var press = jQuery.Event("keypress");
+    press.ctrlKey = false;
+    press.which = 32;
+    $("#container").trigger(press);
+  }
+}
 /*
 eval!
  */
@@ -457,13 +488,22 @@ function parse(str, arr) {
     // window.ok = ok;
     // colliObjs.push(ok);
     var str2 = wrapGenerator(arr);
-    //console.log(str2);
+    console.log(str2);
     eval(str2);
     call = wwwaaattt(clickTimes, startPosition);
     evaled = true;
   } catch (e) {
     console.log(e);
     consoleLog.insert(e.toString());
+    return;
+  }
+
+
+  try{
+    runGenerator(call);
+  }catch(ಠoಠ){
+    console.log(ಠoಠ);
+    consoleLog.insert(ಠoಠ.toString());
     return;
   }
 
@@ -569,3 +609,5 @@ tutorial
  */
 var init = require('./tutorial.js').init;
 init(removeMarker);
+
+

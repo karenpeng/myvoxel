@@ -130,9 +130,6 @@ var tutorials =[
   '//There\'s a lot you could do with it',
   '//Try build a cylinder!',
   ''
-],
-
-[
 ]
 
 ]
@@ -159,19 +156,18 @@ var showcases = [
   ],
 
   [
-    'var addGuy = function(x,y,z,c){',
-    '  var X = x || 0;',
-    '  var Y = y  || 0;',
-    '  var Z = z || 0;',
-    '  var C = c || 0;',
-    '  if(C < 10){',
-    '    C++;',
-    '    addThing(X,Y,Z);',
-    '    addGuy(C,C,0,C);',
-    '  }',
+    'function addTree(x, y, z, counter){',
+    ' if ( counter > 6) return;',
+    ' addThing(x, y, z);',
+    ' //add root',
+    ' var c = counter + 1;',
+    ' //add left sub tree',
+    ' addTree(x - 1, y + 1, z - 1, c);',
+    ' //add right sub tree',
+    ' addTree(x + 1, y + 1, z + 1, c);',
     '}',
-    'addGuy();',
-    ''
+    '',
+    'addTree(0,0,0,0);'
   ],
 
   [
@@ -212,6 +208,13 @@ function init(func){
     editor.setValue(warmup.join('\n'));
     editor.clearSelection();
   };
+
+  // document.getElementById('save').onclick = function(){
+  //   var str = editor.getValue();
+  //   var saveContent = document.createElement('li');
+  //   saveContent.innerHTML = <a href="#" class='showcase' id='s0'>Globe</a>
+  //   document.getElementById('myStuff').appendChild
+  // }
 
 }
 
