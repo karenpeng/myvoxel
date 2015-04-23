@@ -60,8 +60,12 @@ game.voxels.on('missingChunk', function (p) {
 })
 
 var light = new game.THREE.DirectionalLight(0xffffff, 0.5);
-light.position.set(0, 10, 0);
+light.position.set(0, 20, 0);
 game.scene.add(light);
+
+var light1 = new game.THREE.DirectionalLight(0xffffff, 0.5);
+light1.position.set(0, 10, 0);
+game.scene.add(light1);
 
 // var makeFly = fly(game);
 // makeFly(game.contrls.target())
@@ -109,17 +113,17 @@ window.myItems = myItems;
 the api for end-user
  */
 function addThing( _clickTimes, pos, _x, _y, _z, _size) {
- console.log('raph', _clickTimes);
+  //console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
   var mesh = new game.THREE.Mesh(
     new game.THREE.CubeGeometry(size, size, size), // width, height, depth
-    //game.materials.material
-    new game.THREE.MeshNormalMaterial()
+    game.materials.material
+    //new game.THREE.MeshNormalMaterial()
   )
 
   // paint the mesh with a specific texture in the atlas
-  //game.materials.paint(mesh, 'brick');
+  game.materials.paint(mesh, 'brick');
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -157,7 +161,7 @@ window.addThing = addThing; //for debug
 animation
  */
 var theta = 0;
-var interval = 60;
+var interval = 10;
 var begintToCount = 0;
 var result2 = null;
 var result2pre = null;
@@ -326,7 +330,7 @@ function isHit(){
         }
 
         dude.moveTo(something);
-        console.log(i);
+        //console.log(i);
         return;
       }
     }
@@ -334,8 +338,8 @@ function isHit(){
 }
 
 window.onkeydown = function(e){
-  if(e.which === 32 && jumpable && onTop){
-    console.log(':(')
+  if(e.which === 32 && jumpable /*&& onTop*/){
+    //console.log(':(')
     e.preventDefault();
     dude.resting.y = false;
     dude.velocity.y = 0.014;
@@ -512,7 +516,7 @@ function parse(str, arr) {
 
 }
 
-function drawAndAddThing(clickTimes, pos, lineNum, x, y, z, size){
+function addThingAndHighlight(clickTimes, pos, lineNum, x, y, z, size){
   addThing(clickTimes, pos, x, y, z, size);
   highlightLine(lineNum);
 }
@@ -585,7 +589,7 @@ var mySlider = $('#sliderr').slider({
 });
 
 mySlider.on('slide', function(e){
-  console.log(e.value);
+  //console.log(e.value);
   interval = e.value;
 });
 

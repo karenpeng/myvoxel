@@ -7,7 +7,7 @@
 function wrapGenerator(lines){
   var result = '';
   lines.forEach(function(l, index){
-    l = l.replace(/addThing\(/g, 'yield drawAndAddThing(' + index + ', ');
+    l = l.replace(/addThing\(/g, 'yield addThingAndHighlight(' + index + ', ');
     l = injectClickTime(l);
     result += (l + '\n');
   });
@@ -18,7 +18,7 @@ function wrapGenerator(lines){
 
 function injectClickTime(str){
   var copy = str;
-  var copy = copy.replace(/drawAndAddThing\(/g, 'drawAndAddThing(num, pos, ');
+  var copy = copy.replace(/addThingAndHighlight\(/g, 'addThingAndHighlight(num, pos, ');
   return copy;
 }
 
