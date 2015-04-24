@@ -1,118 +1,99 @@
+<!DOCTYPE html>
 <html>
-<style type="text/css">
-html, body{
-  top: 0;
-  left: 0;
-  padding: 0;
-  margin: 0;
-}
-.edit{
-  width: 400px;
-  opacity: 0.8;
-  right: 0;
-}
-#editor{
-  position: absolute;
-  top: 0;
-  height: 80%;
-}
-
-#console{
-  position: absolute;
-  bottom: 0;
-  height: 20%;
-}
-
-#ui{
-  position: absolute;
-  bottom: 20%;
-  width: 400px;
-  right: 0;
-  z-index: 10;
-}
-#valueP{
-  color: white;
-}
-#dataLog{
-  position: absolute;
-  bottom: 0;
-  background-color: #222;
-  opacity: 0.8;
-}
-#status{
-  top: 0;
-}
-#tools{
-  top: 0;
-}
-</style>
+<head>
+  <title>Build It!</title>
+  <meta charset="utf-8">
+  <link rel="icon" href="18px-Grass.png" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/bootstrap.css.map">
+  <link rel="stylesheet" type="text/css" href="css/slider.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <script type="text/javascript" src="js/vendor/jquery-1.11.2.min.js"></script>
+  <script type="text/javascript" src="js/vendor/bootstrap.js"></script>
+  <script type="text/javascript" src="js/vendor/bootstrap-slider.js"></script>
+</head>
+<!-- Latest compiled and minified CSS -->
 <body>
-<div id="container"></div>
-<div class="edit" id="editor">for(var i = 0; i < 3;i++){
- addThing(i, 0, 0);
-}
-// for(var i = 0; i < 3;i++){
-//  addThing(i, i, 0);
-// }
-
-// for(var i = 0; i< 10; i++){
-//     var theta = Math.PI * i /5;
-//     addThing(Math.sin(theta), i, Math.cos(theta))
-// }
-
-//for (var i = 0; i <= 1; i += 0.1) {
-//  for (var j = 0; j <= 1; j += 0.1) {
-//    var uv = [i, j];
-
-//    var u = uv[0];
-//    var v = uv[1];
-
-//    var theta = 2 * Math.PI * u;
-//    var phil = Math.PI * v - Math.PI / 2;
-//    var x = Math.cos(phil) * Math.sin(theta) * 4;
-//    var y = Math.sin(phil) * 4;
-//    var z = Math.cos(phil) * Math.cos(theta) * 4;
-//    addThing(x, y + 4, z);
-//  }
-//}
-</div>
-<div class="edit" id="console"></div>
-<div id="ui">
-<button id="run">run</button>
-<input id="sliderr" type="range" min="10" max="120" step="10" value='60'/>
-<span id="valueP"></span>
-</div>
-<canvas id="dataLog" width="0px" height="0px"></canvas>
-<!-- <nav class="bar-tab" id="tools" >
-      <ul class="tab-inner">
-        <li class="tab-item active">
-          <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/grass_dirt.png">
-          <div class="tab-label">grass</div>
-        </li>
-        <li class="tab-item">
-          <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/obsidian.png">
-          <div class="tab-label">obsidian</div>
-        </li>
-        <li class="tab-item">
-          <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/brick.png">
-          <div class="tab-label">brick</div>
-        </li>
-        <li class="tab-item">
-          <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/plank.png">
-          <div class="tab-label">plank</div>
-        </li>
-        <li class="tab-item">
-          <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/whitewool.png">
-          <div class="tab-label">whitewool</div>
-        </li>
-      </ul>
-    </nav> -->
+  <div id="container"></div>
+  <div class="edit" id="editor">
+  </div>
+  <div class="edit" id="console"></div>
+  <div id="ui">
+  <button id="run" type="button" class="btn btn-sm btn-default">Build</button>
+  <input id="sliderr" type="range" data-slider-id='ex1Slider' data-slider-min="1" data-slider-max="80" data-slider-step="10" data-slider-value='20'/>
+  <button id="pause" type="button" class="btn btn-sm btn-default">Pause</button>
+  <button id="reset" type="button" class="btn btn-sm btn-default">Clean</button>
+  <!-- <button id="save" type="button" class="btn btn-sm btn-default">Save</button> -->
+  </div>
+  <div id="menu"></div>
+  <!-- <nav class="bar-tab" id="tools" >
+        <ul class="tab-inner">
+          <li class="tab-item active">
+            <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/grass_dirt.png">
+            <div class="tab-label">grass</div>
+          </li>
+          <li class="tab-item">
+            <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/obsidian.png">
+            <div class="tab-label">obsidian</div>
+          </li>
+          <li class="tab-item">
+            <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/brick.png">
+            <div class="tab-label">brick</div>
+          </li>
+          <li class="tab-item">
+            <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/plank.png">
+            <div class="tab-label">plank</div>
+          </li>
+          <li class="tab-item">
+            <img class="tab-icon" src="http://commondatastorage.googleapis.com/voxeltextures/whitewool.png">
+            <div class="tab-label">whitewool</div>
+          </li>
+        </ul>
+      </nav> -->
+  <div id="navbar" class="navbar-collapse collapse" class="hello">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#"><b>Build It!</b></a></li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Tutorial <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#" class="tutorial" id="t0">1. One Block</a></li>
+          <li><a href="#" class="tutorial" id="t1">2. Line of Blocks</a></li>
+          <li><a href="#" class="tutorial" id="t2">3. Wall</a></li>
+          <li><a href="#" class="tutorial" id="t3">4. Windows</a></li>
+          <li><a href="#" class="tutorial" id="t4">5. Spiral Stairs</a></li>
+        </ul>
+      </li>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Showcase <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#" class='showcase' id='s0'>Globe</a></li>
+          <li><a href="#" class='showcase' id='s1'>Tree</a></li>
+          <li><a href="#" class='showcase' id='s2'>Infinite Stair</a></li>
+          <li class="divider"></li>
+          <li class="dropdown-header">wow</li>
+          <li><a href="#" class='showcase' id='s3'>TODO: pyramid </a></li>
+          <li><a href="#" class='showcase' id='s4'>TODO: funny stuff</a></li>
+        </ul>
+      </li>
+<!--       <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Stuff <span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu" id="myStuff">
+        </ul>
+      </li> -->
+    </ul>
+  </div>
+  <div id="welcome">
+    <div id="instructions">
+        <span class="bigger">(ﾉ◕ヮ◕)ﾉ Build It!</span>
+        <br>
+        <br>
+        <span id="middleMessage" class="big">loading...</span>
+        <br>
+        <span>W, A, S, D = Move, SPACE = Jump, MOUSE = Look around, R = toogle perspective</span>
+        <br>
+        <br>made by <a href="https://twitter.com/KarenPunkPunk">@KarenPunkPunk</a> with <a href="https://twitter.com/voxeljs">@voxeljs</a></span>
+      </div>
+  </div>
 </body>
-<script type="text/javascript">
-// setTimeout(function(){
-//   document.getElementById('stats').setAttribute('top', '0');
-//   document.getElementById('tools').setAttribute('top', '0');
-// },12000);
-</script>
 <script type="text/javascript" src="bundle.js"></script>
 </html>
