@@ -179,7 +179,13 @@ game.on('tick',function(delta){
     theta += (delta / 16);
 
     if(begintToCount % interval === 0 && evaled){
-      runGenerator(call);
+      try{
+        runGenerator(call);
+      }catch(e){
+        console.log(e);
+        consoleLog.insert(e.toString());
+        return;
+      }
     }
 
     if(evaled){
