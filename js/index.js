@@ -498,9 +498,7 @@ function parse(str, arr) {
     // window.ok = ok;
     // colliObjs.push(ok);
     var str2 = wrapGenerator(arr, str);
-    console.log('here');
     console.log(str2);
-    console.log('there');
     eval(str2);
     call = wwwaaattt(clickTimes, startPosition);
     evaled = true;

@@ -28,3 +28,5 @@ var out = falafel(str, function(node){
 });
 
 console.log(out);
+
+//but falafel does not work for es6 :(

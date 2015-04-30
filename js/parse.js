@@ -10,8 +10,8 @@ function wrapGenerator(lines, str){
      result += (l + '\n');
   });
 
- //function*  addTree(x, y, z, counter){
-  var fnRe = /function\*\s+[^\(\)]\s*\([^\(\)]\)\s*\{/g;
+ //to match function*  addTree(x, y, z, counter){
+ //var fnRe = /function\*\s+[^\(\)]\s*\([^\(\)]\)\s*\{/g;
   var fnRe = /function\*\s+.*?\(.*?\)\s*\{/g;
   var lll = result.match(fnRe);
   if(lll.length){
