@@ -68,8 +68,7 @@ var game = createGame({
   generateChunks: false,
   texturePath: 'textures/',
   materials: [
-    ['grass', 'dirt', 'grass_dirt']
-    ,'brick'
+    ['grass', 'dirt', 'grass_dirt'], 'brick'
     // ,'meow'
   ],
   //materialFlatColor: true,
@@ -125,7 +124,7 @@ var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
 dude.possess();
 //jump from sky
-var jumpFromSky = 10;
+var jumpFromSky = 50;
 dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
@@ -154,7 +153,7 @@ window.myItems = myItems;
 /*
 the api for end-user
  */
-function addThing( _clickTimes, pos, _x, _y, _z, _size) {
+function addThing(_clickTimes, pos, _x, _y, _z, _size) {
   //console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
@@ -176,14 +175,14 @@ function addThing( _clickTimes, pos, _x, _y, _z, _size) {
   colliObjs.push(mesh);
 
   var item = game.addItem({
-      mesh: mesh,
-      size: 1,
-      velocity: {
-        x: 0,
-        y: 0,
-        z: 0
-      } // initial velocity
-    }, false)
+    mesh: mesh,
+    size: 1,
+    velocity: {
+      x: 0,
+      y: 0,
+      z: 0
+    } // initial velocity
+  }, false)
   item.name = _clickTimes;
 
   // //myItem is for destorying things
@@ -197,8 +196,6 @@ function addThing( _clickTimes, pos, _x, _y, _z, _size) {
 }
 window.addThing = addThing; //for debug
 
-
-
 /*
 animation
  */
@@ -209,32 +206,31 @@ var result2 = null;
 var result2pre = null;
 var frameCount = 0;
 
-game.on('tick',function(delta){
-  frameCount ++;
+game.on('tick', function (delta) {
+  frameCount++;
   sky(delta);
 
-
-  if(frameCount !== 0 && frameCount % 2 === 0){
+  if (frameCount !== 0 && frameCount % 2 === 0) {
     //dude2.rotation.y = theta / 100;
     //console.log(game.controls.jumping)
 
     theta += (delta / 16);
 
-    if(begintToCount % interval === 0 && evaled){
-      try{
+    if (begintToCount % interval === 0 && evaled) {
+      try {
         runGenerator(call);
-      }catch(e){
+      } catch (e) {
         console.log(e);
         consoleLog.insert(e.toString());
         return;
       }
     }
 
-    if(evaled){
+    if (evaled) {
       begintToCount += (delta / 16);
     }
 
-  if(colliObjs.length){
+    if (colliObjs.length) {
       isOnTop(delta);
 
       //isHit();
@@ -242,25 +238,24 @@ game.on('tick',function(delta){
     //console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
   }
 
-
 })
 
 /*
 collision detection stuffs
  */
-function showCode(name){
+function showCode(name) {
   editor.setValue(codes[name]);
 }
 
-function destory(name){
-  myItems.forEach(function(item){
-    if(item.name == name){
-      game.removeItem(item);
-    }
-  })
-  codes[name] = null;
-}
-// window.destory = destory; //for debug
+function destory(name) {
+    myItems.forEach(function (item) {
+      if (item.name == name) {
+        game.removeItem(item);
+      }
+    })
+    codes[name] = null;
+  }
+  // window.destory = destory; //for debug
 
 //collision detection!!!
 var rayCaster = new game.THREE.Raycaster();
@@ -268,65 +263,65 @@ var rayCaster = new game.THREE.Raycaster();
 var onTop = false;
 
 function isOnTop(dt) {
-    //get user direction!!
-    var ray = new game.THREE.Vector3(0, -1, 0);
+  //get user direction!!
+  var ray = new game.THREE.Vector3(0, -1, 0);
 
-    var acceleration = {};
-    var velocity = {};
-    var friction = {};
-    var desired = {};
-    acceleration.y = dude.acceleration.y;
-    velocity.y = dude.velocity.y;
-    friction.y = dude.friction.y;
+  var acceleration = {};
+  var velocity = {};
+  var friction = {};
+  var desired = {};
+  acceleration.y = dude.acceleration.y;
+  velocity.y = dude.velocity.y;
+  friction.y = dude.friction.y;
 
-    acceleration.y /= 8 * dt;
-    //acceleration.z += TOTAL_FORCES.z * dt
-    acceleration.y += (-0.0000036) * dt;
+  acceleration.y /= 8 * dt;
+  //acceleration.z += TOTAL_FORCES.z * dt
+  acceleration.y += (-0.0000036) * dt;
 
-    velocity.y += acceleration.y * dt;
-    velocity.y *= friction.y;
+  velocity.y += acceleration.y * dt;
+  velocity.y *= friction.y;
 
-    if(Math.abs(velocity.y) < 0.1) {
-      desired.y = (velocity.y * dt);
-    } else if(velocity.y !== 0) {
-      desired.y = (velocity.y / Math.abs(velocity.y)) * 0.1;
-    }
+  if (Math.abs(velocity.y) < 0.1) {
+    desired.y = (velocity.y * dt);
+  } else if (velocity.y !== 0) {
+    desired.y = (velocity.y / Math.abs(velocity.y)) * 0.1;
+  }
 
-    var dudeNextPos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + desired.y + 0.5, dude.yaw.position.z);
-    rayCaster.ray.set(dudeNextPos, ray);
-    var intersects = rayCaster.intersectObjects(colliObjs);
+  var dudeNextPos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + desired.y + 0.5, dude.yaw.position.z);
+  rayCaster.ray.set(dudeNextPos, ray);
+  var intersects = rayCaster.intersectObjects(colliObjs);
 
-    if (intersects.length > 0 && intersects[0].distance < 0.5 + desired.y /*&& intersects[0].distance > 0.5*/) {
+  if (intersects.length > 0 && intersects[0].distance < 0.5 + desired.y /*&& intersects[0].distance > 0.5*/ ) {
 
-      // console.log(desired.y)
-      // console.log('sdgdgsd')
+    // console.log(desired.y)
+    // console.log('sdgdgsd')
 
-      window.lol = intersects[0];
+    window.lol = intersects[0];
 
-      dude.acceleration.x = 0;
-      //dude.acceleration.y = 0;
-      dude.acceleration.z = 0;
+    dude.acceleration.x = 0;
+    //dude.acceleration.y = 0;
+    dude.acceleration.z = 0;
 
-      dude.resting.x = true;
-      dude.resting.y = true;
-      //dude.velocity.y = 0;
-      dude.resting.z = true;
+    dude.resting.x = true;
+    dude.resting.y = true;
+    //dude.velocity.y = 0;
+    dude.resting.z = true;
 
-      // dude.friction.x = 1;
-      // dude.friction.y = 1;
-      // dude.friction.z = 1;
-      var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+    // dude.friction.x = 1;
+    // dude.friction.y = 1;
+    // dude.friction.z = 1;
+    var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
 
-      dude.moveTo(something);
-      //console.log(intersects[0].distance)
-      onTop = true;
-      return;
-    }
+    dude.moveTo(something);
+    //console.log(intersects[0].distance)
+    onTop = true;
+    return;
+  }
 
-    onTop = false;
+  onTop = false;
 }
 
-function isHit(){
+function isHit() {
   var rays = [
     new game.THREE.Vector3(1, 0, 0),
     new game.THREE.Vector3(-1, 0, 0),
@@ -338,27 +333,27 @@ function isHit(){
   var mY = new game.THREE.Matrix4().makeRotationY(dude.yaw.rotation.y);
 
   var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y, dude.yaw.position.z);
-/*
-  function check(el){
-    rayCaster.ray.set(dudePos, el);
-    var intersects = rayCaster.intersectObjects(colliObjs);
-    return (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5)
-  }
+  /*
+    function check(el){
+      rayCaster.ray.set(dudePos, el);
+      var intersects = rayCaster.intersectObjects(colliObjs);
+      return (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5)
+    }
 
-  //omg the first time i use some in my project!!!!
-  //functional programming :D
-  //
-  //need the return cause there's one layer more to come out of the isHit function :)
-  return rays.some(check);
-*/
-  for(var i = 0; i < rays.length; i++){
+    //omg the first time i use some in my project!!!!
+    //functional programming :D
+    //
+    //need the return cause there's one layer more to come out of the isHit function :)
+    return rays.some(check);
+  */
+  for (var i = 0; i < rays.length; i++) {
     var ray = rays[i];
     ray.applyMatrix4(mY);
 
     rayCaster.ray.set(dudePos, ray);
     var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0){
-     if( (i === 0 || i === 1 && intersects[0].distance < 0.5 )|| (i === 2 || i === 3 && intersects[0].distance < 0.5)) {
+    if (intersects.length > 0) {
+      if ((i === 0 || i === 1 && intersects[0].distance < 0.5) || (i === 2 || i === 3 && intersects[0].distance < 0.5)) {
 
         // window.lol = intersects[0];
 
@@ -371,9 +366,9 @@ function isHit(){
         // dude.friction.x = 1;
         // dude.friction.z = 1;
         var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
-        if(i === 0 || i === 1){
+        if (i === 0 || i === 1) {
           something.add(ray.setLength(0.4).negate());
-        }else{
+        } else {
           something.add(ray.setLength(0.4).negate());
         }
 
@@ -385,8 +380,8 @@ function isHit(){
   }
 }
 
-window.onkeydown = function(e){
-  if(e.which === 32 && jumpable /*&& onTop*/){
+window.onkeydown = function (e) {
+  if (e.which === 32 && jumpable /*&& onTop*/ ) {
     //console.log(':(')
     e.preventDefault();
     dude.resting.y = false;
@@ -395,7 +390,6 @@ window.onkeydown = function(e){
     //console.log(':(')
   }
 }
-
 
 // var mouse = new game.THREE.Vector2();
 // var INTERSECTED;
@@ -407,7 +401,6 @@ window.onkeydown = function(e){
 //   //console.log(mouse.x, mouse.y);
 // }
 // document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
 
 // function isSelect(){
 //   rayCaster.setFromCamera( mouse, game.camera );
@@ -436,9 +429,9 @@ window.onkeydown = function(e){
 //   }
 // }
 
-  /*
-  interaction!
-   */
+/*
+interaction!
+ */
 // var createSelect = require('voxel-select');
 //var selector = createSelect(game);
 
@@ -449,18 +442,21 @@ var hl = highlight(game, {
 
 hl.on('highlight', function (_voxelPos) {
   //if(shiftIsDown){
-    voxelPos = _voxelPos;
-    //console.log(_voxelPos);
+  voxelPos = _voxelPos;
+  //console.log(_voxelPos);
   //}
 });
 
-game.on('fire', function(){
+game.on('fire', function () {
   startPosition = voxelPos;
-  console.log('start from here!' , startPosition[0] , startPosition[1], startPosition[2]);
+  console.log('start from here!', startPosition[0], startPosition[1], startPosition[2]);
   //$("body").trigger({type: 'keypress', which: 27, keyCode: 27});
   var keyVal = 32;
-  $("body").trigger ( {
-    type: 'keypress', keyCode: keyVal, which: keyVal, charCode: keyVal
+  $("body").trigger({
+    type: 'keypress',
+    keyCode: keyVal,
+    which: keyVal,
+    charCode: keyVal
   });
 
   var press = jQuery.Event("keypress");
@@ -478,33 +474,36 @@ message.innerHTML = 'Double Click to play';
 //   welcome.style.visibility = 'hidden';
 // }
 var jumpable = true;
-game.interact.on('attain', function() {
+game.interact.on('attain', function () {
   //welcome.style.visibility = 'hidden';
   jumpable = true;
 })
-game.interact.on('release', function() {
+game.interact.on('release', function () {
   jumpable = false;
   // console.log('ouch1')
   // welcome.style.visibility = 'visible';
 })
 
-window.onkeydown = function(e){
-  if(e.which === 66){
+window.onkeydown = function (e) {
+    if (e.which === 66) {
 
-    var keyVal = 32;
-    $("#container").trigger ( {
-      type: 'keypress', keyCode: keyVal, which: keyVal, charCode: keyVal
-    });
+      var keyVal = 32;
+      $("#container").trigger({
+        type: 'keypress',
+        keyCode: keyVal,
+        which: keyVal,
+        charCode: keyVal
+      });
 
-    var press = jQuery.Event("keypress");
-    press.ctrlKey = false;
-    press.which = 32;
-    $("#container").trigger(press);
+      var press = jQuery.Event("keypress");
+      press.ctrlKey = false;
+      press.which = 32;
+      $("#container").trigger(press);
+    }
   }
-}
-/*
-eval!
- */
+  /*
+  eval!
+   */
 var editor = require('./editor.js').editor;
 var consoleLog = require('./editor.js').consoleLog;
 var editing = require('./editor.js').editing;
@@ -528,7 +527,7 @@ var wrapGenerator = require('./parse.js').wrapGenerator;
 function parse(str, arr) {
 
   try {
-     //console.log(str, arr)
+    //console.log(str, arr)
     // geos[clickTimes+''] = new game.THREE.Geometry();
     // geos[clickTimes+''].verticesNeedUpdate = true;
     // var material = new game.THREE.MeshNormalMaterial();
@@ -550,25 +549,23 @@ function parse(str, arr) {
     return;
   }
 
-
-  try{
+  try {
     runGenerator(call);
-  }catch(ಠoಠ){
+  } catch (ಠoಠ) {
     console.log(ಠoಠ);
     consoleLog.insert(ಠoಠ.toString());
     return;
   }
 
   codes.push(str);
-  clickTimes ++;
+  clickTimes++;
 
 }
 
-function addThingAndHighlight(clickTimes, pos, lineNum, x, y, z, size){
+function addThingAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
   addThing(clickTimes, pos, x, y, z, size);
   highlightLine(lineNum);
 }
-
 
 /*
 editor
@@ -576,20 +573,20 @@ editor
 var addMarkerRange = require('./editor.js').addMarkerRange;
 var marker = null;
 
-function highlightLine(lineNum){
+function highlightLine(lineNum) {
   //console.log('line index ' + lineNum);
   removeMarker();
   marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
 }
 
-function removeMarker(){
-  if(marker){
+function removeMarker() {
+  if (marker) {
     editor.session.removeMarker(marker);
     marker = null;
   }
 }
 
-editor.on('focus', function(){
+editor.on('focus', function () {
   editing = true;
   removeMarker();
 });
@@ -610,13 +607,13 @@ var pause = false;
 
 function runGenerator(generator) {
   //console.log(generator)
-  if(pause){
+  if (pause) {
     return;
   }
 
   var ret = generator.next();
 
-  if(ret.done) {
+  if (ret.done) {
     evaled = false;
     begintToCount = 0;
     editor.session.removeMarker(marker);
@@ -626,31 +623,30 @@ function runGenerator(generator) {
   //console.log(ret.value);
 }
 
-
 /*
 slider
  */
 var mySlider = $('#sliderr').slider({
-  formatter: function(value) {
+  formatter: function (value) {
     return 'Current value: ' + value;
   }
 });
 
-mySlider.on('slide', function(e){
+mySlider.on('slide', function (e) {
   //console.log(e.value);
   interval = e.value;
 });
 
-document.getElementById('pause').onclick = function(){
+document.getElementById('pause').onclick = function () {
   pause = !pause;
-  if(pause){
+  if (pause) {
     document.getElementById('pause').innerHTML = 'Continue';
-  }else{
+  } else {
     document.getElementById('pause').innerHTML = 'Pause';
   }
 }
 
-document.getElementById('reset').onclick = function(){
+document.getElementById('reset').onclick = function () {
   var id = clickTimes - 1;
   call = null;
   destory(id);
@@ -661,48 +657,45 @@ tutorial
  */
 var init = require('./tutorial.js').init;
 init(removeMarker);
-
-
-
 },{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
-function wrapGenerator(lines, str){
+function wrapGenerator(lines, str) {
 
   var fnNames = functionDetection(str);
 
   var result = '';
 
-  lines.forEach(function(l, index){
-     l = l.replace(/addThing\s*\(/g, 'yield addThingAndHighlight(num, pos, ' + index + ', ');
-     l = functionReplace(l, index, fnNames);
-     result += (l + '\n');
+  lines.forEach(function (l, index) {
+    l = l.replace(/addThing\s*\(/g, 'yield addThingAndHighlight(num, pos, ' + index + ', ');
+    if (fnNames !== null) l = functionReplace(l, index, fnNames);
+    result += (l + '\n');
   });
 
- //to match function*  addTree(x, y, z, counter){
- //var fnRe = /function\*\s+[^\(\)]\s*\([^\(\)]\)\s*\{/g;
+  //to match function*  addTree(x, y, z, counter){
+  //var fnRe = /function\*\s+[^\(\)]\s*\([^\(\)]\)\s*\{/g;
   var fnRe = /function\*\s+.*?\(.*?\)\s*\{/g;
   var lll = result.match(fnRe);
-  if(lll.length){
-    lll.forEach(function(m){
+  if (lll !== null) {
+    lll.forEach(function (m) {
       result = result.replace(m, m + '\n' + 'yield highlightLine(lineNum);\n');
     })
   }
 
-  result = 'function* wwwaaattt(num, pos){\n' + result +'\n}';
+  result = 'function* wwwaaattt(num, pos){\n' + result + '\n}';
   return result;
 
 }
 
-function functionReplace(l, index, fnNames){
+function functionReplace(l, index, fnNames) {
 
-  fnNames.forEach(function(fnName){
+  fnNames.forEach(function (fnName) {
     //function declaration
-    var re1 = new RegExp('function\\s*' + fnName +'\\s*\\(', 'g');
+    var re1 = new RegExp('function\\s*' + fnName + '\\s*\\(', 'g');
     //function calling
     var re2 = new RegExp(fnName + '\\s*\\(', 'g');
 
-    if(l.match(re1)!== null){
-      l = l.replace(re1, 'function* '+ fnName + '(lineNum, ');
-    }else{
+    if (l.match(re1) !== null) {
+      l = l.replace(re1, 'function* ' + fnName + '(lineNum, ');
+    } else {
       l = l.replace(re2, 'yield* ' + fnName + '(' + index + ' ,');
     }
 
@@ -712,7 +705,7 @@ function functionReplace(l, index, fnNames){
 
 }
 
-function functionDetection(str){
+function functionDetection(str) {
   // var copy = str;
   var fnNames = [];
   var functionReG = /function\s+(\S*)\s*\((.*?)\)\s*\{/g;
@@ -720,10 +713,10 @@ function functionDetection(str){
 
   var res1 = str.match(functionReG);
   //console.log(res)
-  if(res1 !== null){
+  if (res1 !== null) {
     // console.log('ah');
     // console.log(res);
-    res1.forEach(function(m){
+    res1.forEach(function (m) {
       var temp = m.split(/function\s+/);
       var temp2 = temp[1].split('(');
       var fnName = temp2[0];
@@ -733,10 +726,10 @@ function functionDetection(str){
   }
 
   var res2 = str.match(varFunctionReG);
-  if(res2 !== null){
+  if (res2 !== null) {
     // console.log('ha');
     // console.log(res1);
-    res2.forEach(function(m){
+    res2.forEach(function (m) {
       var temp = m.split(/\s*=/);
       var temp2 = temp[0].split(/var\s+/);
       var fnName = temp2[1];
@@ -922,7 +915,7 @@ var showcases = [
     ' addTree(x + 1, y + 1, z + 1, c);',
     '}',
     '',
-    'addTree(0,0,0,0);'
+    'addTree(0, 0, 0, 0);'
   ],
 
   [
@@ -26059,7 +26052,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -26102,7 +26095,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",

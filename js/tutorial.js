@@ -168,7 +168,7 @@ var showcases = [
     ' addTree(x + 1, y + 1, z + 1, c);',
     '}',
     '',
-    'addTree(0,0,0,0);'
+    'addTree(0, 0, 0, 0);'
   ],
 
   [
