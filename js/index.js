@@ -25,13 +25,8 @@ var copy;
 var evaled = false;
 var code = '';
 
-/*
-set up game
- */
-require('./game.js');
-
-//create dude
-require('./dude.js');
+var game = require('./game.js');
+var sky = require('./sky.js');
 
 /*
 interaction
@@ -40,13 +35,6 @@ var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
 message.innerHTML = 'Double Click to play';
 
-var jumpable = true;
-en.game.interact.on('attain', function () {
-  jumpable = true;
-});
-en.game.interact.on('release', function () {
-  jumpable = false;
-});
 require('./select.js')();
 
 /*
@@ -55,13 +43,13 @@ the api for end-user
 function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
-  var mesh = new en.game.THREE.Mesh(
-    new en.game.THREE.CubeGeometry(size, size, size), // width, height, depth
-    en.game.materials.material
+  var mesh = new game.THREE.Mesh(
+    new game.THREE.CubeGeometry(size, size, size), // width, height, depth
+    game.materials.material
   )
 
   // paint the mesh with a specific texture in the atlas
-  en.game.materials.paint(mesh, myMaterial[en.materialIndex]);
+  game.materials.paint(mesh, myMaterial[en.materialIndex]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -71,7 +59,7 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   mesh.name = _clickTimes;
   en.colliObjs.push(mesh);
 
-  var item = en.game.addItem({
+  var item = game.addItem({
     mesh: mesh,
     size: 1,
     velocity: {
@@ -83,23 +71,24 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   item.name = _clickTimes;
 
   // //myItem is for destorying things
-  myItems.push(item);
+  if (myItems[clickTimes] === undefined) myItems[clickTimes] = [];
+  myItems[clickTimes].push(item);
 
   return [_x, _y, _z];
 }
 
 function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  var ppos = addBlock(clickTimes, pos, x, y, z, size);
-  highlightLine(lineNum, true, ppos);
+  var _pos = addBlock(clickTimes, pos, x, y, z, size);
+  highlightLine(lineNum, true, _pos);
 }
 
 /*
 animation
  */
 var isOnTop = require('./collisionDetection.js').isOnTop;
-en.game.on('tick', function (delta) {
+game.on('tick', function (delta) {
   frameCount++;
-  en.sky(delta);
+  sky(delta);
 
   if (frameCount !== 0 && frameCount % 2 === 0) {
 
@@ -126,6 +115,16 @@ en.game.on('tick', function (delta) {
   }
 
 });
+
+//TODO: fix the logic later
+/*
+function destory() {
+  en.pause = true;
+  myItems[clickTimes].forEach(function (item) {
+    game.removeItem(item);
+  });
+}
+*/
 
 /*
 eval

@@ -1,8 +1,9 @@
-var highlight = require('voxel-highlight');
 var en = require('./global.js');
+var highlight = require('voxel-highlight');
+var game = require('./game.js');
 
 module.exports = function () {
-  var hl = highlight(en.game, {
+  var hl = highlight(game, {
     color: 0xffffff
   });
 
@@ -10,13 +11,13 @@ module.exports = function () {
     en.startPosition = _voxelPos;
   });
 
-  en.game.on('fire', function () {
+  game.on('fire', function () {
     console.log('start from here!', en.startPosition[0], en.startPosition[1], en.startPosition[2]);
     var esc = $.Event("keydown", {
       which: 27
     });
     $("body").trigger(esc);
-    en.game.interact.emit('release');
+    game.interact.emit('release');
   });
 
 }

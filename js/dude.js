@@ -1,28 +1,30 @@
 var en = require('./global.js');
-var createPlayer = require('voxel-player')(en.game);
-var skin = require('minecraft-skin');
+var game = require('./game.js');
+var createPlayer = require('voxel-player')(game);
 
-en.dude = createPlayer('textures/dude.png');
-en.dude.possess();
+dude = createPlayer('textures/dude.png');
+dude.possess();
 //jump from sky
 var jumpFromSky = 40;
-en.dude.yaw.position.set(0, jumpFromSky, 0);
-en.dude.jumpable = true;
+dude.yaw.position.set(0, jumpFromSky, 0);
+dude.jumpable = true;
 
 window.onkeydown = function (e) {
   if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
-    en.dude.toggle();
+    dude.toggle();
   }
-  if (e.which === 32 && en.dude.jumpable /*&& onTop*/ ) {
+  if (e.which === 32 && dude.jumpable /*&& onTop*/ ) {
     e.preventDefault();
-    en.dude.resting.y = false;
-    en.dude.velocity.y = 0.014;
+    dude.resting.y = false;
+    dude.velocity.y = 0.014;
   }
 }
 
-en.game.interact.on('attain', function () {
-  en.dude.jumpable = true;
+game.interact.on('attain', function () {
+  dude.jumpable = true;
 });
-en.game.interact.on('release', function () {
-  en.dude.jumpable = false;
+game.interact.on('release', function () {
+  dude.jumpable = false;
 });
+
+module.exports = dude;

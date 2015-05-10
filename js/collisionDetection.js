@@ -1,17 +1,19 @@
 var en = require('./global.js');
-var rayCaster = new en.game.THREE.Raycaster();
+var game = require('./game.js');
+var dude = require('./dude.js');
+var rayCaster = new game.THREE.Raycaster();
 
 exports.isOnTop = function (dt) {
   //get user direction!!
-  var ray = new en.game.THREE.Vector3(0, -1, 0);
+  var ray = new game.THREE.Vector3(0, -1, 0);
 
   var acceleration = {};
   var velocity = {};
   var friction = {};
   var desired = {};
-  acceleration.y = en.dude.acceleration.y;
-  velocity.y = en.dude.velocity.y;
-  friction.y = en.dude.friction.y;
+  acceleration.y = dude.acceleration.y;
+  velocity.y = dude.velocity.y;
+  friction.y = dude.friction.y;
 
   acceleration.y /= 8 * dt;
   //acceleration.z += TOTAL_FORCES.z * dt
@@ -26,24 +28,24 @@ exports.isOnTop = function (dt) {
     desired.y = (velocity.y / Math.abs(velocity.y)) * 0.1;
   }
 
-  var dudeNextPos = new en.game.THREE.Vector3(en.dude.yaw.position.x, en.dude.yaw.position.y + desired.y + 0.5, en.dude.yaw.position.z);
+  var dudeNextPos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + desired.y + 0.5, dude.yaw.position.z);
   rayCaster.ray.set(dudeNextPos, ray);
   var intersects = rayCaster.intersectObjects(en.colliObjs);
 
   if (intersects.length > 0 && intersects[0].distance < 0.5 + desired.y /*&& intersects[0].distance > 0.5*/ ) {
 
-    en.dude.acceleration.x = 0;
-    //en.dude.acceleration.y = 0;
-    en.dude.acceleration.z = 0;
+    dude.acceleration.x = 0;
+    //dude.acceleration.y = 0;
+    dude.acceleration.z = 0;
 
-    en.dude.resting.x = true;
-    en.dude.resting.y = true;
-    //en.dude.velocity.y = 0;
-    en.dude.resting.z = true;
+    dude.resting.x = true;
+    dude.resting.y = true;
+    //dude.velocity.y = 0;
+    dude.resting.z = true;
 
-    var something = new en.game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+    var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
 
-    en.dude.moveTo(something);
+    dude.moveTo(something);
     //console.log(intersects[0].distance)
     return;
   }
@@ -51,16 +53,16 @@ exports.isOnTop = function (dt) {
 
 exports.isHit = function () {
   var rays = [
-    new en.game.THREE.Vector3(1, 0, 0),
-    new en.game.THREE.Vector3(-1, 0, 0),
+    new game.THREE.Vector3(1, 0, 0),
+    new game.THREE.Vector3(-1, 0, 0),
     // new game.THREE.Vector3(0, 1, 0)
-    new en.game.THREE.Vector3(0, 0, 1),
-    new en.game.THREE.Vector3(0, 0, -1)
+    new game.THREE.Vector3(0, 0, 1),
+    new game.THREE.Vector3(0, 0, -1)
   ]
 
-  var mY = new en.game.THREE.Matrix4().makeRotationY(en.dude.yaw.rotation.y);
+  var mY = new game.THREE.Matrix4().makeRotationY(dude.yaw.rotation.y);
 
-  var dudePos = new en.game.THREE.Vector3(en.dude.yaw.position.x, en.dude.yaw.position.y, en.dude.yaw.position.z);
+  var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y, dude.yaw.position.z);
   /*
     function check(el){
       rayCaster.ray.set(dudePos, el);
@@ -85,20 +87,20 @@ exports.isHit = function () {
 
         // window.lol = intersects[0];
 
-        en.dude.acceleration.x = 0;
-        en.dude.acceleration.z = 0;
+        dude.acceleration.x = 0;
+        dude.acceleration.z = 0;
 
-        en.dude.resting.x = true;
-        en.dude.resting.z = true;
+        dude.resting.x = true;
+        dude.resting.z = true;
 
-        var something = new en.game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+        var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
         if (i === 0 || i === 1) {
           something.add(ray.setLength(0.4).negate());
         } else {
           something.add(ray.setLength(0.4).negate());
         }
 
-        en.dude.moveTo(something);
+        dude.moveTo(something);
         return;
       }
     }
