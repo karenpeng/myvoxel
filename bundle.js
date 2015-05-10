@@ -1,4 +1,104 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js":[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/karen/Documents/my_project/myvoxel/js/api.js":[function(require,module,exports){
+var en = require('./global.js');
+var game = require('./game.js');
+var highlightLine = require('./editor.js').highlightLine;
+
+var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
+/*
+the api for end-user
+ */
+function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
+  // create a mesh and use the internal game material (texture atlas)
+  var size = _size || 1;
+  var mesh = new game.THREE.Mesh(
+    new game.THREE.CubeGeometry(size, size, size), // width, height, depth
+    game.materials.material
+  )
+
+  // paint the mesh with a specific texture in the atlas
+  game.materials.paint(mesh, myMaterial[en.materialIndex]);
+
+  var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
+  var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
+  var z = _z + pos[2] + 0.5 || pos[2] + 0.5;
+
+  mesh.position.set(x, y, z);
+  mesh.name = _clickTimes;
+  en.colliObjs.push(mesh);
+
+  var item = game.addItem({
+    mesh: mesh,
+    size: 1,
+    velocity: {
+      x: 0,
+      y: 0,
+      z: 0
+    } // initial velocity
+  }, false)
+  item.name = _clickTimes;
+
+  // //myItem is for destorying things
+  // if (myItems[clickTimes] === undefined) myItems[clickTimes] = [];
+  // myItems[clickTimes].push(item);
+
+  return [_x, _y, _z];
+}
+
+function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
+  var _pos = addBlock(clickTimes, pos, x, y, z, size);
+  highlightLine(lineNum, true, _pos);
+}
+
+module.exports = {
+  addBlock: addBlock,
+  addBlockAndHighlight: addBlockAndHighlight
+}
+},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/button.js":[function(require,module,exports){
+var en = require('./global.js');
+var editor = require('./editor.js').editor;
+var run = require('./run.js').run;
+
+document.getElementById('run').onclick = function () {
+  en.evaled = false;
+  run(editor.getValue(), editor.session.doc.getAllLines());
+};
+
+document.getElementById('pause').onclick = function () {
+  en.pause = !en.pause;
+  if (en.pause) {
+    document.getElementById('pause').innerHTML = 'Continue';
+  } else {
+    document.getElementById('pause').innerHTML = 'Pause';
+  }
+};
+
+document.getElementById('save').onclick = function () {
+  $.ajax({
+    url: '/upload',
+    method: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    data: JSON.stringify({
+      code: editor.getValue()
+    }),
+    error: function (err) {
+      console.error(err);
+    },
+    success: function () {
+      console.log('(•ω•)');
+    }
+  });
+};
+
+//TODO: fix the logic later
+/*
+function destory() {
+  en.pause = true;
+  myItems[clickTimes].forEach(function (item) {
+    game.removeItem(item);
+  });
+}
+*/
+},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./run.js":"/Users/karen/Documents/my_project/myvoxel/js/run.js"}],"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js":[function(require,module,exports){
 var en = require('./global.js');
 var game = require('./game.js');
 var dude = require('./dude.js');
@@ -271,98 +371,44 @@ module.exports = {
   interval: 10,
   pause: false,
   marker: null,
-  editing: false
+  editing: false,
+  evaled: false,
+  clickTimes: 0,
+  call: null,
+  beginToCount: 0,
+  code: ''
 
 }
 },{}],"/Users/karen/Documents/my_project/myvoxel/js/index.js":[function(require,module,exports){
 var en = require('./global.js');
+require('./welcome.js');
 
-var wrapGenerator = require('./parse.js').wrapGenerator;
 var editor = require('./editor').editor;
 var consoleLog = require('./editor').consoleLog;
 var addMarkerRange = require('./editor.js').addMarkerRange;
-var removeMarker = require('./editor.js').removeMarker;
-var highlightLine = require('./editor.js').highlightLine;
 var runGenerator = require('./generator.js');
+var recover = require('./run.js').recover;
+var removeMarker = require('./editor.js').removeMarker;
 
-require('./toolbar.js')();
-require('./slider.js')();
+require('./toolbar.js');
+require('./slider.js');
+require('./button.js');
 var init = require('./tutorial.js').init;
 init(removeMarker);
 
-var clickTimes = 0;
-var myItems = [];
-var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
+// var myItems = [];
 
 var theta = 0;
-var begintToCount = 0;
 var frameCount = 0;
-var call;
-var copy;
-var evaled = false;
-var code = '';
 
 var game = require('./game.js');
 var sky = require('./sky.js');
-
-/*
-interaction
- */
-var welcome = document.getElementById('welcome');
-var message = document.querySelector('#middleMessage');
-message.innerHTML = 'Double Click to play';
-
-require('./select.js')();
-
-/*
-the api for end-user
- */
-function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
-  // create a mesh and use the internal game material (texture atlas)
-  var size = _size || 1;
-  var mesh = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(size, size, size), // width, height, depth
-    game.materials.material
-  )
-
-  // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[en.materialIndex]);
-
-  var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
-  var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
-  var z = _z + pos[2] + 0.5 || pos[2] + 0.5;
-
-  mesh.position.set(x, y, z);
-  mesh.name = _clickTimes;
-  en.colliObjs.push(mesh);
-
-  var item = game.addItem({
-    mesh: mesh,
-    size: 1,
-    velocity: {
-      x: 0,
-      y: 0,
-      z: 0
-    } // initial velocity
-  }, false)
-  item.name = _clickTimes;
-
-  // //myItem is for destorying things
-  if (myItems[clickTimes] === undefined) myItems[clickTimes] = [];
-  myItems[clickTimes].push(item);
-
-  return [_x, _y, _z];
-}
-
-function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  var _pos = addBlock(clickTimes, pos, x, y, z, size);
-  highlightLine(lineNum, true, _pos);
-}
+require('./select.js');
+var isOnTop = require('./collisionDetection.js').isOnTop;
 
 /*
 animation
  */
-var isOnTop = require('./collisionDetection.js').isOnTop;
 game.on('tick', function (delta) {
   frameCount++;
   sky(delta);
@@ -371,9 +417,9 @@ game.on('tick', function (delta) {
 
     theta += (delta / 16);
 
-    if (begintToCount % en.interval === 0 && evaled) {
+    if (en.beginToCount % en.interval === 0 && en.evaled) {
       try {
-        runGenerator(call, recover);
+        runGenerator(en.call, recover);
       } catch (e) {
         console.log(e);
         consoleLog.insert(e.toString());
@@ -381,8 +427,8 @@ game.on('tick', function (delta) {
       }
     }
 
-    if (evaled) {
-      begintToCount += (delta / 16);
+    if (en.evaled) {
+      en.beginToCount += (delta / 16);
     }
 
     if (en.colliObjs.length) {
@@ -392,63 +438,7 @@ game.on('tick', function (delta) {
   }
 
 });
-
-//TODO: fix the logic later
-/*
-function destory() {
-  en.pause = true;
-  myItems[clickTimes].forEach(function (item) {
-    game.removeItem(item);
-  });
-}
-*/
-
-/*
-eval
- */
-document.getElementById('run').onclick = function () {
-  evaled = false;
-  parse(editor.getValue(), editor.session.doc.getAllLines());
-}
-
-function parse(str, arr) {
-
-  try {
-    var str2 = wrapGenerator(arr, str);
-    console.log(str2);
-    eval(str2);
-    call = wwwaaattt(clickTimes, en.startPosition);
-    evaled = true;
-  } catch (e) {
-    console.log(e);
-    consoleLog.insert(e.toString());
-    return;
-  }
-
-  code = str;
-
-  try {
-    runGenerator(call, recover);
-  } catch (e) {
-    console.log(e);
-    consoleLog.insert(ಠoಠ.toString());
-    code = '';
-    return;
-  }
-
-  clickTimes++;
-
-}
-
-function recover() {
-  evaled = false;
-  begintToCount = 0;
-  removeMarker();
-  editor.setValue(code);
-  editor.clearSelection();
-  code = '';
-}
-},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./sky.js":"/Users/karen/Documents/my_project/myvoxel/js/sky.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+},{"./button.js":"/Users/karen/Documents/my_project/myvoxel/js/button.js","./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./run.js":"/Users/karen/Documents/my_project/myvoxel/js/run.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./sky.js":"/Users/karen/Documents/my_project/myvoxel/js/sky.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","./welcome.js":"/Users/karen/Documents/my_project/myvoxel/js/welcome.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function wrapGenerator(lines, str) {
 
   var fnNames = functionDetection(str);
@@ -540,30 +530,71 @@ module.exports = {
   wrapGenerator: wrapGenerator,
   getNewContent: getNewContent
 }
-},{}],"/Users/karen/Documents/my_project/myvoxel/js/select.js":[function(require,module,exports){
+},{}],"/Users/karen/Documents/my_project/myvoxel/js/run.js":[function(require,module,exports){
+var en = require('./global.js');
+var consoleLog = require('./editor').consoleLog;
+var wrapGenerator = require('./parse.js').wrapGenerator;
+var runGenerator = require('./generator.js');
+var removeMarker = require('./editor.js').removeMarker;
+var addBlock = require('./api.js').addBlock;
+var addBlockAndHighlight = require('./api.js').addBlockAndHighlight;
+var highlightLine = require('./editor.js').highlightLine;
+
+exports.run = function (str, arr) {
+  try {
+    var str2 = wrapGenerator(arr, str);
+    console.log(str2);
+    eval(str2);
+    en.call = wwwaaattt(en.clickTimes, en.startPosition);
+    en.evaled = true;
+  } catch (e) {
+    console.log(e);
+    consoleLog.insert(e.toString());
+    return;
+  }
+
+  en.code = str;
+
+  try {
+    runGenerator(en.call, exports.recover);
+  } catch (e) {
+    console.log(e);
+    consoleLog.insert(e.toString());
+    return;
+  }
+
+  en.clickTimes++;
+}
+
+exports.recover = function () {
+  en.evaled = false;
+  en.beginToCount = 0;
+  removeMarker();
+  editor.setValue(en.code);
+  editor.clearSelection();
+  en.code = '';
+}
+},{"./api.js":"/Users/karen/Documents/my_project/myvoxel/js/api.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js"}],"/Users/karen/Documents/my_project/myvoxel/js/select.js":[function(require,module,exports){
 var en = require('./global.js');
 var highlight = require('voxel-highlight');
 var game = require('./game.js');
 
-module.exports = function () {
-  var hl = highlight(game, {
-    color: 0xffffff
-  });
+var hl = highlight(game, {
+  color: 0xffffff
+});
 
-  hl.on('highlight', function (_voxelPos) {
-    en.startPosition = _voxelPos;
-  });
+hl.on('highlight', function (_voxelPos) {
+  en.startPosition = _voxelPos;
+});
 
-  game.on('fire', function () {
-    console.log('start from here!', en.startPosition[0], en.startPosition[1], en.startPosition[2]);
-    var esc = $.Event("keydown", {
-      which: 27
-    });
-    $("body").trigger(esc);
-    game.interact.emit('release');
+game.on('fire', function () {
+  console.log('start from here!', en.startPosition[0], en.startPosition[1], en.startPosition[2]);
+  var esc = $.Event("keydown", {
+    which: 27
   });
-
-}
+  $("body").trigger(esc);
+  game.interact.emit('release');
+});
 },{"./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/sky.js":[function(require,module,exports){
 var game = require('./game.js');
 var createSky = require('voxel-sky')(game);
@@ -571,44 +602,29 @@ module.exports = createSky();
 },{"./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/slider.js":[function(require,module,exports){
 var en = require('./global.js');
 
-module.exports = function () {
-  var mySlider = $('#sliderr').slider({
-    formatter: function (value) {
-      return 'Current value: ' + value;
-    }
-  });
-
-  mySlider.on('slide', function (e) {
-    //console.log(e.value);
-    en.interval = e.value;
-  });
-
-  document.getElementById('pause').onclick = function () {
-    en.pause = !en.pause;
-    if (pause) {
-      document.getElementById('pause').innerHTML = 'Continue';
-    } else {
-      document.getElementById('pause').innerHTML = 'Pause';
-    }
+var mySlider = $('#sliderr').slider({
+  formatter: function (value) {
+    return 'Current value: ' + value;
   }
-}
+});
+
+mySlider.on('slide', function (e) {
+  //console.log(e.value);
+  en.interval = e.value;
+});
 },{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js":[function(require,module,exports){
 var en = require('./global.js');
 
-module.exports = function () {
+$('.pic').click(function () {
+  var id = $(this).attr('id');
+  var i = id.replace('material', '');
+  en.materialIndex = i;
+  $(this).css('border', "5px ridge #ddd");
+  //console.log($(this).siblings())
+  $('.pic').not(this).css('border', "5px ridge #999");
+});
 
-  $('.pic').click(function () {
-    var id = $(this).attr('id');
-    var i = id.replace('material', '');
-    en.materialIndex = i;
-    $(this).css('border', "5px ridge #ddd");
-    //console.log($(this).siblings())
-    $('.pic').not(this).css('border', "5px ridge #999");
-  });
-
-  $('#material0').css('border', "5px ridge #ddd");
-
-}
+$('#material0').css('border', "5px ridge #ddd");
 },{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js":[function(require,module,exports){
 var editor = require('./editor.js').editor;
 
@@ -841,7 +857,11 @@ function init(func) {
 module.exports = {
   init: init
 }
-},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js":[function(require,module,exports){
+},{"./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js"}],"/Users/karen/Documents/my_project/myvoxel/js/welcome.js":[function(require,module,exports){
+var welcome = document.getElementById('welcome');
+var message = document.querySelector('#middleMessage');
+message.innerHTML = 'Double Click to play';
+},{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js":[function(require,module,exports){
 /* ***** BEGIN LICENSE BLOCK *****
  * Distributed under the BSD license:
  *
@@ -25561,7 +25581,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25604,7 +25624,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",

@@ -6,6 +6,11 @@ module.exports = {
   interval: 10,
   pause: false,
   marker: null,
-  editing: false
+  editing: false,
+  evaled: false,
+  clickTimes: 0,
+  call: null,
+  beginToCount: 0,
+  code: ''
 
 }
