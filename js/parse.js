@@ -5,7 +5,7 @@ function wrapGenerator(lines, str) {
   var result = '';
 
   lines.forEach(function (l, index) {
-    l = l.replace(/addThing\s*\(/g, 'yield addThingAndHighlight(num, pos, ' + index + ', ');
+    l = l.replace(/addBlock\s*\(/g, 'yield addBlockAndHighlight(num, pos, ' + index + ', ');
     if (fnNames !== null) l = functionReplace(l, index, fnNames);
     result += (l + '\n');
   });

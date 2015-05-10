@@ -58,6 +58,8 @@ var codes = [];
 var colliObjs = [];
 var myItems = [];
 var geos = {};
+var materialIndex = 0;
+var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 window.geos = geos;
 /*
 set up game
@@ -68,11 +70,11 @@ var game = createGame({
   generateChunks: false,
   texturePath: 'textures/',
   materials: [
-    ['grass', 'dirt', 'grass_dirt'], 'brick'
+    ['grass', 'dirt', 'grass_dirt'], 'brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'
     // ,'meow'
   ],
   //materialFlatColor: true,
-  chunkSize: 16,
+  chunkSize: 32,
   chunkDistance: 2,
   worldOrigin: [0, 0, 0],
   controls: {
@@ -86,8 +88,8 @@ game.appendTo(container);
 
 window.game = game; //for debug:)
 
+var chunkSize = 32;
 // initialize your noise with a seed, floor height, ceiling height and scale factor
-var chunkSize = 16;
 var generateChunk = terrain('foo', 0, 5, 100);
 // then hook it up to your game as such:
 game.voxels.on('missingChunk', function (p) {
@@ -124,7 +126,7 @@ var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
 dude.possess();
 //jump from sky
-var jumpFromSky = 50;
+var jumpFromSky = 10;
 dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
@@ -153,7 +155,7 @@ window.myItems = myItems;
 /*
 the api for end-user
  */
-function addThing(_clickTimes, pos, _x, _y, _z, _size) {
+function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   //console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
@@ -164,7 +166,8 @@ function addThing(_clickTimes, pos, _x, _y, _z, _size) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, 'brick');
+  game.materials.paint(mesh, myMaterial[materialIndex]);
+  //game.materials.paint(mesh, 'cobblestone')
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -194,7 +197,7 @@ function addThing(_clickTimes, pos, _x, _y, _z, _size) {
 
   // game.THREE.GeometryUtils.merge(geos[_clickTimes+''], mesh);
 }
-window.addThing = addThing; //for debug
+window.addBlock = addBlock; //for debug
 
 /*
 animation
@@ -380,17 +383,6 @@ function isHit() {
   }
 }
 
-window.onkeydown = function (e) {
-  if (e.which === 32 && jumpable /*&& onTop*/ ) {
-    //console.log(':(')
-    e.preventDefault();
-    dude.resting.y = false;
-    dude.velocity.y = 0.014;
-    //dude.friction.y = 1;
-    //console.log(':(')
-  }
-}
-
 // var mouse = new game.THREE.Vector2();
 // var INTERSECTED;
 
@@ -450,21 +442,35 @@ hl.on('highlight', function (_voxelPos) {
 game.on('fire', function () {
   startPosition = voxelPos;
   console.log('start from here!', startPosition[0], startPosition[1], startPosition[2]);
-  //$("body").trigger({type: 'keypress', which: 27, keyCode: 27});
-  var keyVal = 32;
-  $("body").trigger({
-    type: 'keypress',
-    keyCode: keyVal,
-    which: keyVal,
-    charCode: keyVal
+  var esc = $.Event("keydown", {
+    which: 27
   });
-
-  var press = jQuery.Event("keypress");
-  press.ctrlKey = false;
-  press.which = 32;
-  $("body").trigger(press);
-
+  $("body").trigger(esc);
+  game.interact.emit('release');
 });
+
+// function simulateKeyPress(keycode) {
+//   console.log(':/');
+//   //console.log(jQuery)
+//   jQuery.event.trigger({
+//     type: 'keypress',
+//     which: keycode
+//   });
+// }
+
+// simulateKeyPress(32);
+
+window.onkeydown = function (e) {
+  //console.log(e.which)
+  if (e.which === 32 && jumpable /*&& onTop*/ ) {
+    //console.log(':(')
+    e.preventDefault();
+    dude.resting.y = false;
+    dude.velocity.y = 0.014;
+    //dude.friction.y = 1;
+    //console.log(':(')
+  }
+}
 
 var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
@@ -484,26 +490,27 @@ game.interact.on('release', function () {
   // welcome.style.visibility = 'visible';
 })
 
-window.onkeydown = function (e) {
-    if (e.which === 66) {
+// window.onkeydown = function (e) {
+//     if (e.which === 66) {
 
-      var keyVal = 32;
-      $("#container").trigger({
-        type: 'keypress',
-        keyCode: keyVal,
-        which: keyVal,
-        charCode: keyVal
-      });
+//       var keyVal = 32;
+//       $("#container").trigger({
+//         type: 'keypress',
+//         keyCode: keyVal,
+//         which: keyVal,
+//         charCode: keyVal
+//       });
 
-      var press = jQuery.Event("keypress");
-      press.ctrlKey = false;
-      press.which = 32;
-      $("#container").trigger(press);
-    }
-  }
-  /*
-  eval!
-   */
+//       var press = jQuery.Event("keypress");
+//       press.ctrlKey = false;
+//       press.which = 32;
+//       $("#container").trigger(press);
+//     }
+//   }
+
+/*
+eval!
+ */
 var editor = require('./editor.js').editor;
 var consoleLog = require('./editor.js').consoleLog;
 var editing = require('./editor.js').editing;
@@ -562,10 +569,26 @@ function parse(str, arr) {
 
 }
 
-function addThingAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  addThing(clickTimes, pos, x, y, z, size);
+function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
+  addBlock(clickTimes, pos, x, y, z, size);
   highlightLine(lineNum);
 }
+
+$('.pic').click(function () {
+  var id = $(this).attr('id');
+  var i = id.replace('material', '');
+  materialIndex = i;
+  console.log(materialIndex)
+  $(this).css('border', "5px ridge #ddd");
+  console.log($(this).siblings())
+  $('.pic').not(this).css('border', "5px ridge #999");
+  // for (var j = 0; j < 7; j++) {
+  //   if (i === j) continue;
+  //   document.getElementById('material' + j).style.border = "5px ridge #999";
+  // }
+});
+
+$('#material0').css('border', "5px ridge #ddd");
 
 /*
 editor
@@ -646,11 +669,11 @@ document.getElementById('pause').onclick = function () {
   }
 }
 
-document.getElementById('reset').onclick = function () {
-  var id = clickTimes - 1;
-  call = null;
-  destory(id);
-}
+// document.getElementById('reset').onclick = function () {
+//   var id = clickTimes - 1;
+//   call = null;
+//   destory(id);
+// }
 
 /*
 tutorial
@@ -665,7 +688,7 @@ function wrapGenerator(lines, str) {
   var result = '';
 
   lines.forEach(function (l, index) {
-    l = l.replace(/addThing\s*\(/g, 'yield addThingAndHighlight(num, pos, ' + index + ', ');
+    l = l.replace(/addBlock\s*\(/g, 'yield addBlockAndHighlight(num, pos, ' + index + ', ');
     if (fnNames !== null) l = functionReplace(l, index, fnNames);
     result += (l + '\n');
   });
@@ -765,125 +788,125 @@ var warmup = [
   ''
 ]
 
-var tutorials =[
-[
-  '//1. One Block',
-  '',
-  '//Let\'s start from building one block.',
-  '',
-  '//First, click a place with your mouse.',
-  '//Second, press esc key.',
-  '//Third, use the code below:',
-  'addThing(0, 0, 0);',
-  '//Now, click the "Build" button.',
-  '',
-  '//See the block you create in the world?',
-  '//Congrats!',
-  '',
-  '//The three 0 in the function,',
-  '//represet the x, y, and z position of the block.',
-  '',
-  '//You could select another place,',
-  '//and replace the 0 with different values',
-  '//to see where the block will be.',
-  ''
-],
+var tutorials = [
+  [
+    '//1. One Block',
+    '',
+    '//Let\'s start from building one block.',
+    '',
+    '//First, click a place with your mouse.',
+    '//Second, press esc key.',
+    '//Third, use the code below:',
+    'addBlock(0, 0, 0);',
+    '//Now, click the "Build" button.',
+    '',
+    '//See the block you create in the world?',
+    '//Congrats!',
+    '',
+    '//The three 0 in the function,',
+    '//represet the x, y, and z position of the block.',
+    '',
+    '//You could select another place,',
+    '//and replace the 0 with different values',
+    '//to see where the block will be.',
+    ''
+  ],
 
-[
-  '//2. Line of Blocks',
-  '',
-  '//What if you want to build many blocks?',
-  '//Let\'s use a loop:',
-  '',
-  'for(var i = 0; i < 6; i++){',
-  ' addThing(i, 0, 0);',
-  '}',
-  '',
-  '//Select another place and click "Build".',
-  '',
-  '//i increments from 0 to 5',
-  '//that\'s how you get 5 blocks in a line',
-  '//click "build" to see it in action!',
-  '',
-  '//More information of for loop:',
-  '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for',
-  ''
-],
+  [
+    '//2. Line of Blocks',
+    '',
+    '//What if you want to build many blocks?',
+    '//Let\'s use a loop:',
+    '',
+    'for(var i = 0; i < 6; i++){',
+    ' addBlock(i, 0, 0);',
+    '}',
+    '',
+    '//Select another place and click "Build".',
+    '',
+    '//i increments from 0 to 5',
+    '//that\'s how you get 5 blocks in a line',
+    '//click "build" to see it in action!',
+    '',
+    '//More information of for loop:',
+    '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for',
+    ''
+  ],
 
-[
-  '//3. Wall',
-  '',
-  '//Let\'s build a wall with two loops.',
-  '//Yes loop could be inside a loop.',
-  '//It looks like this:',
-  '',
-  'for(var i = 0; i < 6; i++){',
-  ' for(var j = 0; j < 3; j++){',
-  '  addThing(i, j, 0);',
-  ' }',
-  '}',
-  '',
-  '//Select another place and change the max value of i and j,',
-  '//see what will happen.',
-  '',
-  '//The slider bar below controls the speed',
-  '//of the blocks being created.',
-  '//Smaller the number faster the speed.',
-  ''
-],
+  [
+    '//3. Wall',
+    '',
+    '//Let\'s build a wall with two loops.',
+    '//Yes loop could be inside a loop.',
+    '//It looks like this:',
+    '',
+    'for(var i = 0; i < 6; i++){',
+    ' for(var j = 0; j < 3; j++){',
+    '  addBlock(i, j, 0);',
+    ' }',
+    '}',
+    '',
+    '//Select another place and change the max value of i and j,',
+    '//see what will happen.',
+    '',
+    '//The slider bar below controls the speed',
+    '//of the blocks being created.',
+    '//Smaller the number faster the speed.',
+    ''
+  ],
 
-[
-  '//4. Windows',
-  '',
-  '//It\'s time for making some windows',
-  '//We use something called if statement:',
-  'for(var i = 0; i < 7; i++){',
-  '  if(i % 2 === 0){',
-  '    addThing(i, 0, 0);',
-  '    addThing(i, 2, 0);',
-  '  }else{',
-  '    addThing(i, 0, 0);',
-  '    addThing(i, 1, 0);',
-  '    addThing(i, 2, 0);',
-  '  }',
-  '}',
-  '',
-  '//If statement controls where the code runs.',
-  '//When the condition of the if is satisfied,',
-  '//It runs the code inside the if\'s brackets',
-  '//Otherwise it runs the code inside the else\'s bracket',
-  '',
-  '//Try make different windows!',
-  '',
-  '//More information of if statement:',
-  '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else',
-  ''
-],
+  [
+    '//4. Windows',
+    '',
+    '//It\'s time for making some windows',
+    '//We use something called if statement:',
+    'for(var i = 0; i < 7; i++){',
+    '  if(i % 2 === 0){',
+    '    addBlock(i, 0, 0);',
+    '    addBlock(i, 2, 0);',
+    '  }else{',
+    '    addBlock(i, 0, 0);',
+    '    addBlock(i, 1, 0);',
+    '    addBlock(i, 2, 0);',
+    '  }',
+    '}',
+    '',
+    '//If statement controls where the code runs.',
+    '//When the condition of the if is satisfied,',
+    '//It runs the code inside the if\'s brackets',
+    '//Otherwise it runs the code inside the else\'s bracket',
+    '',
+    '//Try make different windows!',
+    '',
+    '//More information of if statement:',
+    '//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else',
+    ''
+  ],
 
-[
-  '//5. Spiral Stairs',
-  '',
-  '//So far, we\'ve built things in straight lines.',
-  '//How about something in a curve?',
-  '',
-  '//Let\'s have some fun with math.',
-  '//Remember sine and cosine from high school?',
-  '',
-  'for(var i = 0; i< 100; i++){',
-  '  var theta = Math.PI * i / 10;',
-  '  addThing(Math.sin(theta)*5, i*0.4, Math.cos(theta)*5);',
-  '}',
-  '',
-  '//There\'s a lot you could do with it',
-  '//Try build a cylinder!',
-  ''
-]
+  [
+    '//5. Spiral Stairs',
+    '',
+    '//So far, we\'ve built things in straight lines.',
+    '//How about something in a curve?',
+    '',
+    '//Let\'s have some fun with math.',
+    '//Remember sine and cosine from high school?',
+    '',
+    'for(var i = 0; i< 100; i++){',
+    '  var theta = Math.PI * i / 10;',
+    '  addBlock(Math.sin(theta)*5, i*0.4, Math.cos(theta)*5);',
+    '}',
+    '',
+    '//There\'s a lot you could do with it',
+    '//Try build a cylinder!',
+    ''
+  ]
 
 ]
 
 var showcases = [
   [
-    'var step = 20;',
+    'var step = 12;',
     'for (var i = 0; i < step; i ++) {',
     ' for (var j = 0; j < step; j ++) {',
     '   var uv = [i, j];',
@@ -896,7 +919,7 @@ var showcases = [
     '   var x = Math.cos(phil) * Math.sin(theta) * 5;',
     '   var y = Math.sin(phil) * 5;',
     '   var z = Math.cos(phil) * Math.cos(theta) * 5;',
-    '   addThing(x, y + 5, z);',
+    '   addBlock(x, y + 5, z);',
     ' }',
     '}',
     ''
@@ -906,7 +929,7 @@ var showcases = [
   [
     'function addTree(x, y, z, counter){',
     ' if ( counter > 6) return;',
-    ' addThing(x, y, z);',
+    ' addBlock(x, y, z);',
     ' //add root',
     ' var c = counter + 1;',
     ' //add left sub tree',
@@ -921,7 +944,7 @@ var showcases = [
   [
     'var i = 0;',
     'while(true){',
-    '  addThing(i, i, 0);',
+    '  addBlock(i, i, 0);',
     '  i++;',
     '}',
     '',
@@ -932,26 +955,25 @@ var showcases = [
 
 ]
 
-
-function init(func){
+function init(func) {
   //var marker = require('./index.js').marker;
-  tutorials.forEach(function(t, index){
-    document.getElementById(('t' + index)).onclick = function(){
+  tutorials.forEach(function (t, index) {
+    document.getElementById(('t' + index)).onclick = function () {
       func();
       editor.setValue(t.join('\n'));
       editor.clearSelection();
     }
   });
 
-  showcases.forEach(function(s, index){
-    document.getElementById(('s' + index)).onclick = function(){
+  showcases.forEach(function (s, index) {
+    document.getElementById(('s' + index)).onclick = function () {
       func();
       editor.setValue(s.join('\n'));
       editor.clearSelection();
     }
   });
 
-  document.getElementById('welcome').onclick = function(){
+  document.getElementById('welcome').onclick = function () {
     document.getElementById('welcome').style.visibility = 'hidden';
     editor.setValue(warmup.join('\n'));
     editor.clearSelection();
@@ -21007,7 +21029,7 @@ Game.prototype.removeItem = function (item) {
     this.scene.traverse(function (stuff) {
       if (stuff instanceof game.THREE.Mesh) {
         stuff.geometry.dispose()
-        //stuff.material.dispose()
+          //stuff.material.dispose()
       }
       stuff = null
     })
@@ -25077,30 +25099,40 @@ function inherits (c, p, proto) {
 //new Child
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/interact/index.js":[function(require,module,exports){
-var lock = require('pointer-lock')
-  , drag = require('drag-stream')
-  , full = require('fullscreen')
+var lock = require('pointer-lock'),
+  drag = require('drag-stream'),
+  full = require('fullscreen')
 
-var EE = require('events').EventEmitter
-  , Stream = require('stream').Stream
+var EE = require('events').EventEmitter,
+  Stream = require('stream').Stream
 
 module.exports = interact
 
 function interact(el, skiplock) {
-  var ee = new EE
-    , internal
+  var ee = new EE,
+    internal
 
-  if(!lock.available() || skiplock) {
+  if (!lock.available() || skiplock) {
     internal = usedrag(el)
   } else {
     internal = uselock(el, politelydeclined)
   }
 
-  ee.release = function() { internal.release && internal.release() }
-  ee.request = function() { internal.request && internal.request() }
-  ee.destroy = function() { internal.destroy && internal.destroy() }
-  ee.pointerAvailable = function() { return lock.available() }
-  ee.fullscreenAvailable = function() { return full.available() }
+  ee.release = function () {
+    internal.release && internal.release()
+  }
+  ee.request = function () {
+    internal.request && internal.request()
+  }
+  ee.destroy = function () {
+    internal.destroy && internal.destroy()
+  }
+  ee.pointerAvailable = function () {
+    return lock.available()
+  }
+  ee.fullscreenAvailable = function () {
+    return full.available()
+  }
 
   forward()
 
@@ -25114,22 +25146,22 @@ function interact(el, skiplock) {
   }
 
   function forward() {
-    internal.on('attain', function(stream) {
+    internal.on('attain', function (stream) {
       ee.emit('attain', stream)
     })
 
-    internal.on('release', function() {
+    internal.on('release', function () {
       ee.emit('release')
     })
   }
 }
 
 function uselock(el, declined) {
-  var pointer = lock(el)
-    , fs = full(el)
+  var pointer = lock(el),
+    fs = full(el)
 
-  pointer.on('needs-fullscreen', function() {
-    fs.once('attain', function() {
+  pointer.on('needs-fullscreen', function () {
+    fs.once('attain', function () {
       pointer.request()
     })
     fs.request()
@@ -25141,35 +25173,35 @@ function uselock(el, declined) {
 }
 
 function usedrag(el) {
-  var ee = new EE
-    , d = drag(el)
-    , stream
+  var ee = new EE,
+    d = drag(el),
+    stream
 
   d.paused = true
 
-  d.on('resume', function() {
+  d.on('resume', function () {
     stream = new Stream
     stream.readable = true
     stream.initial = null
   })
 
-  d.on('data', function(datum) {
-    if(!stream) {
+  d.on('data', function (datum) {
+    if (!stream) {
       stream = new Stream
       stream.readable = true
       stream.initial = null
     }
 
-    if(!stream.initial) {
+    if (!stream.initial) {
       stream.initial = {
-        x: datum.dx
-      , y: datum.dy
-      , t: datum.dt
+        x: datum.dx,
+        y: datum.dy,
+        t: datum.dt
       }
       return ee.emit('attain', stream)
     }
 
-    if(stream.paused) {
+    if (stream.paused) {
       ee.emit('release')
       stream.emit('end')
       stream.readable = false
@@ -25182,7 +25214,6 @@ function usedrag(el) {
 
   return ee
 }
-
 },{"drag-stream":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/interact/node_modules/drag-stream/index.js","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js","fullscreen":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/interact/node_modules/fullscreen/index.js","pointer-lock":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/interact/node_modules/pointer-lock/index.js","stream":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/stream-browserify/index.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/interact/node_modules/drag-stream/index.js":[function(require,module,exports){
 module.exports = dragstream
 
@@ -26052,7 +26083,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -26095,7 +26126,7 @@ module.exports=module.exports={
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
@@ -67536,19 +67567,21 @@ var tic = require('tic')();
 
 function Sky(opts) {
   var self = this;
-  if (opts.THREE) opts = {game:opts};
-  this.game   = opts.game;
-  this.time   = opts.time  || 1200;
-  this.size   = opts.size  || this.game.worldWidth() * 3;
+  if (opts.THREE) opts = {
+    game: opts
+  };
+  this.game = opts.game;
+  this.time = opts.time || 1900;
+  this.size = opts.size || this.game.worldWidth() * 3;
   this._color = opts.color || new this.game.THREE.Color(0, 0, 0);
   this._speed = opts.speed || 0.1;
 }
 
-module.exports = function(opts) {
+module.exports = function (opts) {
   var sky = new Sky(opts || {});
   sky.createBox();
   sky.createLights();
-  return function(fn) {
+  return function (fn) {
     if (typeof fn === 'function') sky.fn = fn;
     else if (typeof fn === 'number') {
       // move to the specific time of day
@@ -67560,7 +67593,7 @@ module.exports = function(opts) {
 };
 module.exports.Sky = Sky;
 
-Sky.prototype.tick = function(dt) {
+Sky.prototype.tick = function (dt) {
   tic.tick(dt);
   this.fn.call(this, this.time);
   var pos = this.game.cameraPosition();
@@ -67573,7 +67606,7 @@ Sky.prototype.tick = function(dt) {
   return this;
 };
 
-Sky.prototype.createBox = function() {
+Sky.prototype.createBox = function () {
   var game = this.game;
   var size = this.size;
 
@@ -67594,13 +67627,13 @@ Sky.prototype.createBox = function() {
     materials.push(this.createCanvas());
   }
   this.inner = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(size-10, size-10, size-10),
+    new game.THREE.CubeGeometry(size - 10, size - 10, size - 10),
     new game.THREE.MeshFaceMaterial(materials)
   );
   game.scene.add(this.inner);
 };
 
-Sky.prototype.createLights = function() {
+Sky.prototype.createLights = function () {
   var game = this.game;
   this.ambient = new game.THREE.HemisphereLight(0x408CFF, 0xFFC880, 0.6);
   game.scene.add(this.ambient);
@@ -67608,17 +67641,17 @@ Sky.prototype.createLights = function() {
   game.scene.add(this.sunlight);
 };
 
-Sky.prototype.color = function(end, time) {
+Sky.prototype.color = function (end, time) {
   var self = this;
   if (self._colorInterval) self._colorInterval();
   var i = 0;
   var start = self._color.clone().getHSL();
   var color = self._color.clone().getHSL();
-  self._colorInterval = tic.interval(function() {
+  self._colorInterval = tic.interval(function () {
     var dt = i / time;
     for (var p in color) color[p] = start[p] + (end[p] - start[p]) * dt;
     self._color.setHSL(color.h, color.s, color.l);
-    self.outer.material.materials.forEach(function(mat) {
+    self.outer.material.materials.forEach(function (mat) {
       mat.color.setHSL(color.h, color.s, color.l);
     });
     self.ambient.color.setHSL(color.h, color.s, color.l);
@@ -67628,19 +67661,19 @@ Sky.prototype.color = function(end, time) {
   }, self._speed);
 };
 
-Sky.prototype.speed = function(speed) {
+Sky.prototype.speed = function (speed) {
   if (speed != null) this._speed = speed;
   return this._speed;
 };
 
-Sky.prototype.paint = function(faces, fn) {
+Sky.prototype.paint = function (faces, fn) {
   var self = this;
   var args = Array.prototype.slice.call(arguments, 2);
   var index = ['back', 'front', 'top', 'bottom', 'left', 'right'];
   if (faces === 'all') faces = index;
   if (faces === 'sides') faces = ['back', 'front', 'left', 'right'];
   if (!isArray(faces)) faces = [faces];
-  faces.forEach(function(face) {
+  faces.forEach(function (face) {
     if (typeof face === 'string') {
       face = index.indexOf(String(face).toLowerCase());
       if (face === -1) return;
@@ -67654,11 +67687,11 @@ Sky.prototype.paint = function(faces, fn) {
   self.material = self.canvas = self.context = false;
 };
 
-Sky.prototype.sun   = require('./lib/sun.js');
-Sky.prototype.moon  = require('./lib/moon.js');
+Sky.prototype.sun = require('./lib/sun.js');
+Sky.prototype.moon = require('./lib/moon.js');
 Sky.prototype.stars = require('./lib/stars.js');
 
-Sky.prototype.createCanvas = function() {
+Sky.prototype.createCanvas = function () {
   var game = this.game;
 
   var canvas = document.createElement('canvas');
@@ -67679,16 +67712,16 @@ Sky.prototype.createCanvas = function() {
   return material;
 };
 
-Sky.prototype.spin = function(r, axis) {
+Sky.prototype.spin = function (r, axis) {
   axis = axis || 'z';
   this.inner.rotation[axis] = this.outer.rotation[axis] = r;
   this.ambient.rotation[axis] = r + Math.PI;
-  var t = traj(this.size/2, this.ambient.rotation);
+  var t = traj(this.size / 2, this.ambient.rotation);
   this.sunlight.position.set(t[0], t[1], t[2]);
   this.sunlight.lookAt(0, 0, 0);
 };
 
-Sky.prototype.clear = function() {
+Sky.prototype.clear = function () {
   if (!this.canvas) return false;
   this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
@@ -67696,13 +67729,43 @@ Sky.prototype.clear = function() {
 // default sky
 Sky.prototype._default = {
   hours: {
-       0: {color: {h: 230/360, s: 0.3, l: 0.2}},
-     300: {color: {h: 26/360, s: 0.3, l: 0.5}},
-     500: {color: {h: 230/360, s: 0.3, l: 0.7}},
-    1400: {color: {h: 26/360, s: 0.3, l: 0.5}},
-    1600: {color: {h: 230/360, s: 0.3, l: 0.2}}
+    0: {
+      color: {
+        h: 230 / 360,
+        s: 0.3,
+        l: 0.2
+      }
+    },
+    300: {
+      color: {
+        h: 26 / 360,
+        s: 0.3,
+        l: 0.5
+      }
+    },
+    500: {
+      color: {
+        h: 230 / 360,
+        s: 0.3,
+        l: 0.7
+      }
+    },
+    1400: {
+      color: {
+        h: 26 / 360,
+        s: 0.3,
+        l: 0.5
+      }
+    },
+    1600: {
+      color: {
+        h: 230 / 360,
+        s: 0.3,
+        l: 0.2
+      }
+    }
   },
-  init: function() {
+  init: function () {
     // add a sun on the bottom
     this.paint('bottom', this.sun);
     // add some stars
@@ -67719,14 +67782,17 @@ Sky.prototype._default = {
 };
 
 // default sky fn
-Sky.prototype.fn = function(time) {
+Sky.prototype.fn = function (time) {
   var my = this._default;
   var hour = Math.round(time / 100) * 100;
   var speed = Math.abs(my.last - time);
   my.last = time;
 
   // run initialization once
-  if (my.init) { my.init.call(this); delete my.init; }
+  if (my.init) {
+    my.init.call(this);
+    delete my.init;
+  }
 
   // switch color based on time of day
   // maybe make this next part into a helper function
@@ -67747,18 +67813,18 @@ Sky.prototype.fn = function(time) {
 
   // fade stars in and out
   if (time === 500) {
-    this.paint(['top', 'left', 'right', 'front', 'back'], function() {
+    this.paint(['top', 'left', 'right', 'front', 'back'], function () {
       this.material.transparent = true;
-      var i = tic.interval(function(mat) {
+      var i = tic.interval(function (mat) {
         mat.opacity -= 0.1;
         if (mat.opacity <= 0) i();
       }, 100, this.material);
     });
   }
   if (time === 1800) {
-    this.paint(['top', 'left', 'right', 'front', 'back'], function() {
+    this.paint(['top', 'left', 'right', 'front', 'back'], function () {
       this.material.transparent = true;
-      var i = tic.interval(function(mat) {
+      var i = tic.interval(function (mat) {
         mat.opacity += 0.1;
         if (mat.opacity >= 1) i();
       }, 100, this.material);
@@ -67767,8 +67833,8 @@ Sky.prototype.fn = function(time) {
 
   // turn on sunlight
   if (time === 400) {
-    (function(sunlight) {
-      var i = tic.interval(function() {
+    (function (sunlight) {
+      var i = tic.interval(function () {
         sunlight.intensity += 0.1;
         if (sunlight.intensity <= 1) i();
       }, 100);
@@ -67777,8 +67843,8 @@ Sky.prototype.fn = function(time) {
 
   // turn off sunlight
   if (time === 1800) {
-    (function(sunlight) {
-      var i = tic.interval(function() {
+    (function (sunlight) {
+      var i = tic.interval(function () {
         sunlight.intensity -= 0.1;
         if (sunlight.intensity <= 0) i();
       }, 100);
@@ -67792,19 +67858,21 @@ Sky.prototype.fn = function(time) {
   if (time === 2400) my.day++;
 };
 
-Sky.prototype.rgba = function(c, o) {
+Sky.prototype.rgba = function (c, o) {
   if (arguments.length === 4) {
-    c = {r: arguments[0], g: arguments[1], b: arguments[2]};
+    c = {
+      r: arguments[0],
+      g: arguments[1],
+      b: arguments[2]
+    };
     o = arguments[3];
   }
-  return 'rgba(' + (c.r*255) + ', ' + (c.g*255) + ', ' + (c.b*255) + ', ' + o + ')';
+  return 'rgba(' + (c.r * 255) + ', ' + (c.g * 255) + ', ' + (c.b * 255) + ', ' + o + ')';
 };
 
 function isArray(ar) {
-  return Array.isArray(ar)
-    || (typeof ar === 'object' && Object.prototype.toString.call(ar) === '[object Array]');
+  return Array.isArray(ar) || (typeof ar === 'object' && Object.prototype.toString.call(ar) === '[object Array]');
 }
-
 },{"./lib/moon.js":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/lib/moon.js","./lib/stars.js":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/lib/stars.js","./lib/sun.js":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/lib/sun.js","tic":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/node_modules/tic/index.js","voxel-trajectory":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/node_modules/voxel-trajectory/index.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/lib/moon.js":[function(require,module,exports){
 module.exports = function(phase, r, color) {
   if (!this.canvas) return false;

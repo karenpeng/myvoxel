@@ -52,7 +52,6 @@ html, body{
   margin: 0 10px;
 }
 
-
 #navbar{
   position: absolute;
   top: 0;
@@ -118,4 +117,27 @@ html, body{
   top: -58px;
   font-size: 20px;
   margin-bottom: 10px;
+}
+
+#material{
+  position: absolute;
+  bottom: 3px;
+  left: 100px;
+}
+
+.material_pic{
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.material_pic img :hover{
+  cursor: pointer;
+}
+
+.material_pic img{
+  width: 40px;
+  border: 5px ridge #999;
+  margin: 0;
+  padding: 0;
 }

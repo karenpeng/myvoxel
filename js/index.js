@@ -16,6 +16,8 @@ var codes = [];
 var colliObjs = [];
 var myItems = [];
 var geos = {};
+var materialIndex = 0;
+var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 window.geos = geos;
 /*
 set up game
@@ -26,11 +28,11 @@ var game = createGame({
   generateChunks: false,
   texturePath: 'textures/',
   materials: [
-    ['grass', 'dirt', 'grass_dirt'], 'brick'
+    ['grass', 'dirt', 'grass_dirt'], 'brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'
     // ,'meow'
   ],
   //materialFlatColor: true,
-  chunkSize: 16,
+  chunkSize: 32,
   chunkDistance: 2,
   worldOrigin: [0, 0, 0],
   controls: {
@@ -44,8 +46,8 @@ game.appendTo(container);
 
 window.game = game; //for debug:)
 
+var chunkSize = 32;
 // initialize your noise with a seed, floor height, ceiling height and scale factor
-var chunkSize = 16;
 var generateChunk = terrain('foo', 0, 5, 100);
 // then hook it up to your game as such:
 game.voxels.on('missingChunk', function (p) {
@@ -82,7 +84,7 @@ var createPlayer = require('voxel-player')(game);
 var dude = createPlayer('textures/dude.png');
 dude.possess();
 //jump from sky
-var jumpFromSky = 50;
+var jumpFromSky = 10;
 dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
@@ -111,7 +113,7 @@ window.myItems = myItems;
 /*
 the api for end-user
  */
-function addThing(_clickTimes, pos, _x, _y, _z, _size) {
+function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   //console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
@@ -122,7 +124,8 @@ function addThing(_clickTimes, pos, _x, _y, _z, _size) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, 'brick');
+  game.materials.paint(mesh, myMaterial[materialIndex]);
+  //game.materials.paint(mesh, 'cobblestone')
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -152,7 +155,7 @@ function addThing(_clickTimes, pos, _x, _y, _z, _size) {
 
   // game.THREE.GeometryUtils.merge(geos[_clickTimes+''], mesh);
 }
-window.addThing = addThing; //for debug
+window.addBlock = addBlock; //for debug
 
 /*
 animation
@@ -338,17 +341,6 @@ function isHit() {
   }
 }
 
-window.onkeydown = function (e) {
-  if (e.which === 32 && jumpable /*&& onTop*/ ) {
-    //console.log(':(')
-    e.preventDefault();
-    dude.resting.y = false;
-    dude.velocity.y = 0.014;
-    //dude.friction.y = 1;
-    //console.log(':(')
-  }
-}
-
 // var mouse = new game.THREE.Vector2();
 // var INTERSECTED;
 
@@ -408,21 +400,35 @@ hl.on('highlight', function (_voxelPos) {
 game.on('fire', function () {
   startPosition = voxelPos;
   console.log('start from here!', startPosition[0], startPosition[1], startPosition[2]);
-  //$("body").trigger({type: 'keypress', which: 27, keyCode: 27});
-  var keyVal = 32;
-  $("body").trigger({
-    type: 'keypress',
-    keyCode: keyVal,
-    which: keyVal,
-    charCode: keyVal
+  var esc = $.Event("keydown", {
+    which: 27
   });
-
-  var press = jQuery.Event("keypress");
-  press.ctrlKey = false;
-  press.which = 32;
-  $("body").trigger(press);
-
+  $("body").trigger(esc);
+  game.interact.emit('release');
 });
+
+// function simulateKeyPress(keycode) {
+//   console.log(':/');
+//   //console.log(jQuery)
+//   jQuery.event.trigger({
+//     type: 'keypress',
+//     which: keycode
+//   });
+// }
+
+// simulateKeyPress(32);
+
+window.onkeydown = function (e) {
+  //console.log(e.which)
+  if (e.which === 32 && jumpable /*&& onTop*/ ) {
+    //console.log(':(')
+    e.preventDefault();
+    dude.resting.y = false;
+    dude.velocity.y = 0.014;
+    //dude.friction.y = 1;
+    //console.log(':(')
+  }
+}
 
 var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
@@ -442,26 +448,27 @@ game.interact.on('release', function () {
   // welcome.style.visibility = 'visible';
 })
 
-window.onkeydown = function (e) {
-    if (e.which === 66) {
+// window.onkeydown = function (e) {
+//     if (e.which === 66) {
 
-      var keyVal = 32;
-      $("#container").trigger({
-        type: 'keypress',
-        keyCode: keyVal,
-        which: keyVal,
-        charCode: keyVal
-      });
+//       var keyVal = 32;
+//       $("#container").trigger({
+//         type: 'keypress',
+//         keyCode: keyVal,
+//         which: keyVal,
+//         charCode: keyVal
+//       });
 
-      var press = jQuery.Event("keypress");
-      press.ctrlKey = false;
-      press.which = 32;
-      $("#container").trigger(press);
-    }
-  }
-  /*
-  eval!
-   */
+//       var press = jQuery.Event("keypress");
+//       press.ctrlKey = false;
+//       press.which = 32;
+//       $("#container").trigger(press);
+//     }
+//   }
+
+/*
+eval!
+ */
 var editor = require('./editor.js').editor;
 var consoleLog = require('./editor.js').consoleLog;
 var editing = require('./editor.js').editing;
@@ -520,10 +527,26 @@ function parse(str, arr) {
 
 }
 
-function addThingAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  addThing(clickTimes, pos, x, y, z, size);
+function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
+  addBlock(clickTimes, pos, x, y, z, size);
   highlightLine(lineNum);
 }
+
+$('.pic').click(function () {
+  var id = $(this).attr('id');
+  var i = id.replace('material', '');
+  materialIndex = i;
+  console.log(materialIndex)
+  $(this).css('border', "5px ridge #ddd");
+  console.log($(this).siblings())
+  $('.pic').not(this).css('border', "5px ridge #999");
+  // for (var j = 0; j < 7; j++) {
+  //   if (i === j) continue;
+  //   document.getElementById('material' + j).style.border = "5px ridge #999";
+  // }
+});
+
+$('#material0').css('border', "5px ridge #ddd");
 
 /*
 editor
@@ -604,11 +627,11 @@ document.getElementById('pause').onclick = function () {
   }
 }
 
-document.getElementById('reset').onclick = function () {
-  var id = clickTimes - 1;
-  call = null;
-  destory(id);
-}
+// document.getElementById('reset').onclick = function () {
+//   var id = clickTimes - 1;
+//   call = null;
+//   destory(id);
+// }
 
 /*
 tutorial
