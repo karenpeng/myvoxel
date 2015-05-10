@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "main": ".bundle.js",
   "dependencies": {
+    "body-parser": "^1.12.3",
     "brace": "^0.5.0",
+    "express": "^4.12.3",
     "minecraft-skin": "^0.1.2",
+    "mongoose": "^4.0.2",
     "voxel-engine": "^0.20.1",
     "voxel-highlight": "0.0.10",
     "voxel-perlin-terrain": "^1.0.0",

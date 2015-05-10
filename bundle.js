@@ -105,7 +105,36 @@ exports.isHit = function () {
     }
   }
 }
-},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/editor.js":[function(require,module,exports){
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/dude.js":[function(require,module,exports){
+var en = require('./global.js');
+var createPlayer = require('voxel-player')(en.game);
+var skin = require('minecraft-skin');
+
+en.dude = createPlayer('textures/dude.png');
+en.dude.possess();
+//jump from sky
+var jumpFromSky = 40;
+en.dude.yaw.position.set(0, jumpFromSky, 0);
+en.dude.jumpable = true;
+
+window.onkeydown = function (e) {
+  if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
+    en.dude.toggle();
+  }
+  if (e.which === 32 && en.dude.jumpable /*&& onTop*/ ) {
+    e.preventDefault();
+    en.dude.resting.y = false;
+    en.dude.velocity.y = 0.014;
+  }
+}
+
+en.game.interact.on('attain', function () {
+  en.dude.jumpable = true;
+});
+en.game.interact.on('release', function () {
+  en.dude.jumpable = false;
+});
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/editor.js":[function(require,module,exports){
 var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/monokai');
@@ -167,7 +196,58 @@ module.exports = {
   removeMarker: removeMarker,
   highlightLine: highlightLine
 }
-},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","brace":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js","brace/mode/javascript":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/mode/javascript.js","brace/theme/monokai":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/theme/monokai.js"}],"/Users/karen/Documents/my_project/myvoxel/js/generator.js":[function(require,module,exports){
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","brace":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js","brace/mode/javascript":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/mode/javascript.js","brace/theme/monokai":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/theme/monokai.js"}],"/Users/karen/Documents/my_project/myvoxel/js/game.js":[function(require,module,exports){
+var createGame = require('voxel-engine');
+var terrain = require('voxel-perlin-terrain');
+var en = require('./global.js');
+
+en.game = createGame({
+
+  generateChunks: false,
+  texturePath: 'textures/',
+  materials: [
+    ['grass', 'dirt', 'grass_dirt'], 'brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'
+    // ,'meow'
+  ],
+  //materialFlatColor: true,
+  chunkSize: 32,
+  chunkDistance: 2,
+  worldOrigin: [0, 0, 0],
+  controls: {
+    discreteFire: false
+  },
+  lightsDisabled: true,
+  playerHeight: 1.62
+});
+
+var container = document.getElementById('container');
+en.game.appendTo(container);
+
+var chunkSize = 32;
+// initialize your noise with a seed, floor height, ceiling height and scale factor
+var generateChunk = terrain('foo', 0, 5, 100);
+// then hook it up to your game as such:
+en.game.voxels.on('missingChunk', function (p) {
+  var voxels = generateChunk(p, chunkSize);
+  var chunk = {
+    position: p,
+    dims: [chunkSize, chunkSize, chunkSize],
+    voxels: voxels
+  }
+  en.game.showChunk(chunk);
+});
+
+var light = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
+light.position.set(0, 20, 0);
+en.game.scene.add(light);
+
+var light1 = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
+light1.position.set(0, 10, 0);
+en.game.scene.add(light1);
+
+var createSky = require('voxel-sky')(en.game);
+en.sky = createSky();
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/generator.js":[function(require,module,exports){
 var en = require('./global.js');
 
 module.exports = function (generator, func) {
@@ -181,21 +261,18 @@ module.exports = function (generator, func) {
 },{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/global.js":[function(require,module,exports){
 module.exports = {
 
+  game: null,
+  dude: null,
+  colliObjs: [],
+  startPosition: [0, 0, 0],
+  sky: null,
   materialIndex: 0,
   interval: 10,
   pause: false,
   marker: null,
-  editing: false,
-  game: null,
-  dude: null,
-  colliObjs: [],
-  startPosition: [0, 0, 0]
+  editing: false
 }
 },{}],"/Users/karen/Documents/my_project/myvoxel/js/index.js":[function(require,module,exports){
-var createGame = require('voxel-engine');
-var skin = require('minecraft-skin');
-var terrain = require('voxel-perlin-terrain');
-
 var en = require('./global.js');
 
 var wrapGenerator = require('./parse.js').wrapGenerator;
@@ -226,71 +303,10 @@ var code = '';
 /*
 set up game
  */
-en.game = createGame({
-
-  generateChunks: false,
-  texturePath: 'textures/',
-  materials: [
-    ['grass', 'dirt', 'grass_dirt'], 'brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'
-    // ,'meow'
-  ],
-  //materialFlatColor: true,
-  chunkSize: 32,
-  chunkDistance: 2,
-  worldOrigin: [0, 0, 0],
-  controls: {
-    discreteFire: false
-  },
-  lightsDisabled: true,
-  playerHeight: 1.62
-});
-var container = document.getElementById('container');
-en.game.appendTo(container);
-
-var chunkSize = 32;
-// initialize your noise with a seed, floor height, ceiling height and scale factor
-var generateChunk = terrain('foo', 0, 5, 100);
-// then hook it up to your game as such:
-en.game.voxels.on('missingChunk', function (p) {
-  var voxels = generateChunk(p, chunkSize);
-  var chunk = {
-    position: p,
-    dims: [chunkSize, chunkSize, chunkSize],
-    voxels: voxels
-  }
-  en.game.showChunk(chunk);
-})
-
-var light = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
-light.position.set(0, 20, 0);
-en.game.scene.add(light);
-
-var light1 = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
-light1.position.set(0, 10, 0);
-en.game.scene.add(light1);
-
-var createSky = require('voxel-sky')(en.game);
-
-var sky = createSky();
+require('./game.js');
 
 //create dude
-var createPlayer = require('voxel-player')(en.game);
-en.dude = createPlayer('textures/dude.png');
-en.dude.possess();
-//jump from sky
-var jumpFromSky = 10;
-en.dude.yaw.position.set(0, jumpFromSky, 0);
-
-window.onkeydown = function (e) {
-  if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
-    en.dude.toggle();
-  }
-  if (e.which === 32 && jumpable /*&& onTop*/ ) {
-    e.preventDefault();
-    en.dude.resting.y = false;
-    en.dude.velocity.y = 0.014;
-  }
-}
+require('./dude.js');
 
 /*
 interaction
@@ -358,7 +374,7 @@ animation
 var isOnTop = require('./collisionDetection.js').isOnTop;
 en.game.on('tick', function (delta) {
   frameCount++;
-  sky(delta);
+  en.sky(delta);
 
   if (frameCount !== 0 && frameCount % 2 === 0) {
 
@@ -431,7 +447,7 @@ function recover() {
   editor.clearSelection();
   code = '';
 }
-},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./dude.js":"/Users/karen/Documents/my_project/myvoxel/js/dude.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function wrapGenerator(lines, str) {
 
   var fnNames = functionDetection(str);
@@ -25911,7 +25927,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25954,7 +25970,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",

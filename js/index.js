@@ -1,7 +1,3 @@
-var createGame = require('voxel-engine');
-var skin = require('minecraft-skin');
-var terrain = require('voxel-perlin-terrain');
-
 var en = require('./global.js');
 
 var wrapGenerator = require('./parse.js').wrapGenerator;
@@ -32,71 +28,10 @@ var code = '';
 /*
 set up game
  */
-en.game = createGame({
-
-  generateChunks: false,
-  texturePath: 'textures/',
-  materials: [
-    ['grass', 'dirt', 'grass_dirt'], 'brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'
-    // ,'meow'
-  ],
-  //materialFlatColor: true,
-  chunkSize: 32,
-  chunkDistance: 2,
-  worldOrigin: [0, 0, 0],
-  controls: {
-    discreteFire: false
-  },
-  lightsDisabled: true,
-  playerHeight: 1.62
-});
-var container = document.getElementById('container');
-en.game.appendTo(container);
-
-var chunkSize = 32;
-// initialize your noise with a seed, floor height, ceiling height and scale factor
-var generateChunk = terrain('foo', 0, 5, 100);
-// then hook it up to your game as such:
-en.game.voxels.on('missingChunk', function (p) {
-  var voxels = generateChunk(p, chunkSize);
-  var chunk = {
-    position: p,
-    dims: [chunkSize, chunkSize, chunkSize],
-    voxels: voxels
-  }
-  en.game.showChunk(chunk);
-})
-
-var light = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
-light.position.set(0, 20, 0);
-en.game.scene.add(light);
-
-var light1 = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
-light1.position.set(0, 10, 0);
-en.game.scene.add(light1);
-
-var createSky = require('voxel-sky')(en.game);
-
-var sky = createSky();
+require('./game.js');
 
 //create dude
-var createPlayer = require('voxel-player')(en.game);
-en.dude = createPlayer('textures/dude.png');
-en.dude.possess();
-//jump from sky
-var jumpFromSky = 10;
-en.dude.yaw.position.set(0, jumpFromSky, 0);
-
-window.onkeydown = function (e) {
-  if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
-    en.dude.toggle();
-  }
-  if (e.which === 32 && jumpable /*&& onTop*/ ) {
-    e.preventDefault();
-    en.dude.resting.y = false;
-    en.dude.velocity.y = 0.014;
-  }
-}
+require('./dude.js');
 
 /*
 interaction
@@ -164,7 +99,7 @@ animation
 var isOnTop = require('./collisionDetection.js').isOnTop;
 en.game.on('tick', function (delta) {
   frameCount++;
-  sky(delta);
+  en.sky(delta);
 
   if (frameCount !== 0 && frameCount % 2 === 0) {
 
