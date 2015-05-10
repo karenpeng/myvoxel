@@ -98,7 +98,9 @@ window.onkeydown = function (e) {
   }
 }
 
-//info config
+/*
+interaction
+ */
 var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
 message.innerHTML = 'Double Click to play';
@@ -216,8 +218,8 @@ function parse(str, arr) {
 
   try {
     runGenerator(call, recover);
-  } catch (ಠoಠ) {
-    console.log(ಠoಠ);
+  } catch (e) {
+    console.log(e);
     consoleLog.insert(ಠoಠ.toString());
     code = '';
     return;
