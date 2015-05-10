@@ -1,7 +1,6 @@
 var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
-var highlight = require('voxel-highlight');
 
 var en = require('./global.js');
 
@@ -18,10 +17,7 @@ require('./slider.js')();
 var init = require('./tutorial.js').init;
 init(removeMarker);
 
-var voxelPos = [0, 0, 0];
-var startPosition = [0, 0, 0];
 var clickTimes = 0;
-var colliObjs = [];
 var myItems = [];
 var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 
@@ -36,7 +32,7 @@ var code = '';
 /*
 set up game
  */
-var game = createGame({
+en.game = createGame({
 
   generateChunks: false,
   texturePath: 'textures/',
@@ -55,67 +51,66 @@ var game = createGame({
   playerHeight: 1.62
 });
 var container = document.getElementById('container');
-game.appendTo(container);
-
-window.game = game; //for debug:)
+en.game.appendTo(container);
 
 var chunkSize = 32;
 // initialize your noise with a seed, floor height, ceiling height and scale factor
 var generateChunk = terrain('foo', 0, 5, 100);
 // then hook it up to your game as such:
-game.voxels.on('missingChunk', function (p) {
+en.game.voxels.on('missingChunk', function (p) {
   var voxels = generateChunk(p, chunkSize);
   var chunk = {
     position: p,
     dims: [chunkSize, chunkSize, chunkSize],
     voxels: voxels
   }
-  game.showChunk(chunk);
+  en.game.showChunk(chunk);
 })
 
-var light = new game.THREE.DirectionalLight(0xffffff, 0.5);
+var light = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
 light.position.set(0, 20, 0);
-game.scene.add(light);
+en.game.scene.add(light);
 
-var light1 = new game.THREE.DirectionalLight(0xffffff, 0.5);
+var light1 = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
 light1.position.set(0, 10, 0);
-game.scene.add(light1);
+en.game.scene.add(light1);
 
-var createSky = require('voxel-sky')(game);
+var createSky = require('voxel-sky')(en.game);
 
 var sky = createSky();
 
 //create dude
-var createPlayer = require('voxel-player')(game);
-var dude = createPlayer('textures/dude.png');
-dude.possess();
+var createPlayer = require('voxel-player')(en.game);
+en.dude = createPlayer('textures/dude.png');
+en.dude.possess();
 //jump from sky
 var jumpFromSky = 10;
-dude.yaw.position.set(0, jumpFromSky, 0);
-window.dude = dude; //for debug
+en.dude.yaw.position.set(0, jumpFromSky, 0);
 
 window.onkeydown = function (e) {
   if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
-    dude.toggle();
+    en.dude.toggle();
   }
   if (e.which === 32 && jumpable /*&& onTop*/ ) {
     e.preventDefault();
-    dude.resting.y = false;
-    dude.velocity.y = 0.014;
+    en.dude.resting.y = false;
+    en.dude.velocity.y = 0.014;
   }
 }
 
+//info config
 var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
 message.innerHTML = 'Double Click to play';
 
 var jumpable = true;
-game.interact.on('attain', function () {
+en.game.interact.on('attain', function () {
   jumpable = true;
-})
-game.interact.on('release', function () {
+});
+en.game.interact.on('release', function () {
   jumpable = false;
-})
+});
+require('./select.js')();
 
 /*
 the api for end-user
@@ -123,13 +118,13 @@ the api for end-user
 function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
-  var mesh = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(size, size, size), // width, height, depth
-    game.materials.material
+  var mesh = new en.game.THREE.Mesh(
+    new en.game.THREE.CubeGeometry(size, size, size), // width, height, depth
+    en.game.materials.material
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[en.materialIndex]);
+  en.game.materials.paint(mesh, myMaterial[en.materialIndex]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -137,9 +132,9 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
 
   mesh.position.set(x, y, z);
   mesh.name = _clickTimes;
-  colliObjs.push(mesh);
+  en.colliObjs.push(mesh);
 
-  var item = game.addItem({
+  var item = en.game.addItem({
     mesh: mesh,
     size: 1,
     velocity: {
@@ -164,8 +159,8 @@ function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
 /*
 animation
  */
-
-game.on('tick', function (delta) {
+var isOnTop = require('./collisionDetection.js').isOnTop;
+en.game.on('tick', function (delta) {
   frameCount++;
   sky(delta);
 
@@ -187,38 +182,12 @@ game.on('tick', function (delta) {
       begintToCount += (delta / 16);
     }
 
-    if (colliObjs.length) {
-      //isOnTop(delta);
+    if (en.colliObjs.length) {
+      isOnTop(delta);
     }
 
   }
 
-})
-
-/*
-collision detection stuffs
- */
-var isOnTop = require('./collisionDetection.js').isOnTop;
-
-/*
-interaction
- */
-var hl = highlight(game, {
-  color: 0xffffff
-});
-
-hl.on('highlight', function (_voxelPos) {
-  voxelPos = _voxelPos;
-});
-
-game.on('fire', function () {
-  startPosition = voxelPos;
-  console.log('start from here!', startPosition[0], startPosition[1], startPosition[2]);
-  var esc = $.Event("keydown", {
-    which: 27
-  });
-  $("body").trigger(esc);
-  game.interact.emit('release');
 });
 
 /*
@@ -229,22 +198,13 @@ document.getElementById('run').onclick = function () {
   parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
-function recover() {
-  evaled = false;
-  begintToCount = 0;
-  removeMarker();
-  editor.setValue(code);
-  editor.clearSelection();
-  code = '';
-}
-
 function parse(str, arr) {
 
   try {
     var str2 = wrapGenerator(arr, str);
     console.log(str2);
     eval(str2);
-    call = wwwaaattt(clickTimes, startPosition);
+    call = wwwaaattt(clickTimes, en.startPosition);
     evaled = true;
   } catch (e) {
     console.log(e);
@@ -265,4 +225,13 @@ function parse(str, arr) {
 
   clickTimes++;
 
+}
+
+function recover() {
+  evaled = false;
+  begintToCount = 0;
+  removeMarker();
+  editor.setValue(code);
+  editor.clearSelection();
+  code = '';
 }

@@ -1,17 +1,18 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js":[function(require,module,exports){
-var rayCaster = new game.THREE.Raycaster();
+var en = require('./global.js');
+var rayCaster = new en.game.THREE.Raycaster();
 
 exports.isOnTop = function (dt) {
   //get user direction!!
-  var ray = new game.THREE.Vector3(0, -1, 0);
+  var ray = new en.game.THREE.Vector3(0, -1, 0);
 
   var acceleration = {};
   var velocity = {};
   var friction = {};
   var desired = {};
-  acceleration.y = dude.acceleration.y;
-  velocity.y = dude.velocity.y;
-  friction.y = dude.friction.y;
+  acceleration.y = en.dude.acceleration.y;
+  velocity.y = en.dude.velocity.y;
+  friction.y = en.dude.friction.y;
 
   acceleration.y /= 8 * dt;
   //acceleration.z += TOTAL_FORCES.z * dt
@@ -26,53 +27,45 @@ exports.isOnTop = function (dt) {
     desired.y = (velocity.y / Math.abs(velocity.y)) * 0.1;
   }
 
-  var dudeNextPos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + desired.y + 0.5, dude.yaw.position.z);
+  var dudeNextPos = new en.game.THREE.Vector3(en.dude.yaw.position.x, en.dude.yaw.position.y + desired.y + 0.5, en.dude.yaw.position.z);
   rayCaster.ray.set(dudeNextPos, ray);
-  var intersects = rayCaster.intersectObjects(colliObjs);
+  var intersects = rayCaster.intersectObjects(en.colliObjs);
 
   if (intersects.length > 0 && intersects[0].distance < 0.5 + desired.y /*&& intersects[0].distance > 0.5*/ ) {
 
-    // console.log(desired.y)
-    // console.log('sdgdgsd')
+    en.dude.acceleration.x = 0;
+    //en.dude.acceleration.y = 0;
+    en.dude.acceleration.z = 0;
 
-    window.lol = intersects[0];
+    en.dude.resting.x = true;
+    en.dude.resting.y = true;
+    //en.dude.velocity.y = 0;
+    en.dude.resting.z = true;
 
-    dude.acceleration.x = 0;
-    //dude.acceleration.y = 0;
-    dude.acceleration.z = 0;
+    var something = new en.game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
 
-    dude.resting.x = true;
-    dude.resting.y = true;
-    //dude.velocity.y = 0;
-    dude.resting.z = true;
-
-    var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
-
-    dude.moveTo(something);
+    en.dude.moveTo(something);
     //console.log(intersects[0].distance)
-    onTop = true;
     return;
   }
-
-  onTop = false;
 }
 
-function isHit() {
+exports.isHit = function () {
   var rays = [
-    new game.THREE.Vector3(1, 0, 0),
-    new game.THREE.Vector3(-1, 0, 0),
+    new en.game.THREE.Vector3(1, 0, 0),
+    new en.game.THREE.Vector3(-1, 0, 0),
     // new game.THREE.Vector3(0, 1, 0)
-    new game.THREE.Vector3(0, 0, 1),
-    new game.THREE.Vector3(0, 0, -1)
+    new en.game.THREE.Vector3(0, 0, 1),
+    new en.game.THREE.Vector3(0, 0, -1)
   ]
 
-  var mY = new game.THREE.Matrix4().makeRotationY(dude.yaw.rotation.y);
+  var mY = new en.game.THREE.Matrix4().makeRotationY(en.dude.yaw.rotation.y);
 
-  var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y, dude.yaw.position.z);
+  var dudePos = new en.game.THREE.Vector3(en.dude.yaw.position.x, en.dude.yaw.position.y, en.dude.yaw.position.z);
   /*
     function check(el){
       rayCaster.ray.set(dudePos, el);
-      var intersects = rayCaster.intersectObjects(colliObjs);
+      var intersects = rayCaster.intersectObjects(en.colliObjs);
       return (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5)
     }
 
@@ -87,70 +80,32 @@ function isHit() {
     ray.applyMatrix4(mY);
 
     rayCaster.ray.set(dudePos, ray);
-    var intersects = rayCaster.intersectObjects(colliObjs);
+    var intersects = rayCaster.intersectObjects(en.colliObjs);
     if (intersects.length > 0) {
       if ((i === 0 || i === 1 && intersects[0].distance < 0.5) || (i === 2 || i === 3 && intersects[0].distance < 0.5)) {
 
         // window.lol = intersects[0];
 
-        dude.acceleration.x = 0;
-        dude.acceleration.z = 0;
+        en.dude.acceleration.x = 0;
+        en.dude.acceleration.z = 0;
 
-        dude.resting.x = true;
-        dude.resting.z = true;
+        en.dude.resting.x = true;
+        en.dude.resting.z = true;
 
-        var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
+        var something = new en.game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
         if (i === 0 || i === 1) {
           something.add(ray.setLength(0.4).negate());
         } else {
           something.add(ray.setLength(0.4).negate());
         }
 
-        dude.moveTo(something);
+        en.dude.moveTo(something);
         return;
       }
     }
   }
 }
-
-// var mouse = new game.THREE.Vector2();
-// var INTERSECTED;
-
-// function onDocumentMouseMove( event ) {
-//   event.preventDefault();
-//   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-//   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-//   //console.log(mouse.x, mouse.y);
-// }
-// document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
-// function isSelect(){
-//   rayCaster.setFromCamera( mouse, game.camera );
-//   var intersects = rayCaster.intersectObjects(colliObjs);
-
-//   if ( intersects.length > 0 ) {
-//     console.log('ohhhhh')
-//     console.log(intersects[0].object.name)
-
-//     if ( INTERSECTED != intersects[ 0 ].object ) {
-
-//       if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-//       INTERSECTED = intersects[ 0 ].object;
-//       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-//       INTERSECTED.material.emissive.setHex( 0xff0000 );
-
-//     }
-
-//   } else {
-
-//     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-//     INTERSECTED = null;
-
-//   }
-// }
-},{}],"/Users/karen/Documents/my_project/myvoxel/js/editor.js":[function(require,module,exports){
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/editor.js":[function(require,module,exports){
 var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/monokai');
@@ -226,33 +181,20 @@ module.exports = function (generator, func) {
 },{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/global.js":[function(require,module,exports){
 module.exports = {
 
-  voxelPos: [0, 0, 0],
-  startPosition: [0, 0, 0],
-  clickTimes: 0,
-  colliObjs: [],
-  myItems: [],
-  myMaterial: ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'],
-
-  theta: 0,
-
-  begintToCount: 0,
-  frameCount: 0,
-  call: null,
-  copy: null,
-  evaled: false,
-
   materialIndex: 0,
   interval: 10,
   pause: false,
   marker: null,
   editing: false,
-
+  game: null,
+  dude: null,
+  colliObjs: [],
+  startPosition: [0, 0, 0]
 }
 },{}],"/Users/karen/Documents/my_project/myvoxel/js/index.js":[function(require,module,exports){
 var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
-var highlight = require('voxel-highlight');
 
 var en = require('./global.js');
 
@@ -269,10 +211,7 @@ require('./slider.js')();
 var init = require('./tutorial.js').init;
 init(removeMarker);
 
-var voxelPos = [0, 0, 0];
-var startPosition = [0, 0, 0];
 var clickTimes = 0;
-var colliObjs = [];
 var myItems = [];
 var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 
@@ -287,7 +226,7 @@ var code = '';
 /*
 set up game
  */
-var game = createGame({
+en.game = createGame({
 
   generateChunks: false,
   texturePath: 'textures/',
@@ -306,67 +245,66 @@ var game = createGame({
   playerHeight: 1.62
 });
 var container = document.getElementById('container');
-game.appendTo(container);
-
-window.game = game; //for debug:)
+en.game.appendTo(container);
 
 var chunkSize = 32;
 // initialize your noise with a seed, floor height, ceiling height and scale factor
 var generateChunk = terrain('foo', 0, 5, 100);
 // then hook it up to your game as such:
-game.voxels.on('missingChunk', function (p) {
+en.game.voxels.on('missingChunk', function (p) {
   var voxels = generateChunk(p, chunkSize);
   var chunk = {
     position: p,
     dims: [chunkSize, chunkSize, chunkSize],
     voxels: voxels
   }
-  game.showChunk(chunk);
+  en.game.showChunk(chunk);
 })
 
-var light = new game.THREE.DirectionalLight(0xffffff, 0.5);
+var light = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
 light.position.set(0, 20, 0);
-game.scene.add(light);
+en.game.scene.add(light);
 
-var light1 = new game.THREE.DirectionalLight(0xffffff, 0.5);
+var light1 = new en.game.THREE.DirectionalLight(0xffffff, 0.5);
 light1.position.set(0, 10, 0);
-game.scene.add(light1);
+en.game.scene.add(light1);
 
-var createSky = require('voxel-sky')(game);
+var createSky = require('voxel-sky')(en.game);
 
 var sky = createSky();
 
 //create dude
-var createPlayer = require('voxel-player')(game);
-var dude = createPlayer('textures/dude.png');
-dude.possess();
+var createPlayer = require('voxel-player')(en.game);
+en.dude = createPlayer('textures/dude.png');
+en.dude.possess();
 //jump from sky
 var jumpFromSky = 10;
-dude.yaw.position.set(0, jumpFromSky, 0);
-window.dude = dude; //for debug
+en.dude.yaw.position.set(0, jumpFromSky, 0);
 
 window.onkeydown = function (e) {
   if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
-    dude.toggle();
+    en.dude.toggle();
   }
   if (e.which === 32 && jumpable /*&& onTop*/ ) {
     e.preventDefault();
-    dude.resting.y = false;
-    dude.velocity.y = 0.014;
+    en.dude.resting.y = false;
+    en.dude.velocity.y = 0.014;
   }
 }
 
+//info config
 var welcome = document.getElementById('welcome');
 var message = document.querySelector('#middleMessage');
 message.innerHTML = 'Double Click to play';
 
 var jumpable = true;
-game.interact.on('attain', function () {
+en.game.interact.on('attain', function () {
   jumpable = true;
-})
-game.interact.on('release', function () {
+});
+en.game.interact.on('release', function () {
   jumpable = false;
-})
+});
+require('./select.js')();
 
 /*
 the api for end-user
@@ -374,13 +312,13 @@ the api for end-user
 function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
-  var mesh = new game.THREE.Mesh(
-    new game.THREE.CubeGeometry(size, size, size), // width, height, depth
-    game.materials.material
+  var mesh = new en.game.THREE.Mesh(
+    new en.game.THREE.CubeGeometry(size, size, size), // width, height, depth
+    en.game.materials.material
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[en.materialIndex]);
+  en.game.materials.paint(mesh, myMaterial[en.materialIndex]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -388,9 +326,9 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
 
   mesh.position.set(x, y, z);
   mesh.name = _clickTimes;
-  colliObjs.push(mesh);
+  en.colliObjs.push(mesh);
 
-  var item = game.addItem({
+  var item = en.game.addItem({
     mesh: mesh,
     size: 1,
     velocity: {
@@ -415,8 +353,8 @@ function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
 /*
 animation
  */
-
-game.on('tick', function (delta) {
+var isOnTop = require('./collisionDetection.js').isOnTop;
+en.game.on('tick', function (delta) {
   frameCount++;
   sky(delta);
 
@@ -438,38 +376,12 @@ game.on('tick', function (delta) {
       begintToCount += (delta / 16);
     }
 
-    if (colliObjs.length) {
-      //isOnTop(delta);
+    if (en.colliObjs.length) {
+      isOnTop(delta);
     }
 
   }
 
-})
-
-/*
-collision detection stuffs
- */
-var isOnTop = require('./collisionDetection.js').isOnTop;
-
-/*
-interaction
- */
-var hl = highlight(game, {
-  color: 0xffffff
-});
-
-hl.on('highlight', function (_voxelPos) {
-  voxelPos = _voxelPos;
-});
-
-game.on('fire', function () {
-  startPosition = voxelPos;
-  console.log('start from here!', startPosition[0], startPosition[1], startPosition[2]);
-  var esc = $.Event("keydown", {
-    which: 27
-  });
-  $("body").trigger(esc);
-  game.interact.emit('release');
 });
 
 /*
@@ -480,22 +392,13 @@ document.getElementById('run').onclick = function () {
   parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
-function recover() {
-  evaled = false;
-  begintToCount = 0;
-  removeMarker();
-  editor.setValue(code);
-  editor.clearSelection();
-  code = '';
-}
-
 function parse(str, arr) {
 
   try {
     var str2 = wrapGenerator(arr, str);
     console.log(str2);
     eval(str2);
-    call = wwwaaattt(clickTimes, startPosition);
+    call = wwwaaattt(clickTimes, en.startPosition);
     evaled = true;
   } catch (e) {
     console.log(e);
@@ -517,7 +420,16 @@ function parse(str, arr) {
   clickTimes++;
 
 }
-},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+
+function recover() {
+  evaled = false;
+  begintToCount = 0;
+  removeMarker();
+  editor.setValue(code);
+  editor.clearSelection();
+  code = '';
+}
+},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function wrapGenerator(lines, str) {
 
   var fnNames = functionDetection(str);
@@ -609,7 +521,30 @@ module.exports = {
   wrapGenerator: wrapGenerator,
   getNewContent: getNewContent
 }
-},{}],"/Users/karen/Documents/my_project/myvoxel/js/slider.js":[function(require,module,exports){
+},{}],"/Users/karen/Documents/my_project/myvoxel/js/select.js":[function(require,module,exports){
+var highlight = require('voxel-highlight');
+var en = require('./global.js');
+
+module.exports = function () {
+  var hl = highlight(en.game, {
+    color: 0xffffff
+  });
+
+  hl.on('highlight', function (_voxelPos) {
+    en.startPosition = _voxelPos;
+  });
+
+  en.game.on('fire', function () {
+    console.log('start from here!', en.startPosition[0], en.startPosition[1], en.startPosition[2]);
+    var esc = $.Event("keydown", {
+      which: 27
+    });
+    $("body").trigger(esc);
+    en.game.interact.emit('release');
+  });
+
+}
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/slider.js":[function(require,module,exports){
 var en = require('./global.js');
 
 module.exports = function () {
@@ -25974,7 +25909,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -26017,7 +25952,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
