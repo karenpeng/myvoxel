@@ -16,13 +16,18 @@ function wrapGenerator(lines, str) {
   var lll = result.match(fnRe);
   if (lll !== null) {
     lll.forEach(function (m) {
-      result = result.replace(m, m + '\n' + 'yield highlightLine(lineNum);\n');
+      result = result.replace(m, m + '\n' + 'yield highlightLine(lineNum, false);\n');
     })
   }
 
   result = 'function* wwwaaattt(num, pos){\n' + result + '\n}';
   return result;
 
+}
+
+function getNewContent(oldLine, pos) {
+  //var re = /addBlock\s*\(.*?\)/;
+  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
 }
 
 function functionReplace(l, index, fnNames) {
@@ -82,5 +87,6 @@ function functionDetection(str) {
 }
 
 module.exports = {
-  wrapGenerator: wrapGenerator
+  wrapGenerator: wrapGenerator,
+  getNewContent: getNewContent
 }

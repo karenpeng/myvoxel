@@ -168,7 +168,15 @@ var showcases = [
     ' addTree(x + 1, y + 1, z + 1, c);',
     '}',
     '',
-    'addTree(0, 0, 0, 0);'
+    'addTree(0, 0, 0, 0);',
+    '',
+    '//You can see value is repeatative sometimes,',
+    '//That\'s why you don\'t see the block being build,',
+    '//Because it\'s in the same position of an old block,',
+    '//Recursion could be a waste of time sometimes,',
+    '//We could improve it with memoization:',
+    '//http://en.wikipedia.org/wiki/Memoization',
+    ''
   ],
 
   [

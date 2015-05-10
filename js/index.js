@@ -1,28 +1,29 @@
 var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
-//var createSelect = require('voxel-select');
-// var highlight = require('voxel-highlight');
-// var transforms = require('voxel-transforms');
-//require('./parse.js');
-// var toolbar = require('toolbar');
-// var bartab = toolbar('.bar-tab');
-//var fly = require('voxel-fly');
+var highlight = require('voxel-highlight');
+var editor = require('./editor.js').editor;
+var consoleLog = require('./editor.js').consoleLog;
+var editing = require('./editor.js').editing;
+var wrapGenerator = require('./parse.js').wrapGenerator;
+var addMarkerRange = require('./editor.js').addMarkerRange;
+var getNewContent = require('./parse.js').getNewContent;
+require('./toolbar.js')(materialIndex);
+require('./slider.js')(interval, pause);
+var init = require('./tutorial.js').init;
+init(removeMarker);
 
 var voxelPos = [0, 0, 0];
 var startPosition = [0, 0, 0];
 var clickTimes = 0;
-var codes = [];
 var colliObjs = [];
 var myItems = [];
-var geos = {};
 var materialIndex = 0;
 var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
-window.geos = geos;
+
 /*
 set up game
  */
-
 var game = createGame({
 
   generateChunks: false,
@@ -68,16 +69,9 @@ var light1 = new game.THREE.DirectionalLight(0xffffff, 0.5);
 light1.position.set(0, 10, 0);
 game.scene.add(light1);
 
-// var makeFly = fly(game);
-// makeFly(game.contrls.target())
-
 var createSky = require('voxel-sky')(game);
 
 var sky = createSky();
-
-// toolbar('.bar-tab').on('select', function (item) {
-//   currentMaterial = item
-// })
 
 //create dude
 var createPlayer = require('voxel-player')(game);
@@ -88,44 +82,42 @@ var jumpFromSky = 10;
 dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
-window.addEventListener('keydown', function (ev) {
+window.onkeydown = function (e) {
   if (!editing && ev.keyCode === 'R'.charCodeAt(0)) {
     dude.toggle();
   }
-});
+  if (e.which === 32 && jumpable /*&& onTop*/ ) {
+    e.preventDefault();
+    dude.resting.y = false;
+    dude.velocity.y = 0.014;
+  }
+}
 
-// var dude2 = skin(game.THREE, 'textures/dude.png').createPlayerObject();
-// //console.log(dude2);
-// dude2.position.set(10, 4, 0);
-// dude2.scale.set(0.1, 0.1, 0.1);
-// window.dude2 = dude2;
-// game.scene.add(dude2);
+var welcome = document.getElementById('welcome');
+var message = document.querySelector('#middleMessage');
+message.innerHTML = 'Double Click to play';
 
-// var createDrone = require('voxel-drone');
-// var logodrone = require('logo-drone');
-// var drone = createDrone(game);
-// var item = drone.item();
-// item.avatar.position.set(0, 10, -10);
-// game.addItem(drone.item());
-
-window.myItems = myItems;
+var jumpable = true;
+game.interact.on('attain', function () {
+  jumpable = true;
+})
+game.interact.on('release', function () {
+  jumpable = false;
+})
 
 /*
 the api for end-user
  */
 function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
-  //console.log('raph', _clickTimes);
   // create a mesh and use the internal game material (texture atlas)
   var size = _size || 1;
   var mesh = new game.THREE.Mesh(
     new game.THREE.CubeGeometry(size, size, size), // width, height, depth
     game.materials.material
-    //new game.THREE.MeshNormalMaterial()
   )
 
   // paint the mesh with a specific texture in the atlas
   game.materials.paint(mesh, myMaterial[materialIndex]);
-  //game.materials.paint(mesh, 'cobblestone')
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -147,13 +139,9 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   item.name = _clickTimes;
 
   // //myItem is for destorying things
-  // myItems.push(item);
-  // // colliObjs.push(item.mesh);
+  myItems.push(item);
 
-  return mesh;
-  // geos[_clickTimes+''].verticesNeedUpdate = true;
-
-  // game.THREE.GeometryUtils.merge(geos[_clickTimes+''], mesh);
+  return [_x, _y, _z];
 }
 window.addBlock = addBlock; //for debug
 
@@ -163,8 +151,6 @@ animation
 var theta = 0;
 var interval = 10;
 var begintToCount = 0;
-var result2 = null;
-var result2pre = null;
 var frameCount = 0;
 
 game.on('tick', function (delta) {
@@ -172,14 +158,12 @@ game.on('tick', function (delta) {
   sky(delta);
 
   if (frameCount !== 0 && frameCount % 2 === 0) {
-    //dude2.rotation.y = theta / 100;
-    //console.log(game.controls.jumping)
 
     theta += (delta / 16);
 
     if (begintToCount % interval === 0 && evaled) {
       try {
-        runGenerator(call);
+        runGenerator(call, copy);
       } catch (e) {
         console.log(e);
         consoleLog.insert(e.toString());
@@ -192,11 +176,9 @@ game.on('tick', function (delta) {
     }
 
     if (colliObjs.length) {
-      isOnTop(delta);
-
-      //isHit();
+      //isOnTop(delta);
     }
-    //console.log(dude.acceleration.x, dude.acceleration.y, dude.acceleration.z)
+
   }
 
 })
@@ -204,197 +186,17 @@ game.on('tick', function (delta) {
 /*
 collision detection stuffs
  */
-function showCode(name) {
-  editor.setValue(codes[name]);
-}
-
-function destory(name) {
-    myItems.forEach(function (item) {
-      if (item.name == name) {
-        game.removeItem(item);
-      }
-    })
-    codes[name] = null;
-  }
-  // window.destory = destory; //for debug
-
-//collision detection!!!
-var rayCaster = new game.THREE.Raycaster();
-
-var onTop = false;
-
-function isOnTop(dt) {
-  //get user direction!!
-  var ray = new game.THREE.Vector3(0, -1, 0);
-
-  var acceleration = {};
-  var velocity = {};
-  var friction = {};
-  var desired = {};
-  acceleration.y = dude.acceleration.y;
-  velocity.y = dude.velocity.y;
-  friction.y = dude.friction.y;
-
-  acceleration.y /= 8 * dt;
-  //acceleration.z += TOTAL_FORCES.z * dt
-  acceleration.y += (-0.0000036) * dt;
-
-  velocity.y += acceleration.y * dt;
-  velocity.y *= friction.y;
-
-  if (Math.abs(velocity.y) < 0.1) {
-    desired.y = (velocity.y * dt);
-  } else if (velocity.y !== 0) {
-    desired.y = (velocity.y / Math.abs(velocity.y)) * 0.1;
-  }
-
-  var dudeNextPos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y + desired.y + 0.5, dude.yaw.position.z);
-  rayCaster.ray.set(dudeNextPos, ray);
-  var intersects = rayCaster.intersectObjects(colliObjs);
-
-  if (intersects.length > 0 && intersects[0].distance < 0.5 + desired.y /*&& intersects[0].distance > 0.5*/ ) {
-
-    // console.log(desired.y)
-    // console.log('sdgdgsd')
-
-    window.lol = intersects[0];
-
-    dude.acceleration.x = 0;
-    //dude.acceleration.y = 0;
-    dude.acceleration.z = 0;
-
-    dude.resting.x = true;
-    dude.resting.y = true;
-    //dude.velocity.y = 0;
-    dude.resting.z = true;
-
-    // dude.friction.x = 1;
-    // dude.friction.y = 1;
-    // dude.friction.z = 1;
-    var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
-
-    dude.moveTo(something);
-    //console.log(intersects[0].distance)
-    onTop = true;
-    return;
-  }
-
-  onTop = false;
-}
-
-function isHit() {
-  var rays = [
-    new game.THREE.Vector3(1, 0, 0),
-    new game.THREE.Vector3(-1, 0, 0),
-    // new game.THREE.Vector3(0, 1, 0)
-    new game.THREE.Vector3(0, 0, 1),
-    new game.THREE.Vector3(0, 0, -1)
-  ]
-
-  var mY = new game.THREE.Matrix4().makeRotationY(dude.yaw.rotation.y);
-
-  var dudePos = new game.THREE.Vector3(dude.yaw.position.x, dude.yaw.position.y, dude.yaw.position.z);
-  /*
-    function check(el){
-      rayCaster.ray.set(dudePos, el);
-      var intersects = rayCaster.intersectObjects(colliObjs);
-      return (intersects.length > 0 && intersects[0].distance <= 1  && intersects[0].distance >= 0.5)
-    }
-
-    //omg the first time i use some in my project!!!!
-    //functional programming :D
-    //
-    //need the return cause there's one layer more to come out of the isHit function :)
-    return rays.some(check);
-  */
-  for (var i = 0; i < rays.length; i++) {
-    var ray = rays[i];
-    ray.applyMatrix4(mY);
-
-    rayCaster.ray.set(dudePos, ray);
-    var intersects = rayCaster.intersectObjects(colliObjs);
-    if (intersects.length > 0) {
-      if ((i === 0 || i === 1 && intersects[0].distance < 0.5) || (i === 2 || i === 3 && intersects[0].distance < 0.5)) {
-
-        // window.lol = intersects[0];
-
-        dude.acceleration.x = 0;
-        dude.acceleration.z = 0;
-
-        dude.resting.x = true;
-        dude.resting.z = true;
-
-        // dude.friction.x = 1;
-        // dude.friction.z = 1;
-        var something = new game.THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z);
-        if (i === 0 || i === 1) {
-          something.add(ray.setLength(0.4).negate());
-        } else {
-          something.add(ray.setLength(0.4).negate());
-        }
-
-        dude.moveTo(something);
-        //console.log(i);
-        return;
-      }
-    }
-  }
-}
-
-// var mouse = new game.THREE.Vector2();
-// var INTERSECTED;
-
-// function onDocumentMouseMove( event ) {
-//   event.preventDefault();
-//   mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-//   mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-//   //console.log(mouse.x, mouse.y);
-// }
-// document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
-// function isSelect(){
-//   rayCaster.setFromCamera( mouse, game.camera );
-//   var intersects = rayCaster.intersectObjects(colliObjs);
-
-//   if ( intersects.length > 0 ) {
-//     console.log('ohhhhh')
-//     console.log(intersects[0].object.name)
-
-//     if ( INTERSECTED != intersects[ 0 ].object ) {
-
-//       if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-//       INTERSECTED = intersects[ 0 ].object;
-//       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-//       INTERSECTED.material.emissive.setHex( 0xff0000 );
-
-//     }
-
-//   } else {
-
-//     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-
-//     INTERSECTED = null;
-
-//   }
-// }
+var isOnTop = require('./collisionDetection.js').isOnTop;
 
 /*
-interaction!
+interaction
  */
-// var createSelect = require('voxel-select');
-//var selector = createSelect(game);
-
-var highlight = require('voxel-highlight');
 var hl = highlight(game, {
   color: 0xffffff
 });
 
 hl.on('highlight', function (_voxelPos) {
-  //if(shiftIsDown){
   voxelPos = _voxelPos;
-  //console.log(_voxelPos);
-  //}
 });
 
 game.on('fire', function () {
@@ -407,102 +209,19 @@ game.on('fire', function () {
   game.interact.emit('release');
 });
 
-// function simulateKeyPress(keycode) {
-//   console.log(':/');
-//   //console.log(jQuery)
-//   jQuery.event.trigger({
-//     type: 'keypress',
-//     which: keycode
-//   });
-// }
-
-// simulateKeyPress(32);
-
-window.onkeydown = function (e) {
-  //console.log(e.which)
-  if (e.which === 32 && jumpable /*&& onTop*/ ) {
-    //console.log(':(')
-    e.preventDefault();
-    dude.resting.y = false;
-    dude.velocity.y = 0.014;
-    //dude.friction.y = 1;
-    //console.log(':(')
-  }
-}
-
-var welcome = document.getElementById('welcome');
-var message = document.querySelector('#middleMessage');
-message.innerHTML = 'Double Click to play';
-// if (game.notCapable()) {
-//   console.log('hello?')
-//   welcome.style.visibility = 'hidden';
-// }
-var jumpable = true;
-game.interact.on('attain', function () {
-  //welcome.style.visibility = 'hidden';
-  jumpable = true;
-})
-game.interact.on('release', function () {
-  jumpable = false;
-  // console.log('ouch1')
-  // welcome.style.visibility = 'visible';
-})
-
-// window.onkeydown = function (e) {
-//     if (e.which === 66) {
-
-//       var keyVal = 32;
-//       $("#container").trigger({
-//         type: 'keypress',
-//         keyCode: keyVal,
-//         which: keyVal,
-//         charCode: keyVal
-//       });
-
-//       var press = jQuery.Event("keypress");
-//       press.ctrlKey = false;
-//       press.which = 32;
-//       $("#container").trigger(press);
-//     }
-//   }
-
 /*
-eval!
+eval
  */
-var editor = require('./editor.js').editor;
-var consoleLog = require('./editor.js').consoleLog;
-var editing = require('./editor.js').editing;
 document.getElementById('run').onclick = function () {
   evaled = false;
   parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
-// document.getElementById('reset').onclick = function(){
-//   if(result2 === result2pre && result2 !== null){
-//     destory(result2pre);
-//   }
-// }
-
-/*
-parse
- */
-//var maxMinFuc = require('./parse.js').maxMinFuc;
-var wrapGenerator = require('./parse.js').wrapGenerator;
-
 function parse(str, arr) {
 
+  copy = str
+
   try {
-    //console.log(str, arr)
-    // geos[clickTimes+''] = new game.THREE.Geometry();
-    // geos[clickTimes+''].verticesNeedUpdate = true;
-    // var material = new game.THREE.MeshNormalMaterial();
-
-    // var ok = new game.THREE.Mesh(geos[clickTimes+''], material);
-
-    // ok.name = clickTimes;
-    // game.scene.add(ok);
-    // window.ok = ok;
-    // colliObjs.push(ok);
     var str2 = wrapGenerator(arr, str);
     console.log(str2);
     eval(str2);
@@ -515,7 +234,7 @@ function parse(str, arr) {
   }
 
   try {
-    runGenerator(call);
+    runGenerator(call, copy);
   } catch (ಠoಠ) {
     console.log(ಠoಠ);
     consoleLog.insert(ಠoಠ.toString());
@@ -528,37 +247,53 @@ function parse(str, arr) {
 }
 
 function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  addBlock(clickTimes, pos, x, y, z, size);
-  highlightLine(lineNum);
+  var ppos = addBlock(clickTimes, pos, x, y, z, size);
+  highlightLine(lineNum, true, ppos);
 }
 
-$('.pic').click(function () {
-  var id = $(this).attr('id');
-  var i = id.replace('material', '');
-  materialIndex = i;
-  console.log(materialIndex)
-  $(this).css('border', "5px ridge #ddd");
-  console.log($(this).siblings())
-  $('.pic').not(this).css('border', "5px ridge #999");
-  // for (var j = 0; j < 7; j++) {
-  //   if (i === j) continue;
-  //   document.getElementById('material' + j).style.border = "5px ridge #999";
-  // }
-});
+function highlightLine(lineNum, change, pos) {
+  //console.log('line index ' + lineNum);
+  removeMarker();
+  marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
+  if (change) {
+    var oldLine = editor.session.getLine(lineNum);
+    var newLine = getNewContent(oleLine, pos);
+    editor.session.replace(addMarkerRange(lineNum), newLine);
+  }
+}
 
-$('#material0').css('border', "5px ridge #ddd");
+/*
+generator
+ */
+var call;
+var copy;
+var evaled = false;
+var pause = false;
+
+function runGenerator(generator, oldValue) {
+  //console.log(generator)
+  if (pause) {
+    return;
+  }
+
+  var ret = generator.next();
+
+  if (ret.done) {
+    evaled = false;
+    begintToCount = 0;
+    editor.session.removeMarker(marker);
+    marker = null;
+    editor.setValue(oldValue);
+    editor.clearSelection();
+    return;
+  }
+  //console.log(ret.value);
+}
 
 /*
 editor
  */
-var addMarkerRange = require('./editor.js').addMarkerRange;
 var marker = null;
-
-function highlightLine(lineNum) {
-  //console.log('line index ' + lineNum);
-  removeMarker();
-  marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
-}
 
 function removeMarker() {
   if (marker) {
@@ -577,64 +312,3 @@ var editing = false;
 editor.on("blur", function () {
   editing = false;
 });
-
-/*
-generator
- */
-
-var call;
-var evaled = false;
-var pause = false;
-
-function runGenerator(generator) {
-  //console.log(generator)
-  if (pause) {
-    return;
-  }
-
-  var ret = generator.next();
-
-  if (ret.done) {
-    evaled = false;
-    begintToCount = 0;
-    editor.session.removeMarker(marker);
-    marker = null;
-    return;
-  }
-  //console.log(ret.value);
-}
-
-/*
-slider
- */
-var mySlider = $('#sliderr').slider({
-  formatter: function (value) {
-    return 'Current value: ' + value;
-  }
-});
-
-mySlider.on('slide', function (e) {
-  //console.log(e.value);
-  interval = e.value;
-});
-
-document.getElementById('pause').onclick = function () {
-  pause = !pause;
-  if (pause) {
-    document.getElementById('pause').innerHTML = 'Continue';
-  } else {
-    document.getElementById('pause').innerHTML = 'Pause';
-  }
-}
-
-// document.getElementById('reset').onclick = function () {
-//   var id = clickTimes - 1;
-//   call = null;
-//   destory(id);
-// }
-
-/*
-tutorial
- */
-var init = require('./tutorial.js').init;
-init(removeMarker);
