@@ -2,14 +2,19 @@ var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
 var highlight = require('voxel-highlight');
-var editor = require('./editor.js').editor;
-var consoleLog = require('./editor.js').consoleLog;
-var editing = require('./editor.js').editing;
+
+var en = require('./global.js');
+
 var wrapGenerator = require('./parse.js').wrapGenerator;
+var editor = require('./editor').editor;
+var consoleLog = require('./editor').consoleLog;
 var addMarkerRange = require('./editor.js').addMarkerRange;
-var getNewContent = require('./parse.js').getNewContent;
-require('./toolbar.js')(materialIndex);
-require('./slider.js')(interval, pause);
+var removeMarker = require('./editor.js').removeMarker;
+var highlightLine = require('./editor.js').highlightLine;
+var runGenerator = require('./generator.js');
+
+require('./toolbar.js')();
+require('./slider.js')();
 var init = require('./tutorial.js').init;
 init(removeMarker);
 
@@ -18,8 +23,15 @@ var startPosition = [0, 0, 0];
 var clickTimes = 0;
 var colliObjs = [];
 var myItems = [];
-var materialIndex = 0;
 var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
+
+var theta = 0;
+var begintToCount = 0;
+var frameCount = 0;
+var call;
+var copy;
+var evaled = false;
+var code = '';
 
 /*
 set up game
@@ -83,7 +95,7 @@ dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
 window.onkeydown = function (e) {
-  if (!editing && ev.keyCode === 'R'.charCodeAt(0)) {
+  if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
     dude.toggle();
   }
   if (e.which === 32 && jumpable /*&& onTop*/ ) {
@@ -117,7 +129,7 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[materialIndex]);
+  game.materials.paint(mesh, myMaterial[en.materialIndex]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -143,15 +155,15 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
 
   return [_x, _y, _z];
 }
-window.addBlock = addBlock; //for debug
+
+function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
+  var ppos = addBlock(clickTimes, pos, x, y, z, size);
+  highlightLine(lineNum, true, ppos);
+}
 
 /*
 animation
  */
-var theta = 0;
-var interval = 10;
-var begintToCount = 0;
-var frameCount = 0;
 
 game.on('tick', function (delta) {
   frameCount++;
@@ -161,9 +173,9 @@ game.on('tick', function (delta) {
 
     theta += (delta / 16);
 
-    if (begintToCount % interval === 0 && evaled) {
+    if (begintToCount % en.interval === 0 && evaled) {
       try {
-        runGenerator(call, copy);
+        runGenerator(call, recover);
       } catch (e) {
         console.log(e);
         consoleLog.insert(e.toString());
@@ -217,9 +229,16 @@ document.getElementById('run').onclick = function () {
   parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
-function parse(str, arr) {
+function recover() {
+  evaled = false;
+  begintToCount = 0;
+  removeMarker();
+  editor.setValue(code);
+  editor.clearSelection();
+  code = '';
+}
 
-  copy = str
+function parse(str, arr) {
 
   try {
     var str2 = wrapGenerator(arr, str);
@@ -233,82 +252,17 @@ function parse(str, arr) {
     return;
   }
 
+  code = str;
+
   try {
-    runGenerator(call, copy);
+    runGenerator(call, recover);
   } catch (ಠoಠ) {
     console.log(ಠoಠ);
     consoleLog.insert(ಠoಠ.toString());
+    code = '';
     return;
   }
 
-  codes.push(str);
   clickTimes++;
 
 }
-
-function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  var ppos = addBlock(clickTimes, pos, x, y, z, size);
-  highlightLine(lineNum, true, ppos);
-}
-
-function highlightLine(lineNum, change, pos) {
-  //console.log('line index ' + lineNum);
-  removeMarker();
-  marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
-  if (change) {
-    var oldLine = editor.session.getLine(lineNum);
-    var newLine = getNewContent(oleLine, pos);
-    editor.session.replace(addMarkerRange(lineNum), newLine);
-  }
-}
-
-/*
-generator
- */
-var call;
-var copy;
-var evaled = false;
-var pause = false;
-
-function runGenerator(generator, oldValue) {
-  //console.log(generator)
-  if (pause) {
-    return;
-  }
-
-  var ret = generator.next();
-
-  if (ret.done) {
-    evaled = false;
-    begintToCount = 0;
-    editor.session.removeMarker(marker);
-    marker = null;
-    editor.setValue(oldValue);
-    editor.clearSelection();
-    return;
-  }
-  //console.log(ret.value);
-}
-
-/*
-editor
- */
-var marker = null;
-
-function removeMarker() {
-  if (marker) {
-    editor.session.removeMarker(marker);
-    marker = null;
-  }
-}
-
-editor.on('focus', function () {
-  editing = true;
-  removeMarker();
-});
-
-var editing = false;
-
-editor.on("blur", function () {
-  editing = false;
-});

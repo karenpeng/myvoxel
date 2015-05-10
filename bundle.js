@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js":[function(require,module,exports){
 var rayCaster = new game.THREE.Raycaster();
 
-exports.isOnTop = function (dt, game, dude) {
+exports.isOnTop = function (dt) {
   //get user direction!!
   var ray = new game.THREE.Vector3(0, -1, 0);
 
@@ -155,55 +155,117 @@ var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/monokai');
 
-var editor = ace.edit('editor');
+var en = require('./global.js');
+
+var getNewContent = require('./parse.js').getNewContent;
+
+editor = ace.edit('editor');
 editor.getSession().setMode('ace/mode/javascript');
 editor.setTheme('ace/theme/monokai');
 
-var consoleLog = ace.edit('console');
+consoleLog = ace.edit('console');
 consoleLog.setReadOnly(true);
-  consoleLog.setOptions({
-    highlightActiveLine: false,
-    highlightGutterLine: false
-  });
+consoleLog.setOptions({
+  highlightActiveLine: false,
+  highlightGutterLine: false
+});
 consoleLog.renderer.$cursorLayer.element.style.opacity = 0;
-
-var editing = false;
 
 editor.on('focus', function () {
   editor.getSession().setMode('ace/mode/javascript');
-  editing = true;
+  en.editing = true;
+  removeMarker();
 });
 
 editor.on("blur", function () {
-  editing = false;
+  en.editing = false;
 });
 
-
 var Range = ace.acequire('ace/range').Range;
-//console.log(Range);
 
 function addMarkerRange(lineNum) {
   return new Range(lineNum, 0, lineNum, 2000);
 }
 
+function removeMarker() {
+  if (en.marker) {
+    editor.session.removeMarker(en.marker);
+    en.marker = null;
+  }
+}
+
+function highlightLine(lineNum, change, pos) {
+  //console.log('line index ' + lineNum);
+  removeMarker();
+  en.marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
+  if (change) {
+    var oldLine = editor.session.getLine(lineNum);
+    var newLine = getNewContent(oldLine, pos);
+    editor.session.replace(addMarkerRange(lineNum), newLine);
+  }
+}
+
 module.exports = {
   editor: editor,
   consoleLog: consoleLog,
-  addMarkerRange: addMarkerRange
+  addMarkerRange: addMarkerRange,
+  removeMarker: removeMarker,
+  highlightLine: highlightLine
 }
-},{"brace":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js","brace/mode/javascript":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/mode/javascript.js","brace/theme/monokai":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/theme/monokai.js"}],"/Users/karen/Documents/my_project/myvoxel/js/index.js":[function(require,module,exports){
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","brace":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/index.js","brace/mode/javascript":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/mode/javascript.js","brace/theme/monokai":"/Users/karen/Documents/my_project/myvoxel/node_modules/brace/theme/monokai.js"}],"/Users/karen/Documents/my_project/myvoxel/js/generator.js":[function(require,module,exports){
+var en = require('./global.js');
+
+module.exports = function (generator, func) {
+  if (en.pause) return;
+  var ret = generator.next();
+  if (ret.done) {
+    func();
+    return;
+  }
+}
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/global.js":[function(require,module,exports){
+module.exports = {
+
+  voxelPos: [0, 0, 0],
+  startPosition: [0, 0, 0],
+  clickTimes: 0,
+  colliObjs: [],
+  myItems: [],
+  myMaterial: ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'],
+
+  theta: 0,
+
+  begintToCount: 0,
+  frameCount: 0,
+  call: null,
+  copy: null,
+  evaled: false,
+
+  materialIndex: 0,
+  interval: 10,
+  pause: false,
+  marker: null,
+  editing: false,
+
+}
+},{}],"/Users/karen/Documents/my_project/myvoxel/js/index.js":[function(require,module,exports){
 var createGame = require('voxel-engine');
 var skin = require('minecraft-skin');
 var terrain = require('voxel-perlin-terrain');
 var highlight = require('voxel-highlight');
-var editor = require('./editor.js').editor;
-var consoleLog = require('./editor.js').consoleLog;
-var editing = require('./editor.js').editing;
+
+var en = require('./global.js');
+
 var wrapGenerator = require('./parse.js').wrapGenerator;
+var editor = require('./editor').editor;
+var consoleLog = require('./editor').consoleLog;
 var addMarkerRange = require('./editor.js').addMarkerRange;
-var getNewContent = require('./parse.js').getNewContent;
-require('./toolbar.js')(materialIndex);
-require('./slider.js')(interval, pause);
+var removeMarker = require('./editor.js').removeMarker;
+var highlightLine = require('./editor.js').highlightLine;
+var runGenerator = require('./generator.js');
+
+require('./toolbar.js')();
+require('./slider.js')();
 var init = require('./tutorial.js').init;
 init(removeMarker);
 
@@ -212,8 +274,15 @@ var startPosition = [0, 0, 0];
 var clickTimes = 0;
 var colliObjs = [];
 var myItems = [];
-var materialIndex = 0;
 var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
+
+var theta = 0;
+var begintToCount = 0;
+var frameCount = 0;
+var call;
+var copy;
+var evaled = false;
+var code = '';
 
 /*
 set up game
@@ -277,7 +346,7 @@ dude.yaw.position.set(0, jumpFromSky, 0);
 window.dude = dude; //for debug
 
 window.onkeydown = function (e) {
-  if (!editing && ev.keyCode === 'R'.charCodeAt(0)) {
+  if (!en.editing && e.keyCode === 'R'.charCodeAt(0)) {
     dude.toggle();
   }
   if (e.which === 32 && jumpable /*&& onTop*/ ) {
@@ -311,7 +380,7 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[materialIndex]);
+  game.materials.paint(mesh, myMaterial[en.materialIndex]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -337,15 +406,15 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
 
   return [_x, _y, _z];
 }
-window.addBlock = addBlock; //for debug
+
+function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
+  var ppos = addBlock(clickTimes, pos, x, y, z, size);
+  highlightLine(lineNum, true, ppos);
+}
 
 /*
 animation
  */
-var theta = 0;
-var interval = 10;
-var begintToCount = 0;
-var frameCount = 0;
 
 game.on('tick', function (delta) {
   frameCount++;
@@ -355,9 +424,9 @@ game.on('tick', function (delta) {
 
     theta += (delta / 16);
 
-    if (begintToCount % interval === 0 && evaled) {
+    if (begintToCount % en.interval === 0 && evaled) {
       try {
-        runGenerator(call, copy);
+        runGenerator(call, recover);
       } catch (e) {
         console.log(e);
         consoleLog.insert(e.toString());
@@ -411,9 +480,16 @@ document.getElementById('run').onclick = function () {
   parse(editor.getValue(), editor.session.doc.getAllLines());
 }
 
-function parse(str, arr) {
+function recover() {
+  evaled = false;
+  begintToCount = 0;
+  removeMarker();
+  editor.setValue(code);
+  editor.clearSelection();
+  code = '';
+}
 
-  copy = str
+function parse(str, arr) {
 
   try {
     var str2 = wrapGenerator(arr, str);
@@ -427,86 +503,21 @@ function parse(str, arr) {
     return;
   }
 
+  code = str;
+
   try {
-    runGenerator(call, copy);
+    runGenerator(call, recover);
   } catch (ಠoಠ) {
     console.log(ಠoಠ);
     consoleLog.insert(ಠoಠ.toString());
+    code = '';
     return;
   }
 
-  codes.push(str);
   clickTimes++;
 
 }
-
-function addBlockAndHighlight(clickTimes, pos, lineNum, x, y, z, size) {
-  var ppos = addBlock(clickTimes, pos, x, y, z, size);
-  highlightLine(lineNum, true, ppos);
-}
-
-function highlightLine(lineNum, change, pos) {
-  //console.log('line index ' + lineNum);
-  removeMarker();
-  marker = editor.session.addMarker(addMarkerRange(lineNum), 'highlight', 'fullLine', false);
-  if (change) {
-    var oldLine = editor.session.getLine(lineNum);
-    var newLine = getNewContent(oleLine, pos);
-    editor.session.replace(addMarkerRange(lineNum), newLine);
-  }
-}
-
-/*
-generator
- */
-var call;
-var copy;
-var evaled = false;
-var pause = false;
-
-function runGenerator(generator, oldValue) {
-  //console.log(generator)
-  if (pause) {
-    return;
-  }
-
-  var ret = generator.next();
-
-  if (ret.done) {
-    evaled = false;
-    begintToCount = 0;
-    editor.session.removeMarker(marker);
-    marker = null;
-    editor.setValue(oldValue);
-    editor.clearSelection();
-    return;
-  }
-  //console.log(ret.value);
-}
-
-/*
-editor
- */
-var marker = null;
-
-function removeMarker() {
-  if (marker) {
-    editor.session.removeMarker(marker);
-    marker = null;
-  }
-}
-
-editor.on('focus', function () {
-  editing = true;
-  removeMarker();
-});
-
-var editing = false;
-
-editor.on("blur", function () {
-  editing = false;
-});
-},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./parse.js":"/Users/karen/Documents/my_project/myvoxel/js/parse.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","minecraft-skin":"/Users/karen/Documents/my_project/myvoxel/node_modules/minecraft-skin/index.js","voxel-engine":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/index.js","voxel-highlight":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-highlight/index.js","voxel-perlin-terrain":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-perlin-terrain/index.js","voxel-player":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-player/index.js","voxel-sky":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-sky/index.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function wrapGenerator(lines, str) {
 
   var fnNames = functionDetection(str);
@@ -522,9 +533,9 @@ function wrapGenerator(lines, str) {
   //to match function*  addTree(x, y, z, counter){
   //var fnRe = /function\*\s+[^\(\)]\s*\([^\(\)]\)\s*\{/g;
   var fnRe = /function\*\s+.*?\(.*?\)\s*\{/g;
-  var lll = result.match(fnRe);
-  if (lll !== null) {
-    lll.forEach(function (m) {
+  var fns = result.match(fnRe);
+  if (fns !== null) {
+    fns.forEach(function (m) {
       result = result.replace(m, m + '\n' + 'yield highlightLine(lineNum, false);\n');
     })
   }
@@ -532,11 +543,6 @@ function wrapGenerator(lines, str) {
   result = 'function* wwwaaattt(num, pos){\n' + result + '\n}';
   return result;
 
-}
-
-function getNewContent(oldLine, pos) {
-  //var re = /addBlock\s*\(.*?\)/;
-  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
 }
 
 function functionReplace(l, index, fnNames) {
@@ -595,12 +601,18 @@ function functionDetection(str) {
   return fnNames;
 }
 
+function getNewContent(oldLine, pos) {
+  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
+}
+
 module.exports = {
   wrapGenerator: wrapGenerator,
   getNewContent: getNewContent
 }
 },{}],"/Users/karen/Documents/my_project/myvoxel/js/slider.js":[function(require,module,exports){
-module.exports = function (interval, pause) {
+var en = require('./global.js');
+
+module.exports = function () {
   var mySlider = $('#sliderr').slider({
     formatter: function (value) {
       return 'Current value: ' + value;
@@ -609,11 +621,11 @@ module.exports = function (interval, pause) {
 
   mySlider.on('slide', function (e) {
     //console.log(e.value);
-    interval = e.value;
+    en.interval = e.value;
   });
 
   document.getElementById('pause').onclick = function () {
-    pause = !pause;
+    en.pause = !en.pause;
     if (pause) {
       document.getElementById('pause').innerHTML = 'Continue';
     } else {
@@ -621,22 +633,24 @@ module.exports = function (interval, pause) {
     }
   }
 }
-},{}],"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js":[function(require,module,exports){
-module.exports = function (materialIndex) {
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js":[function(require,module,exports){
+var en = require('./global.js');
+
+module.exports = function () {
 
   $('.pic').click(function () {
     var id = $(this).attr('id');
     var i = id.replace('material', '');
-    materialIndex = i;
+    en.materialIndex = i;
     $(this).css('border', "5px ridge #ddd");
-    console.log($(this).siblings())
+    //console.log($(this).siblings())
     $('.pic').not(this).css('border', "5px ridge #999");
   });
 
   $('#material0').css('border', "5px ridge #ddd");
 
 }
-},{}],"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js":[function(require,module,exports){
+},{"./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js"}],"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js":[function(require,module,exports){
 var editor = require('./editor.js').editor;
 
 var warmup = [
@@ -25960,7 +25974,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -26003,7 +26017,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",

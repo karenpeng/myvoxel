@@ -1,11 +1,13 @@
-module.exports = function (materialIndex) {
+var en = require('./global.js');
+
+module.exports = function () {
 
   $('.pic').click(function () {
     var id = $(this).attr('id');
     var i = id.replace('material', '');
-    materialIndex = i;
+    en.materialIndex = i;
     $(this).css('border', "5px ridge #ddd");
-    console.log($(this).siblings())
+    //console.log($(this).siblings())
     $('.pic').not(this).css('border', "5px ridge #999");
   });
 

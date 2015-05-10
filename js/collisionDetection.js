@@ -1,6 +1,6 @@
 var rayCaster = new game.THREE.Raycaster();
 
-exports.isOnTop = function (dt, game, dude) {
+exports.isOnTop = function (dt) {
   //get user direction!!
   var ray = new game.THREE.Vector3(0, -1, 0);
 

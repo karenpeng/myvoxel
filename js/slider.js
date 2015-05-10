@@ -1,4 +1,6 @@
-module.exports = function (interval, pause) {
+var en = require('./global.js');
+
+module.exports = function () {
   var mySlider = $('#sliderr').slider({
     formatter: function (value) {
       return 'Current value: ' + value;
@@ -7,11 +9,11 @@ module.exports = function (interval, pause) {
 
   mySlider.on('slide', function (e) {
     //console.log(e.value);
-    interval = e.value;
+    en.interval = e.value;
   });
 
   document.getElementById('pause').onclick = function () {
-    pause = !pause;
+    en.pause = !en.pause;
     if (pause) {
       document.getElementById('pause').innerHTML = 'Continue';
     } else {

@@ -13,9 +13,9 @@ function wrapGenerator(lines, str) {
   //to match function*  addTree(x, y, z, counter){
   //var fnRe = /function\*\s+[^\(\)]\s*\([^\(\)]\)\s*\{/g;
   var fnRe = /function\*\s+.*?\(.*?\)\s*\{/g;
-  var lll = result.match(fnRe);
-  if (lll !== null) {
-    lll.forEach(function (m) {
+  var fns = result.match(fnRe);
+  if (fns !== null) {
+    fns.forEach(function (m) {
       result = result.replace(m, m + '\n' + 'yield highlightLine(lineNum, false);\n');
     })
   }
@@ -23,11 +23,6 @@ function wrapGenerator(lines, str) {
   result = 'function* wwwaaattt(num, pos){\n' + result + '\n}';
   return result;
 
-}
-
-function getNewContent(oldLine, pos) {
-  //var re = /addBlock\s*\(.*?\)/;
-  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
 }
 
 function functionReplace(l, index, fnNames) {
@@ -84,6 +79,10 @@ function functionDetection(str) {
   }
 
   return fnNames;
+}
+
+function getNewContent(oldLine, pos) {
+  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
 }
 
 module.exports = {

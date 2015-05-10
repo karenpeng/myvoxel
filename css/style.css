@@ -29,6 +29,7 @@ html, body{
   width: 420px;
   right: 0;
   z-index: 1;
+  margin: 6px -6px;
 }
 
 .highlight{
