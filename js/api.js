@@ -2,7 +2,6 @@ var en = require('./global.js');
 var game = require('./game.js');
 var highlightLine = require('./editor.js').highlightLine;
 
-var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 /*
 the api for end-user
  */
