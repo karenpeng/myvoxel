@@ -82,7 +82,7 @@ function functionDetection(str) {
 }
 
 function getNewContent(oldLine, pos) {
-  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
+  return oldLine.replace(/addBlock\s*\(.*?,\s*.*?,.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
 }
 
 module.exports = {

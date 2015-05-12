@@ -3,6 +3,8 @@ var editor = require('./editor.js').editor;
 var run = require('./run.js').run;
 
 document.getElementById('run').onclick = function () {
+  en.pause = false;
+  document.getElementById('pause').innerHTML = 'Pause';
   en.evaled = false;
   run(editor.getValue(), editor.session.doc.getAllLines());
 };

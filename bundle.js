@@ -1,4 +1,47 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/karen/Documents/my_project/myvoxel/js/api.js":[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/karen/Documents/my_project/myvoxel/js/animation.js":[function(require,module,exports){
+var en = require('./global.js');
+
+var game = require('./game.js');
+var sky = require('./sky.js');
+
+var runGenerator = require('./generator.js');
+var recover = require('./run.js').recover;
+
+var isOnTop = require('./collisionDetection.js').isOnTop;
+
+var theta = 0;
+var frameCount = 0;
+
+game.on('tick', function (delta) {
+  frameCount++;
+  sky(delta);
+
+  if (frameCount !== 0 && frameCount % 2 === 0) {
+
+    theta += (delta / 16);
+
+    if (en.beginToCount % en.interval === 0 && en.evaled) {
+      try {
+        runGenerator(en.call, recover);
+      } catch (e) {
+        console.log(e);
+        consoleLog.insert(e.toString());
+        return;
+      }
+    }
+
+    if (en.evaled) {
+      en.beginToCount += (delta / 16);
+    }
+
+    if (en.colliObjs.length) {
+      isOnTop(delta);
+    }
+
+  }
+
+});
+},{"./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./run.js":"/Users/karen/Documents/my_project/myvoxel/js/run.js","./sky.js":"/Users/karen/Documents/my_project/myvoxel/js/sky.js"}],"/Users/karen/Documents/my_project/myvoxel/js/api.js":[function(require,module,exports){
 var en = require('./global.js');
 var game = require('./game.js');
 var highlightLine = require('./editor.js').highlightLine;
@@ -59,6 +102,8 @@ var editor = require('./editor.js').editor;
 var run = require('./run.js').run;
 
 document.getElementById('run').onclick = function () {
+  en.pause = false;
+  document.getElementById('pause').innerHTML = 'Pause';
   en.evaled = false;
   run(editor.getValue(), editor.session.doc.getAllLines());
 };
@@ -367,6 +412,7 @@ module.exports = {
 
   colliObjs: [],
   startPosition: [0, 0, 0],
+  voxelPos: [0, 0, 0],
   materialIndex: 0,
   interval: 10,
   pause: false,
@@ -386,8 +432,7 @@ require('./welcome.js');
 var editor = require('./editor').editor;
 var consoleLog = require('./editor').consoleLog;
 var addMarkerRange = require('./editor.js').addMarkerRange;
-var runGenerator = require('./generator.js');
-var recover = require('./run.js').recover;
+
 var removeMarker = require('./editor.js').removeMarker;
 
 require('./toolbar.js');
@@ -398,47 +443,19 @@ init(removeMarker);
 
 // var myItems = [];
 
-var theta = 0;
-var frameCount = 0;
-
+/*
+setup
+ */
 var game = require('./game.js');
 var sky = require('./sky.js');
+
 require('./select.js');
-var isOnTop = require('./collisionDetection.js').isOnTop;
 
 /*
 animation
  */
-game.on('tick', function (delta) {
-  frameCount++;
-  sky(delta);
-
-  if (frameCount !== 0 && frameCount % 2 === 0) {
-
-    theta += (delta / 16);
-
-    if (en.beginToCount % en.interval === 0 && en.evaled) {
-      try {
-        runGenerator(en.call, recover);
-      } catch (e) {
-        console.log(e);
-        consoleLog.insert(e.toString());
-        return;
-      }
-    }
-
-    if (en.evaled) {
-      en.beginToCount += (delta / 16);
-    }
-
-    if (en.colliObjs.length) {
-      isOnTop(delta);
-    }
-
-  }
-
-});
-},{"./button.js":"/Users/karen/Documents/my_project/myvoxel/js/button.js","./collisionDetection.js":"/Users/karen/Documents/my_project/myvoxel/js/collisionDetection.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./generator.js":"/Users/karen/Documents/my_project/myvoxel/js/generator.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./run.js":"/Users/karen/Documents/my_project/myvoxel/js/run.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./sky.js":"/Users/karen/Documents/my_project/myvoxel/js/sky.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","./welcome.js":"/Users/karen/Documents/my_project/myvoxel/js/welcome.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
+require('./animation.js');
+},{"./animation.js":"/Users/karen/Documents/my_project/myvoxel/js/animation.js","./button.js":"/Users/karen/Documents/my_project/myvoxel/js/button.js","./editor":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./editor.js":"/Users/karen/Documents/my_project/myvoxel/js/editor.js","./game.js":"/Users/karen/Documents/my_project/myvoxel/js/game.js","./global.js":"/Users/karen/Documents/my_project/myvoxel/js/global.js","./select.js":"/Users/karen/Documents/my_project/myvoxel/js/select.js","./sky.js":"/Users/karen/Documents/my_project/myvoxel/js/sky.js","./slider.js":"/Users/karen/Documents/my_project/myvoxel/js/slider.js","./toolbar.js":"/Users/karen/Documents/my_project/myvoxel/js/toolbar.js","./tutorial.js":"/Users/karen/Documents/my_project/myvoxel/js/tutorial.js","./welcome.js":"/Users/karen/Documents/my_project/myvoxel/js/welcome.js"}],"/Users/karen/Documents/my_project/myvoxel/js/parse.js":[function(require,module,exports){
 function wrapGenerator(lines, str) {
 
   var fnNames = functionDetection(str);
@@ -523,7 +540,7 @@ function functionDetection(str) {
 }
 
 function getNewContent(oldLine, pos) {
-  return oldLine.replace(/addBlock\s*\(.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
+  return oldLine.replace(/addBlock\s*\(.*?,\s*.*?,.*?\)/, 'addBlock(' + pos[0] + ', ' + pos[1] + ', ' + pos[2] + ')');
 }
 
 module.exports = {
@@ -584,10 +601,11 @@ var hl = highlight(game, {
 });
 
 hl.on('highlight', function (_voxelPos) {
-  en.startPosition = _voxelPos;
+  en.voxelPos = _voxelPos;
 });
 
 game.on('fire', function () {
+  en.startPosition = en.voxelPos;
   console.log('start from here!', en.startPosition[0], en.startPosition[1], en.startPosition[2]);
   var esc = $.Event("keydown", {
     which: 27
@@ -621,7 +639,7 @@ $('.pic').click(function () {
   en.materialIndex = i;
   $(this).css('border', "5px ridge #ddd");
   //console.log($(this).siblings())
-  $('.pic').not(this).css('border', "5px ridge #999");
+  $('.pic').not(this).css('border', "5px ridge #777");
 });
 
 $('#material0').css('border', "5px ridge #ddd");
@@ -25944,7 +25962,7 @@ Ever.typeOf = (function () {
 })();;
 
 },{"./init.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json","./types.json":"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json","events":"/usr/local/lib/node_modules/watchify/node_modules/browserify/node_modules/events/events.js"}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/init.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "initEvent" : [
     "type",
     "canBubble", 
@@ -25987,7 +26005,7 @@ module.exports=module.exports=module.exports=module.exports=module.exports=modul
 }
 
 },{}],"/Users/karen/Documents/my_project/myvoxel/node_modules/voxel-engine/node_modules/kb-controls/node_modules/ever/types.json":[function(require,module,exports){
-module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
+module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports=module.exports={
   "MouseEvent" : [
     "click",
     "mousedown",
