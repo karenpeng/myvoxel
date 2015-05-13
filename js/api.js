@@ -1,7 +1,7 @@
 var en = require('./global.js');
 var game = require('./game.js');
 var highlightLine = require('./editor.js').highlightLine;
-
+var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 /*
 the api for end-user
  */
@@ -14,7 +14,7 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[en.materialIndex]);
+  game.materials.paint(mesh, myMaterial[en.materialIndexs]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;

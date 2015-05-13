@@ -137,6 +137,7 @@ var tutorials = [
 var showcases = [
   [
     'var step = 12;',
+    'var r = 10;',
     'for (var i = 0; i < step; i ++) {',
     ' for (var j = 0; j < step; j ++) {',
     '   var uv = [i, j];',
@@ -146,14 +147,13 @@ var showcases = [
     '',
     '   var theta = 2 * Math.PI * u / step;',
     '   var phil = Math.PI * v / step - Math.PI / 2;',
-    '   var x = Math.cos(phil) * Math.sin(theta) * 5;',
-    '   var y = Math.sin(phil) * 5;',
-    '   var z = Math.cos(phil) * Math.cos(theta) * 5;',
-    '   addBlock(x, y + 5, z);',
+    '   var x = Math.cos(phil) * Math.sin(theta) * r;',
+    '   var y = Math.sin(phil) * r;',
+    '   var z = Math.cos(phil) * Math.cos(theta) * r;',
+    '   addBlock(x, y + r, z);',
     ' }',
     '}',
     ''
-
   ],
 
   [

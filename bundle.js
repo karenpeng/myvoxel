@@ -45,7 +45,7 @@ game.on('tick', function (delta) {
 var en = require('./global.js');
 var game = require('./game.js');
 var highlightLine = require('./editor.js').highlightLine;
-
+var myMaterial = ['brick', 'cobblestone', 'bluewool', 'glowstone', 'diamond', 'grass_dirt', 'grass'];
 /*
 the api for end-user
  */
@@ -58,7 +58,7 @@ function addBlock(_clickTimes, pos, _x, _y, _z, _size) {
   )
 
   // paint the mesh with a specific texture in the atlas
-  game.materials.paint(mesh, myMaterial[en.materialIndex]);
+  game.materials.paint(mesh, myMaterial[en.materialIndexs]);
 
   var x = _x + pos[0] + 0.5 || pos[0] + 0.5;
   var y = _y + pos[1] + 1.5 || pos[1] + 1.5;
@@ -412,7 +412,7 @@ module.exports = {
   colliObjs: [],
   startPosition: [0, 0, 0],
   voxelPos: [0, 0, 0],
-  materialIndex: 0,
+  materialIndexs: 0,
   interval: 10,
   pause: false,
   marker: null,
@@ -635,7 +635,7 @@ var en = require('./global.js');
 $('.pic').click(function () {
   var id = $(this).attr('id');
   var i = id.replace('material', '');
-  en.materialIndex = i;
+  en.materialIndexs = i;
   $(this).css('border', "5px ridge #ddd");
   //console.log($(this).siblings())
   $('.pic').not(this).css('border', "5px ridge #777");
@@ -782,6 +782,7 @@ var tutorials = [
 var showcases = [
   [
     'var step = 12;',
+    'var r = 10;',
     'for (var i = 0; i < step; i ++) {',
     ' for (var j = 0; j < step; j ++) {',
     '   var uv = [i, j];',
@@ -791,14 +792,13 @@ var showcases = [
     '',
     '   var theta = 2 * Math.PI * u / step;',
     '   var phil = Math.PI * v / step - Math.PI / 2;',
-    '   var x = Math.cos(phil) * Math.sin(theta) * 5;',
-    '   var y = Math.sin(phil) * 5;',
-    '   var z = Math.cos(phil) * Math.cos(theta) * 5;',
-    '   addBlock(x, y + 5, z);',
+    '   var x = Math.cos(phil) * Math.sin(theta) * r;',
+    '   var y = Math.sin(phil) * r;',
+    '   var z = Math.cos(phil) * Math.cos(theta) * r;',
+    '   addBlock(x, y + r, z);',
     ' }',
     '}',
     ''
-
   ],
 
   [
